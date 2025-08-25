@@ -74,7 +74,8 @@ rng = np.random.RandomState(42)
 bg_idx = rng.choice(len(X_df), size=min(512, len(X_df)), replace=False)
 background = X_df.iloc[bg_idx]
 
-explainer = shap.TreeExplainer(model, feature_perturbation="tree_path_dependent", data=background)
+#explainer = shap.TreeExplainer(model, feature_perturbation="tree_path_dependent", data=background)
+explainer = shap.TreeExplainer(model)
 
 def get_shap_3d(explainer, X_batch):
     """Normalize SHAP output to shape (N, D, C)."""
