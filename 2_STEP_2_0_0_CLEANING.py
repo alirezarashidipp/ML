@@ -373,27 +373,15 @@ def clean_df(df: pd.DataFrame, text_col: str, cfg: Optional[CleanConfig] = None)
 
 # -------- Example (comment out in production) --------
 if __name__ == "__main__":
-    raw = """as a business
-I want to add something so taht I would have new feature
+import pandas as pd
 
-ac1:
-adding it correctly
+    # Load your CSV
+    df = pd.read_csv("input.csv")
+    
+    # Apply cleaning on column ISSUE_DESC_STR (assume this is your raw text column)
+    df["ISSUE_DESC_STR_CLEANED"] = df["ISSUE_DESC_STR"].apply(lambda x: clean_text(x)[0])
+    
+    # Save to CSV
+    df.to_csv("output_cleaned.csv", index=False, encoding="utf-8")
+    print("Saved: output_cleaned.csv")
 
-|| Role || Action || Benefit ||
-| user | login | access dashboard |
-| admin | delete | remove accounts |
-
-bq. this is quoted
-* first item
-- second item
-
-{code}
-SELECT * FROM X;
-{code}
-
-see [the docs|https://example.com] and contact a@b.com
-"""
-    cfg = CleanConfig(use_spacy_sentencizer=USE_SPACY_DEFAULT)
-    cleaned, meta = clean_text(raw, cfg)
-    print("CLEANED:\n", cleaned)
-    print("\nMETA:\n", json.dumps(meta, indent=2))
