@@ -119,6 +119,7 @@ model = XGBClassifier(
     colsample_bytree=0.9,
     tree_method="hist",
     reg_lambda=1.0,
+    early_stopping_rounds=100,
 )
 
 # ========= Train =========
@@ -126,7 +127,6 @@ model.fit(
     X_train_df, y_train,
     sample_weight=sample_weight,
     eval_set=[(X_train_df, y_train), (X_dev_df, y_dev)],
-    early_stopping_rounds=100,
     verbose=False
 )
 
