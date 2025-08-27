@@ -64,10 +64,12 @@ RE_EG  = re.compile(r"\be\.\s*g\.", re.I)
 RE_ETC = re.compile(r"\betc\.\b", re.I)
 
 KEEP_PUNCT = ".!?;,"  # keep comma for table cell joining
-TRANS = {ord(ch): " " for ch in string.punctuation if ch not in KEEP_PUNCT}
+# ---- Minimal change here: keep '-' out of translation, we control it ourselves
+TRANS = {ord(ch): " " for ch in string.punctuation if ch not in KEEP_PUNCT + "-"}
+
 RE_ZW  = re.compile(r"[\u200B-\u200D\u2060]")  # zero-widths
 
-# New: internal hyphen rule (word-char - word-char)
+# Internal hyphen rule (word-char - word-char)
 RE_INTERNAL_HYPHEN = re.compile(r"(?<=\w)-(?!\s)(?=\w)")
 
 # Short-line comma rule threshold
