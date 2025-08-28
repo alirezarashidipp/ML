@@ -248,3 +248,22 @@ except Exception:
 print("\n=== Saved under:", OUTDIR)
 print("Base:", base)
 print(json.dumps({k: v for k, v in metrics.items() if k not in ["classification_report","params"]}, indent=2))
+
+
+
+# ========= ExplainerDashboard =========
+from explainerdashboard import ClassifierExplainer, ExplainerDashboard
+
+explainer = ClassifierExplainer(
+    model,
+    X_test_df,
+    y_test,
+    labels=classes
+)
+
+dashboard = ExplainerDashboard(
+    explainer,
+    title="XGBoost Readability Dashboard"
+)
+
+dashboard.run()   
