@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
-# Jira/Confluence text cleaner (one-function only)
-
-import re, html
 import pandas as pd
+import re, html
 from ftfy import fix_text
 import contractions
 
 def clean_text(raw: str) -> str:
-    # normalize
     s = "" if raw is None else str(raw)
     s = fix_text(s)
     s = contractions.fix(s)
@@ -66,7 +63,7 @@ def clean_text(raw: str) -> str:
         else:
             lines.append(t)
 
-    # punctuation rules (comma vs period)
+    # punctuation rules
     out = []
     for i, line in enumerate(lines):
         words = len(line.split())
@@ -87,7 +84,12 @@ def clean_text(raw: str) -> str:
     s = re.sub(r"\s+", " ", s)
     return s
 
-def clean_df(df: pd.DataFrame, text_col: str, out_col: str = "ISSUE_DESC_STR_CLEANED") -> pd.DataFrame:
-    out = df.copy()
-    out[out_col] = [clean_text(x) for x in out[text_col].astype(str).tolist()]
-    return out
+# --------- Main job ---------
+# Read CSV
+df = pd.read_csv("1_STEP_FLAG.csv")
+
+# Apply cleaning
+df["cleaned_str_final"] = df["cleaned_str"].astype(str).apply(clean_text)
+
+# Save to new CSV
+df.to_csv("cleaning.csv", index=False)
