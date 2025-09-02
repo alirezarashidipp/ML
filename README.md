@@ -5,6 +5,8 @@
 
 
 ------------------------
+سناریوهای قطعی
+
 we need to fix a bug\nwe need a plan
 → we need to fix a bug. we need a plan.
 
