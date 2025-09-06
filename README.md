@@ -14,7 +14,7 @@ Confusion matrix normalized.
 
 instead of best_ntree_limit using best_iteration.
 eval_set با دو Early stopping.
-
+for accuracy: QWK و Adjacent Accuracy.
 
 
 
