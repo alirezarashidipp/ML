@@ -5,37 +5,8 @@
 
 
 ------------------------
-سناریوهای قطعی
+training 
 
-we need to fix a bug\nwe need a plan
-→ we need to fix a bug. we need a plan.
-
-add logs now\nfor debugging steps
-→ add logs now, for debugging steps.
-
-title:\nimprove resilience
-→ title, improve resilience.
-
-consider edge cases (null values\nhandle them
-→ consider edge cases (null values). handle them.
-
-do not retry on 500;\nlog and alert
-→ do not retry on 500; log and alert.
-
-acceptance criteria:\nuser sees dashboard
-→ acceptance criteria, user sees dashboard.
-
-summary\n\nadd metrics
-→ summary, add metrics.
-
-we need to fix a bug\n with more details
-→ we need to fix a bug. with more details.
-
-this is a long requirement\nwith more details.
-→ this is a long requirement with more details.
-
-ac1: user can login
-→ acceptance criteria, user can login.
-
-ac2:\nuser enters credentials\nsystem validates\n\nnotes:
-→ acceptance criteria, user enters credentials system validates.
+Hyperparameter Tuning:
+   · This is the biggest potential addition. The script uses a well-chosen set of fixed hyperparameters (max_depth=6, learning_rate=0.05, etc.). These are good sensible defaults, but they are unlikely to be optimal.
+   · Suggestion: Integrate a tuning step (e.g., RandomizedSearchCV or BayesianOptimization) before the final training run with early stopping. You would use the X_tmp/y_tmp set for cross-validated tuning, find the best params, and then train the final model (with early stopping on X_dev/y_dev) using those best parameters.
