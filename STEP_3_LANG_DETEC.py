@@ -18,10 +18,16 @@ def main():
     input_csv  = "STEP_0_DA_JIRA_MASTER.csv"
     output_csv = "STEP_0_DA_JIRA_MASTER_with_lang.csv"
 
-    df = pd.read_csv(input_csv, usecols=["Key", "Description"])
-    df["TEXT_LANG"], df["CONFIDENCE"] = zip(*df["Description"].map(detect_language))
+    # Read all three columns
+    df = pd.read_csv(input_csv, usecols=["Key", "Description", "ISSUE_DESC_STR_CLEANED"])
 
+    # Run detection on ISSUE_DESC_STR_CLEANED
+    df["TEXT_LANG"], df["CONFIDENCE"] = zip(*df["ISSUE_DESC_STR_CLEANED"].map(detect_language))
+
+    # Save output
     df.to_csv(output_csv, index=False, encoding="utf-8-sig")
+
+    # Preview
     print(df.head())
 
 if __name__ == "__main__":
