@@ -20,8 +20,8 @@ from sklearn.preprocessing import RobustScaler
 
 # ---------------- Config ----------------
 INPUT_CSV      = "STEP_9_MERGE.csv"
-GO_OUT_CSV     = "STEP_9_FOR_HUMAN_LABELLING.csv"
-UNLAB_OUT_CSV  = "STEP_9_UNLABELLED_DATA.csv"
+GO_OUT_CSV     = "STEP_10_FOR_HUMAN_LABELLING.csv"
+UNLAB_OUT_CSV  = "STEP_10_UNLABELLED_DATA.csv"
 
 # columns
 ID_COL         = "Key"
