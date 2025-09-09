@@ -18,15 +18,15 @@ def normalize(raw, lo, hi, inverse=False):
 
 # readability map:  func , lower , upper , inverse?
 METRICS = {
-    "FRE":  (textstat.flesch_reading_ease,          0, 100, False),  # higher = plainer
+    "FRE":  (textstat.flesch_reading_ease,          -20, 100, False),  # higher = plainer
     "FKGL": (textstat.flesch_kincaid_grade, 0, 18, True), # New
-    "Fog":  (textstat.gunning_fog,                  3,  25,  True),  # lower = plainer
+    "Fog":  (textstat.gunning_fog,                  0,  25,  True),  # lower = plainer
     "LW":   (textstat.linsear_write_formula,        0,  25,  True),
     "ARI":  (textstat.automated_readability_index,  -10,  25,  True),
     "SMOG": (textstat.smog_index,                   3,  20,  True),
     "CLI":  (textstat.coleman_liau_index,           -10,  20,  True),
     "DC":  (textstat.dale_chall_readability_score,           1,  15,  True),
-    "LIX":  (textstat.lix,           15,  80,  True),
+    "LIX":  (textstat.lix,           1,  80,  True),
     "SPACHE": (textstat.spache_readability, 1, 10, True),   # New
 
 }
