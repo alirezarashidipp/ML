@@ -1,7 +1,4 @@
-# full_features_simple_min.py
-# Build 15 linguistic/style features from a cleaned English column DESC.
-# INPUT: CSV with columns: KEY_ID, DESC
-# OUTPUT: CSV with KEY_ID + 15 feature columns (same names you requested).
+
 
 import pandas as pd
 import numpy as np
