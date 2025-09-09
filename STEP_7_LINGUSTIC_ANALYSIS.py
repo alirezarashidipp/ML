@@ -7,9 +7,9 @@ from functools import lru_cache
 from wordfreq import zipf_frequency
 
 # -------- paths & model --------
-INPUT_CSV  = "INPUT.csv"              # set your path
-OUTPUT_CSV = "OUTPUT_features.csv"    # set your path
-SPACY_MODEL = "en_core_web_sm"        # use md/lg if available
+INPUT_CSV  = "STEP6_EMPTY_SEP_AFTER_AC_SEP.csv"
+OUTPUT_CSV = "STEP_7_LANG_ANALYSIS.csv" 
+SPACY_MODEL = "en_core_web_sm_qbf"     
 
 # -------- small helpers (kept minimal) --------
 def safe_div(a, b):
@@ -157,7 +157,7 @@ def extract_15_features(doc):
 
 # -------- main (super simple) --------
 def main():
-    df = pd.read_csv(INPUT_CSV, usecols=["KEY_ID", "DESC"])
+    df = pd.read_csv(INPUT_CSV, usecols=["Key", "ISSUE_DESC_STR_CLEANED"])
     nlp = spacy.load(SPACY_MODEL)
 
     feats = []
@@ -165,7 +165,7 @@ def main():
         feats.append(extract_15_features(doc))
 
     out = pd.DataFrame(feats)
-    out.insert(0, "KEY_ID", df["KEY_ID"].tolist())
+    out.insert(0, "Key", df["Key"].tolist())
     out.to_csv(OUTPUT_CSV, index=False)
     print(f"Saved: {OUTPUT_CSV}  rows={len(out)}  cols={len(out.columns)}")
 
