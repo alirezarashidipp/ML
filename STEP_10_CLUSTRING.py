@@ -1,87 +1,72 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import RobustScaler
 from sklearn.cluster import KMeans
 
-# -------- Config --------
-INPUT_CSV   = "merged_features.csv"          # your input file
-GO_OUT_CSV  = "GO_GET_HUMAN_LABEL.csv"       # core samples for human labeling
-UNLAB_OUT   = "UNLABELLED_DATA.csv"          # the rest (unlabeled pool)
+# ---- Config ----
+INPUT_CSV   = "STEP_9_MERGE.csv"
+GO_OUT_CSV  = "STE_9_FOR_HUMAN_LABELLING.csv"
+UNLAB_OUT   = "STE_9_UNLABELLED_DATA.csv"
 N_CLUSTERS  = 5
 TOP_N       = 10
-ID_COL      = "Key"                          # your ID column name
-EXCLUDE_COLS = [ID_COL, "ISSUE_DESC_STR_CLEANED"]  # non-numeric/text columns to exclude from clustering
+ID_COL      = "Key"
+EXCLUDE_COLS = [ID_COL, "ISSUE_DESC_STR_CLEANED"]  # non-numeric/text columns to exclude
 
-# -------- 1) Load --------
-df = pd.read_csv(INPUT_CSV)
+if __name__ == "__main__":
+    # 1) Load
+    df = pd.read_csv(INPUT_CSV)
 
-# -------- 2) Numeric features only (exclude ID/text) --------
-num_cols = df.select_dtypes(include=[np.number]).columns.tolist()
-feature_cols = [c for c in num_cols if c not in EXCLUDE_COLS]
-if len(feature_cols) == 0:
-    raise ValueError("No numeric feature columns found for clustering.")
+    # 2) Numeric feature columns (exclude IDs/text)
+    num_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+    feature_cols = [c for c in num_cols if c not in EXCLUDE_COLS]
+    if not feature_cols:
+        raise ValueError("No numeric feature columns found for clustering.")
 
-# -------- 3) Clean NaN/Inf --------
-X_raw = df[feature_cols].replace([np.inf, -np.inf], np.nan)
+    # 3) Clean NaN/Inf and drop rows with all-NaN features
+    X = df[feature_cols].replace([np.inf, -np.inf], np.nan)
+    keep_mask = X.notna().any(axis=1)
+    df = df.loc[keep_mask].reset_index(drop=True)
+    X = X.loc[keep_mask].reset_index(drop=True)
 
-# report missing columns counts (optional)
-missing = X_raw.isna().sum()
-missing = missing[missing > 0].sort_values(ascending=False)
-if not missing.empty:
-    print("Columns with missing values (before imputation):")
-    print(missing.to_string())
+    # 4) Impute -> Scale (Robust to outliers)
+    X = SimpleImputer(strategy="median").fit_transform(X)
+    X = RobustScaler().fit_transform(X)
 
-# drop rows with all-NaN features (optional but safe)
-all_nan_mask = X_raw.isna().all(axis=1)
-if all_nan_mask.any():
-    print(f"Dropping {all_nan_mask.sum()} rows with all-NaN features.")
-    df = df.loc[~all_nan_mask].reset_index(drop=True)
-    X_raw = X_raw.loc[~all_nan_mask].reset_index(drop=True)
+    # 5) KMeans (stable init)
+    km = KMeans(n_clusters=N_CLUSTERS, random_state=42, n_init="auto")
+    labels = km.fit_predict(X)
+    centers = km.cluster_centers_
 
-# -------- 4) Impute -> Scale --------
-imputer = SimpleImputer(strategy='median')
-scaler = StandardScaler()
-X_imputed = imputer.fit_transform(X_raw)
-X = scaler.fit_transform(X_imputed)
+    # 6) Distances to own centroid
+    dists = np.linalg.norm(X - centers[labels], axis=1)
 
-# -------- 5) KMeans --------
-kmeans = KMeans(n_clusters=N_CLUSTERS, random_state=42, n_init=10)
-labels = kmeans.fit_predict(X)
-centers = kmeans.cluster_centers_
+    # 7) Pick TOP_N closest per cluster with a deterministic tie-break on ID_COL
+    meta = pd.DataFrame({"cluster": labels, "dist": dists})
+    # tie-break: rank by ID (string), stable ordering inside equal distances
+    meta["tie"] = df[ID_COL].astype(str).rank(method="first")
+    meta_sorted = meta.sort_values(["cluster", "dist", "tie"])
 
-# -------- 6) Distances to centroid --------
-dists = np.linalg.norm(X - centers[labels], axis=1)
-
-# meta table to help selection (keep original index)
-meta = pd.DataFrame({
-    "cluster": labels,
-    "dist_to_centroid": dists
-}, index=df.index)
-
-# -------- 7) Pick TOP_N nearest-to-centroid per cluster --------
-core_idx = (
-    meta.sort_values(["cluster", "dist_to_centroid"], ascending=[True, True])
-        .groupby("cluster", as_index=False, group_keys=False)
+    core_idx = (
+        meta_sorted.groupby("cluster", as_index=False, group_keys=False)
         .head(TOP_N)
         .index
-)
+    )
 
-# -------- 8) Build GO_GET_HUMAN_LABEL.csv (all cols + empty HUMAN_LABEL) --------
-go_df = df.loc[core_idx].copy()
-go_df["HUMAN_LABEL"] = ""   # empty column for human labeling
-go_df.to_csv(GO_OUT_CSV, index=False)
+    # Optional: warn on small clusters
+    counts = meta["cluster"].value_counts().sort_index()
+    small = counts[counts < TOP_N]
+    if not small.empty:
+        print("Warning: small clusters (size < TOP_N):", small.to_dict())
 
-# -------- 9) Build UNLABELLED_DATA.csv (exclude GO ids; has all original cols) --------
-rest_df = df.drop(index=core_idx).copy()
-rest_df.to_csv(UNLAB_OUT, index=False)
+    # 8) Outputs
+    go_df = df.loc[core_idx].copy()
+    go_df["HUMAN_LABEL"] = ""  # to be filled by human
+    go_df.to_csv(GO_OUT_CSV, index=False)
 
-# -------- 10) Logs --------
-counts = meta.loc[core_idx, "cluster"].value_counts().sort_index()
-print("Core samples selected per cluster:")
-print(counts.to_string())
-print(f"Saved: {GO_OUT_CSV}  (central {TOP_N} per cluster, with HUMAN_LABEL empty)")
-print(f"Saved: {UNLAB_OUT}   (remaining rows, no HUMAN_LABEL)")
+    rest_df = df.drop(index=core_idx).copy()
+    rest_df.to_csv(UNLAB_OUT, index=False)
 
-
-
+    print(f"Saved {GO_OUT_CSV} (top {TOP_N} per cluster)")
+    print(f"Saved {UNLAB_OUT} (remaining pool)")
+    print("Selected per cluster:", counts.to_dict())
