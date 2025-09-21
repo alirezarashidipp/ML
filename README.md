@@ -1,3 +1,227 @@
+تقسیم داده بدون نشت (Train/Valid/Test یا KFold/TimeSeriesSplit)
+
+تثبیت طرح فیچرها (Feature List/Order/Dtypes)
+
+مدیریت مقادیر گمشده (NaN handling یا Imputer فیت‌شده روی Train)
+
+Encoding دسته‌ای‌ها (One-Hot/Target) فیت‌شده روی Train
+
+Label Encoding و نگه‌داری mapping کلاس‌ها
+
+وزن‌دهی کلاس‌ها (Class Weights/Sample Weights)
+
+انتخاب Objective مناسب (multi:softprob برای چندکلاسه)
+
+تنظیم پارامترهای کلیدی (max_depth, learning_rate, n_estimators, min_child_weight, subsample, colsample_bytree, reg_lambda/alpha, gamma)
+
+انتخاب Tree Method (hist / gpu_hist) و Seed ثابت
+
+Early Stopping با eval_set (Train/Valid) و best_iteration
+
+طرح Cross-Validation و تجمیع نتایج (mean ± std)
+
+متریک‌های مناسب نامتوازن (F1-macro, MCC, PR-AUC, Confusion Matrix نرمال)
+
+کالیبراسیون احتمال (Platt/Isotonic) روی Valid
+
+لاگینگ و ردیابی آزمایش‌ها (params, metrics, seeds, data hashes)
+
+ذخیرهٔ آرتیفکت‌ها (model, features, encoders/imputers, calibrator, label_encoder, params.json, metrics.json)
+
+پس‌زمینهٔ SHAP از Train و خروجی توضیح‌پذیری (Global/Local)
+
+کنترل کیفیت داده (قواعد کسب‌وکار، رِنج‌ها، sanity checks)
+
+پایش Drift (آمار پایه، PSI/KS) و نسخه‌گذاری داده
+
+بازتولیدپذیری محیط (requirements/conda, نسخهٔ xgboost/shap)
+
+آماده‌سازی Active Learning (thresholdهای margin/max_proba/entropy از Valid)
+
+امنیت و حریم داده (masking/PII) در لاگ‌ها و آرتیفکت‌ها
+
+سازگاری Serving (Feature Store/Schema Contract) و هماهنگی Train↔Infer
+تقسیم داده‌ها (Data Splitting)
+اعتبارسنجی متقابل (Cross-Validation)
+تنظیم پارامترهای فوق (Hyperparameter Tuning)
+توقف زودهنگام (Early Stopping)
+تابع هدف (Objective Function)
+معیارهای ارزیابی (Evaluation Metrics)
+مدیریت عدم تعادل کلاس‌ها (Imbalanced Classes Handling)
+تنظیم Seed برای تکرارپذیری (Random Seed)
+اهمیت ویژگی‌ها (Feature Importance)
+توضیح‌پذیری با SHAP (SHAP Interpretability)
+پیش‌پردازش داده‌ها (Data Preprocessing)
+نظارت بر فرآیند آموزش (Training Monitoring)
+استفاده از GPU (GPU Acceleration)
+ذخیره مدل (Model Saving)
+پیش‌پردازش و آماده‌سازی داده
+
+Feature Engineering پیشرفته
+Handling Missing Values استراتژیک
+Encoding متغیرهای categorical (Target/Label/One-Hot)
+Feature Scaling در صورت نیاز
+Outlier Detection & Treatment
+Data Leakage Prevention
+
+تنظیمات هایپرپارامتر
+
+Learning Rate (eta) Scheduling
+Tree-specific: max_depth, min_child_weight, subsample
+Regularization: alpha (L1), lambda (L2), gamma
+Column Sampling: colsample_bytree/bylevel/bynode
+Objective Function انتخاب بهینه
+Evaluation Metrics متناسب با مسئله
+
+استراتژی Cross-Validation
+
+Stratified K-Fold برای Imbalanced Data
+Time Series Split برای داده‌های زمانی
+Nested CV برای Model Selection
+Group K-Fold برای داده‌های گروه‌بندی شده
+
+مدیریت Imbalanced Dataset
+
+Scale_pos_weight parameter
+Custom Evaluation Metrics
+SMOTE/ADASYN techniques
+Focal Loss implementation
+
+بهینه‌سازی محاسباتی
+
+GPU acceleration (tree_method='gpu_hist')
+Distributed Computing (Dask/Spark integration)
+Memory optimization techniques
+Early Stopping استراتژیک
+Incremental Learning
+
+Feature Importance & Selection
+
+Multiple importance types (gain, cover, frequency)
+SHAP values integration
+Permutation Importance
+Recursive Feature Elimination
+Boruta Algorithm
+
+Ensemble Strategies
+
+Stacking with XGBoost
+Voting Classifiers/Regressors
+Blending techniques
+Multi-level ensembles
+
+Monitoring & Debugging
+
+Learning Curves Analysis
+Overfitting Detection Mechanisms
+Convergence Monitoring
+Custom Callbacks Implementation
+Watchlist برای multiple datasets
+
+Production Considerations
+
+Model Versioning
+Reproducibility (random seeds)
+Model Serialization (pickle/joblib/native)
+Inference Optimization
+A/B Testing Framework
+
+Advanced Techniques
+
+Custom Objective Functions
+Custom Evaluation Metrics
+Monotonic Constraints
+Interaction Constraints
+Dart Booster for better generalization
+Linear Booster for specific cases
+
+Hyperparameter Tuning
+
+Bayesian Optimization (Optuna/Hyperopt)
+Grid/Random Search strategies
+Multi-objective optimization
+AutoML integration
+
+تحلیل خطا و بهبود
+
+Residual Analysis
+Error Distribution Study
+Confidence Intervals
+Prediction Uncertainty Quantification
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 7_STEP_XGBOOST.py
 
 انتخاب پارامترها: پارامترهای مدل XGBoost (مثل n_estimators, max_depth, learning_rate) به صورت دستی تنظیم شده‌اند. اگرچه این پارامترها شروع خوبی هستند، اما برای یافتن بهترین ترکیب، می‌توانید از روش‌های بهینه‌سازی پارامتر (Hyperparameter Tuning) مانند Grid Search یا Random Search استفاده کنید.
