@@ -3,7 +3,10 @@ ali. hyper parameters@
 ali.Class Imbalance Handling@
 ali.early stopping@
 ali.accuracy, precision, recall, F1-score (macro and weighted), and the Matthews Correlation Coefficient (MCC)@
-
+ali. learning curve@
+ali.SHAP@
+ali.Feature Importance@
+ali.Confusion Matrix@
 
 
 
