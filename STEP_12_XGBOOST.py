@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# XGBoost (multiclass) Training + Dev EarlyStopping + MCC + Normalized ConfMat
-# + Learning Curves (Acc & F1-macro) + SHAP
-# Works with xgboost==2.1.*, shap>=0.44
+# XGBoost (multiclass) + Simple K-Fold CV (with inner early stopping) + Holdout Train/Dev/Test
+# MCC + ConfMat + Learning Curves + SHAP
+# xgboost==2.1.*, shap>=0.44
 
 import warnings, os, json, time
 warnings.filterwarnings("ignore")
@@ -36,6 +36,11 @@ FEATURES = [
 SEED   = 42
 OUTDIR = "runs_train"; os.makedirs(OUTDIR, exist_ok=True)
 
+# switches
+DO_CV = True           # ← اگر فقط می‌خواهی هولدآوت باشد، این را False کن
+CV_FOLDS = 5
+CV_VAL_SIZE = 0.15     # سهم validation داخل هر فولد برای early stopping
+
 # ========= Utils =========
 def save_json(obj, path):
     with open(path, "w", encoding="utf-8") as f:
@@ -52,9 +57,10 @@ def plot_confmat(cm, classes, title, path):
     thresh = cm.max() / 2.0
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
-            plt.text(j, i, format(cm[i, j], '.2f' if cm.dtype!=int else 'd'),
-                     ha="center", va="center",
-                     color="white" if cm[i, j] > thresh else "black")
+            val = cm[i, j]
+            txt = f"{val:.2f}" if cm.dtype!=int else f"{val:d}"
+            plt.text(j, i, txt, ha="center", va="center",
+                     color="white" if val > thresh else "black")
     plt.ylabel('True')
     plt.xlabel('Predicted')
     plt.tight_layout()
@@ -67,7 +73,6 @@ def plot_learning_curve_generic(model, X, y, scoring, title, path_png, path_csv)
     ts, tr, va = learning_curve(model, X, y, cv=cv, train_sizes=sizes,
                                 scoring=scoring, n_jobs=-1)
     tr_mean, va_mean = tr.mean(axis=1), va.mean(axis=1)
-
     fig = plt.figure()
     plt.plot(ts, tr_mean, 'o-', label=f"Train ({scoring})")
     plt.plot(ts, va_mean, 'o-', label=f"CV ({scoring})")
@@ -76,9 +81,49 @@ def plot_learning_curve_generic(model, X, y, scoring, title, path_png, path_csv)
     plt.title(title)
     plt.legend(); plt.grid(); plt.tight_layout()
     plt.savefig(path_png, dpi=160); plt.close(fig)
-
     pd.DataFrame({"train_size": ts, "train_score": tr_mean, "cv_score": va_mean}) \
       .to_csv(path_csv, index=False, encoding="utf-8")
+
+def compute_metrics(y_true, y_pred, y_proba, num_classes):
+    acc = accuracy_score(y_true, y_pred)
+    prec_m, rec_m, f1_m, _ = precision_recall_fscore_support(
+        y_true, y_pred, average="macro", zero_division=0)
+    prec_w, rec_w, f1_w, _ = precision_recall_fscore_support(
+        y_true, y_pred, average="weighted", zero_division=0)
+    mcc = matthews_corrcoef(y_true, y_pred)
+    try:
+        auc_macro = roc_auc_score(y_true, y_proba, multi_class="ovo", average="macro")
+    except Exception:
+        auc_macro = np.nan
+    cm_raw = confusion_matrix(y_true, y_pred, labels=np.arange(num_classes))
+    cm_norm = cm_raw.astype(float) / np.maximum(cm_raw.sum(axis=1, keepdims=True), 1)
+    return {
+        "accuracy": round(acc, 4),
+        "precision_macro": round(prec_m, 4),
+        "recall_macro": round(rec_m, 4),
+        "f1_macro": round(f1_m, 4),
+        "precision_weighted": round(prec_w, 4),
+        "recall_weighted": round(rec_w, 4),
+        "f1_weighted": round(f1_w, 4),
+        "mcc": round(mcc, 4),
+        "roc_auc_ovo_macro": None if np.isnan(auc_macro) else round(float(auc_macro), 4),
+    }, cm_raw, cm_norm
+
+def new_model(num_classes):
+    return XGBClassifier(
+        objective="multi:softprob",
+        num_class=num_classes,
+        eval_metric=["mlogloss","merror"],
+        random_state=SEED,
+        n_estimators=2000,
+        max_depth=6,
+        learning_rate=0.05,
+        subsample=0.9,
+        colsample_bytree=0.9,
+        tree_method="hist",
+        reg_lambda=1.0,
+        early_stopping_rounds=100,
+    )
 
 # ========= Load =========
 df = pd.read_csv(CSV_PATH)
@@ -91,7 +136,86 @@ y = le.transform(y_raw)
 classes = list(le.classes_)
 num_classes = len(classes)
 
-# ========= Split =========
+# ========= Cross-Validation =========
+ts = int(time.time())
+base = os.path.join(OUTDIR, f"xgb_train_{ts}")
+
+if DO_CV:
+    cv_dir = base + "_cv"
+    os.makedirs(cv_dir, exist_ok=True)
+
+    kfold = StratifiedKFold(n_splits=CV_FOLDS, shuffle=True, random_state=SEED)
+    fold_rows = []
+    all_cm_raw = np.zeros((num_classes, num_classes), dtype=float)
+
+    for fold_idx, (tr_idx, te_idx) in enumerate(kfold.split(X_df, y), start=1):
+        X_tr_full, X_te = X_df.iloc[tr_idx], X_df.iloc[te_idx]
+        y_tr_full, y_te = y[tr_idx], y[te_idx]
+
+        # inner split for early stopping
+        X_tr, X_val, y_tr, y_val = train_test_split(
+            X_tr_full, y_tr_full, test_size=CV_VAL_SIZE,
+            stratify=y_tr_full, random_state=SEED
+        )
+
+        # class weights per fold (on training partition)
+        cw = compute_class_weight(class_weight="balanced",
+                                  classes=np.unique(y_tr), y=y_tr)
+        cw_map = {cls: w for cls, w in zip(np.unique(y_tr), cw)}
+        sw_tr = np.array([cw_map[yy] for yy in y_tr])
+
+        model_cv = new_model(num_classes)
+        model_cv.fit(
+            X_tr, y_tr,
+            sample_weight=sw_tr,
+            eval_set=[(X_tr, y_tr), (X_val, y_val)],
+            verbose=False
+        )
+        best_ntree = getattr(model_cv, "best_ntree_limit", None)
+
+        it_range = (0, best_ntree) if best_ntree else None
+        y_pred = model_cv.predict(X_te, iteration_range=it_range)
+        y_proba = model_cv.predict_proba(X_te, iteration_range=it_range)
+
+        mets, cm_raw, cm_norm = compute_metrics(y_te, y_pred, y_proba, num_classes)
+        all_cm_raw += cm_raw
+
+        # save per-fold confmats
+        plot_confmat(cm_raw, classes, f"CV Fold {fold_idx} - ConfMat (raw)",
+                     os.path.join(cv_dir, f"cv_fold{fold_idx}_confmat_raw.png"))
+        plot_confmat(cm_norm, classes, f"CV Fold {fold_idx} - ConfMat (norm)",
+                     os.path.join(cv_dir, f"cv_fold{fold_idx}_confmat_norm.png"))
+
+        row = {"fold": fold_idx,
+               "n_train_fold": int(len(X_tr)),
+               "n_val_fold": int(len(X_val)),
+               "n_test_fold": int(len(X_te)),
+               "best_ntree_limit": int(best_ntree) if best_ntree else None}
+        row.update(mets)
+        fold_rows.append(row)
+
+    # aggregate & save
+    df_folds = pd.DataFrame(fold_rows)
+    df_folds.to_csv(os.path.join(cv_dir, "cv_fold_metrics.csv"), index=False, encoding="utf-8")
+
+    summary = {"k_folds": CV_FOLDS}
+    for col in ["accuracy","precision_macro","recall_macro","f1_macro",
+                "precision_weighted","recall_weighted","f1_weighted","mcc"]:
+        summary[f"{col}_mean"] = round(float(df_folds[col].mean()), 4)
+        summary[f"{col}_std"]  = round(float(df_folds[col].std(ddof=1)), 4)
+    if "roc_auc_ovo_macro" in df_folds.columns:
+        vals = df_folds["roc_auc_ovo_macro"].dropna()
+        summary["roc_auc_ovo_macro_mean"] = None if vals.empty else round(float(vals.mean()), 4)
+        summary["roc_auc_ovo_macro_std"]  = None if vals.empty else round(float(vals.std(ddof=1)), 4)
+
+    save_json(summary, os.path.join(cv_dir, "cv_summary.json"))
+
+    # average confusion matrix across folds (raw counts)
+    avg_cm = all_cm_raw / CV_FOLDS
+    plot_confmat(avg_cm, classes, "CV Average ConfMat (raw counts)",
+                 os.path.join(cv_dir, "cv_avg_confmat_raw.png"))
+
+# ========= Holdout Split (original flow) =========
 X_tmp, X_test_df, y_tmp, y_test = train_test_split(
     X_df, y, test_size=0.20, stratify=y, random_state=SEED
 )
@@ -99,30 +223,16 @@ X_train_df, X_dev_df, y_train, y_dev = train_test_split(
     X_tmp, y_tmp, test_size=0.20, stratify=y_tmp, random_state=SEED
 )
 
-# ========= Class weights =========
+# ========= Class weights (holdout) =========
 class_weights = compute_class_weight(class_weight="balanced",
-                                     classes=np.unique(y_train),
-                                     y=y_train)
+                                     classes=np.unique(y_train), y=y_train)
 cw_map = {cls: w for cls, w in zip(np.unique(y_train), class_weights)}
 sample_weight = np.array([cw_map[yy] for yy in y_train])
 
-# ========= Model =========
-model = XGBClassifier(
-    objective="multi:softprob",
-    num_class=num_classes,
-    eval_metric=["mlogloss","merror"],
-    random_state=SEED,
-    n_estimators=2000,
-    max_depth=6,
-    learning_rate=0.05,
-    subsample=0.9,
-    colsample_bytree=0.9,
-    tree_method="hist",
-    reg_lambda=1.0,
-    early_stopping_rounds=100,
-)
+# ========= Model (holdout) =========
+model = new_model(num_classes)
 
-# ========= Train =========
+# ========= Train (holdout) =========
 model.fit(
     X_train_df, y_train,
     sample_weight=sample_weight,
@@ -132,9 +242,10 @@ model.fit(
 
 best_ntree = model.best_ntree_limit if hasattr(model, "best_ntree_limit") else None
 
-# ========= Evaluate =========
-y_pred = model.predict(X_test_df, iteration_range=(0, best_ntree) if best_ntree else None)
-y_proba = model.predict_proba(X_test_df, iteration_range=(0, best_ntree) if best_ntree else None)
+# ========= Evaluate (holdout) =========
+it_range = (0, best_ntree) if best_ntree else None
+y_pred = model.predict(X_test_df, iteration_range=it_range)
+y_proba = model.predict_proba(X_test_df, iteration_range=it_range)
 
 acc = accuracy_score(y_test, y_pred)
 prec_m, rec_m, f1_m, _ = precision_recall_fscore_support(y_test, y_pred, average="macro", zero_division=0)
@@ -146,15 +257,12 @@ try:
 except Exception:
     auc_macro = np.nan
 
-cm_raw = confusion_matrix(y_test, y_pred)
+cm_raw = confusion_matrix(y_test, y_pred, labels=np.arange(num_classes))
 cm_norm = cm_raw.astype(float) / np.maximum(cm_raw.sum(axis=1, keepdims=True), 1)
 
 cls_rep = classification_report(y_test, y_pred, target_names=classes, zero_division=0)
 
-# ========= Save =========
-ts = int(time.time())
-base = os.path.join(OUTDIR, f"xgb_train_{ts}")
-
+# ========= Save (holdout) =========
 model.save_model(base + "_model.json")
 joblib.dump({"model": model, "label_encoder": le, "features": FEATURES}, base + "_model.joblib")
 
@@ -183,6 +291,7 @@ pd.DataFrame([metrics]).to_csv(base + "_metrics.csv", index=False, encoding="utf
 plot_confmat(cm_raw, classes, "Confusion Matrix (Raw counts)", base + "_confmat_raw.png")
 plot_confmat(cm_norm, classes, "Confusion Matrix (Normalized by true class)", base + "_confmat_norm.png")
 
+# ========= Learning Curves (quick) =========
 lc_model = XGBClassifier(
     objective="multi:softprob",
     num_class=num_classes,
@@ -206,6 +315,7 @@ plot_learning_curve_generic(
     path_csv=base + "_lc_f1macro.csv"
 )
 
+# ========= Feature Importance =========
 booster = model.get_booster()
 fscore = booster.get_score(importance_type="gain")
 imp_vals = [fscore.get(feat, 0.0) for feat in X_train_df.columns]
@@ -219,6 +329,7 @@ plt.tight_layout()
 plt.savefig(base + "_feat_importance.png", dpi=160)
 plt.close(fig)
 
+# ========= SHAP (subset) =========
 explainer = shap.TreeExplainer(model, feature_perturbation="tree_path_dependent")
 bg_idx = np.random.RandomState(SEED).choice(len(X_train_df), size=min(512, len(X_train_df)), replace=False)
 bg = X_train_df.iloc[bg_idx]
@@ -249,21 +360,8 @@ print("\n=== Saved under:", OUTDIR)
 print("Base:", base)
 print(json.dumps({k: v for k, v in metrics.items() if k not in ["classification_report","params"]}, indent=2))
 
-
-
 # ========= ExplainerDashboard =========
 from explainerdashboard import ClassifierExplainer, ExplainerDashboard
-
-explainer = ClassifierExplainer(
-    model,
-    X_test_df,
-    y_test,
-    labels=classes
-)
-
-dashboard = ExplainerDashboard(
-    explainer,
-    title="XGBoost Readability Dashboard"
-)
-
-dashboard.run()   
+explainer_dash = ClassifierExplainer(model, X_test_df, y_test, labels=classes)
+dashboard = ExplainerDashboard(explainer_dash, title="XGBoost Readability Dashboard")
+dashboard.run()
