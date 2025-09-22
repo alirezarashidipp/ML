@@ -8,6 +8,7 @@ learning curve@
 SHAP@
 Feature Importance@
 Confusion Matrix@
+active learning details@
 ordinal classification, regression@
 (i start with 500 labeled data, as a baseline,
 then via inference (as active learning process) i get labelled new 200 ids, and re train the model based on 
