@@ -7,7 +7,7 @@ ali. learning curve@
 ali.SHAP@
 ali.Feature Importance@
 ali.Confusion Matrix@
-
+(evey week i have new labeled data and i want to re train model, but i want to have lurning curve and drift detection and other needed things,my baseline is to habe 500 labeled data, and ebery week i get new ones)
 
 
 
