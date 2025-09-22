@@ -1,7 +1,7 @@
 ali. cross validation 
 ali. hyper parameters 
 ali.Class Imbalance Handling
-
+ali.early stopping 
 
 
 
