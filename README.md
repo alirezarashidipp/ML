@@ -1,3 +1,12 @@
+ali. cross validation 
+ali. hyper parameters 
+
+
+
+
+
+
+
 تقسیم داده بدون نشت (Train/Valid/Test یا KFold/TimeSeriesSplit)
 
 تثبیت طرح فیچرها (Feature List/Order/Dtypes)
