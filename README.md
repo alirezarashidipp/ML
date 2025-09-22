@@ -1,7 +1,8 @@
-ali. cross validation 
-ali. hyper parameters 
-ali.Class Imbalance Handling
-ali.early stopping 
+ali. cross validation@
+ali. hyper parameters@
+ali.Class Imbalance Handling@
+ali.early stopping@
+ali.accuracy, precision, recall, F1-score (macro and weighted), and the Matthews Correlation Coefficient (MCC)@
 
 
 
