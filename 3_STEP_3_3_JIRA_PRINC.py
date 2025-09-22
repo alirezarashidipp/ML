@@ -1,106 +1,93 @@
 import re
 import spacy
+import pandas as pd
 from spacy.matcher import Matcher
 from typing import Dict
 
-# Feature keys
-_FEATURE_KEYS = [
-    'has_acceptance_criteria',
-    'has_role_defined',
-    'has_goal_defined',
-    'has_reason_defined',
-]
+# ---------------- Config ----------------
+INPUT_CSV  = "STEP_4_LANG_SEP.csv"
+OUTPUT_CSV = "STEP_100_JIRA_PRINC.csv"
+TEXT_COL   = "ISSUE_DESC_STR_CLEANED"
+KEY_COL    = "Key"
 
-# Load spaCy model and initialize matcher
-nlp = spacy.load("en_core_web_sm")
+nlp = spacy.load("en_core_web_sm_qbf")
 matcher = Matcher(nlp.vocab)
 
+FEATURE_KEYS = [
+    "has_acceptance_criteria",
+    "has_role_defined",
+    "has_goal_defined",
+    "has_reason_defined",
+]
 
-pattern_role = [
-    {"LOWER": "as"},
-    {"LOWER": {"IN": ["a", "an", "the"]}},
-    {"POS": {"IN": ["NOUN", "PROPN"]}, "OP": "+"}
-     ]
+# ---- Pattern definitions ----
+PATTERNS = {
+    "has_role_defined": [
+        [{"LOWER": "as"}, {"LOWER": {"IN": ["a", "an", "the"]}}, {"POS": {"IN": ["NOUN", "PROPN"]}, "OP": "+"}],
+    ],
+    "has_goal_defined": [
+        "i want to", "i would like to", "i need to", "i can", "i am able to", "wish to",
+        "we want to", "we would like to", "we need to", "we can", "we are able to",
+        "i'm able to", "we're able to", "i'd like to", "we'd like to",
+        "im able to", "were able to", "id like to", "wed like to",
+    ],
+    "has_reason_defined": [
+        "so that", "so i can", "in order to"
+    ],
+    "has_acceptance_criteria": [
+        "acceptance criteria", "acceptance criterion", "acc. crit."
+    ],
+}
 
-
-matcher.add("has_role_defined", [pattern_role])
-
-# 2. Goal: various phrases
-goal_phrases = [
-"i want to", "i would like to", "i need to", "i can", 
-"i am able to", "wish to", "we need to",
-
-
-"we want to", "we would like to", "we need to", "we can", 
-"we are able to", "wish to",
-
-"i'm able to", 
-"we're able to", 
-"i'd like to", 
-"we'd like to",
-
-"im able to", 
-"were able to", 
-"id like to", 
-"wed like to",]
-
-
-patterns_goal = []
-for phrase in goal_phrases:
-    tokens = phrase.split()
-    patterns_goal.append([{"LOWER": tok} for tok in tokens])
-matcher.add("has_goal_defined", patterns_goal)
-
-# 3. Reason: "so that", "so i can", "in order to"
-reason_phrases = ["so that", "so i can", "in order to"]
-patterns_reason = []
-for phrase in reason_phrases:
-    tokens = phrase.split()
-    patterns_reason.append([{"LOWER": tok} for tok in tokens])
-matcher.add("has_reason_defined", patterns_reason)
-
-
-
-# 4. Acceptance: phrase-based and regex fallback
-acceptance_phrases = ["acceptance criteria", "AC", "acceptance criterion", "acc. crit."]
-patterns_acceptance = []
-for phrase in acceptance_phrases:
-    tokens = phrase.split()
-    patterns_acceptance.append([{"LOWER": tok.strip(".") if tok.endswith('.') else tok} for tok in tokens])
-matcher.add("has_acceptance_criteria", patterns_acceptance)
-# regex fallback for variants like ac:, a/c:
+# Regex for short forms like "AC:", "a/c:"
 _ACCEPTANCE_REGEX = re.compile(r"\b(?:ac|a/c)[:\-]?\b", re.I)
 
+# ---- Build matcher patterns ----
+def _phrase_to_pattern(phrase: str):
+    return [{"LOWER": tok} for tok in phrase.split()]
 
-def flag_story_quality(description: str) -> Dict[str, int]:
-    # Ensure string input
-    if not isinstance(description, str):
-        return {k: 0 for k in _FEATURE_KEYS}
+for key, items in PATTERNS.items():
+    spacy_patterns = []
+    for item in items:
+        if isinstance(item, str):
+            spacy_patterns.append(_phrase_to_pattern(item))
+        elif isinstance(item, list):
+            spacy_patterns.append(item)
+    if spacy_patterns:
+        matcher.add(key, spacy_patterns)
 
-    flags = {k: 0 for k in _FEATURE_KEYS}
+# ---- Main function ----
+def flag_story_quality(text: str) -> Dict[str, int]:
+    if not isinstance(text, str):
+        return {k: 0 for k in FEATURE_KEYS}
 
+    flags = {k: 0 for k in FEATURE_KEYS}
 
+    clean_text = re.sub(r"[\r\n\t]+", " ", text)
+    clean_text = re.sub(r"[{}[\]*—\-_/#\\+]", " ", clean_text)
+    clean_text = re.sub(r"\s{2,}", " ", clean_text).strip()
 
-
-
-    if _ACCEPTANCE_REGEX.search(description):
-        flags['has_acceptance_criteria'] = 1
-
-    # Normalize newlines and whitespace
-    raw_text = description.replace("\r\n", "\n").replace("\r", "\n")
-    raw_text = re.sub(r"[\{\}\[\]\*\—\-\-_/\\+#]", " ", raw_text)
-    raw_text = re.sub(r"\s{2,}", " ", raw_text).strip()
-    
-    # Run spaCy matcher
-    doc = nlp(raw_text)
-    matches = matcher(doc)
-    for match_id, start, end in matches:
+    doc = nlp(clean_text)
+    for match_id, start, end in matcher(doc):
         feature = nlp.vocab.strings[match_id]
         flags[feature] = 1
 
-    # Fallback for acceptance regex
-    if not flags['has_acceptance_criteria'] and _ACCEPTANCE_REGEX.search(raw_text):
-        flags['has_acceptance_criteria'] = 1
+    if _ACCEPTANCE_REGEX.search(clean_text):
+        flags["has_acceptance_criteria"] = 1
 
     return flags
 
+# ---- Pipeline ----
+def main():
+    df = pd.read_csv(INPUT_CSV)
+
+    flag_rows = df[TEXT_COL].apply(flag_story_quality)
+    flag_df = pd.DataFrame(list(flag_rows))
+
+    df_out = pd.concat([df[[KEY_COL, TEXT_COL]], flag_df], axis=1)
+    df_out.to_csv(OUTPUT_CSV, index=False, encoding="utf-8")
+
+    print(f"✅ Saved {len(df_out)} rows to {OUTPUT_CSV}")
+
+if __name__ == "__main__":
+    main()
