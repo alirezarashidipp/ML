@@ -45,6 +45,19 @@ merged["FLEISS_KAPPA"] = fkappa
 for c in cats:
     merged[f"AGREEMENT_ON_{c}"] = (merged[label_cols] == c).sum(axis=1) / n_annotators
 
-merged.to_excel("FINAL_LABELS.xlsx", index=False)
-print("[done] Saved FINAL_LABELS.xlsx")
+# محاسبه اختلاف annotator با اکثریت
+diff_scores = {}
+for a in label_cols:
+    diff_scores[a] = (merged[a] != merged["HUMAN_LABEL"]).mean()
+
+summary = pd.DataFrame({
+    "Annotator": list(diff_scores.keys()),
+    "Disagreement_with_majority": list(diff_scores.values())
+})
+
+with pd.ExcelWriter("FINAL_LABELS.xlsx", engine="openpyxl") as writer:
+    merged.to_excel(writer, sheet_name="Labels", index=False)
+    summary.to_excel(writer, sheet_name="Annotator_Summary", index=False)
+
+print("[done] Saved FINAL_LABELS.xlsx with 2 sheets")
 print(f"Fleiss Kappa = {fkappa:.3f}")
