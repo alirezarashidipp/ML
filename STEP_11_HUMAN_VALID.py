@@ -38,6 +38,8 @@ Focus only on readability, not on technical accuracy.
 
 
 
+# -*- coding: utf-8 -*-
+# Merge annotation Excel files (sheet="Label") + Validate + Graphs
 
 import pandas as pd
 import glob
@@ -45,17 +47,21 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # ========= Load & Merge =========
-files = glob.glob("HUMAN_LABELING_*.xlsx")
+path = r"C:\Users\45315874\Desktop\EXTERNAL WORKS\JRE\Code\OUTPUT\HUMAN_LABELLING\HUMAN_LABELING_*.xlsx"
+files = glob.glob(path)
 dfs = []
 
 for f in files:
     name = f.split("_")[-1].split(".")[0].upper()   # e.g. "JOHN"
-    df = pd.read_excel(f)
+    df = pd.read_excel(f, sheet_name="Label")       # ← مشخصاً sheet="Label"
     df = df[["Key", "HUMAN_LABEL"]].copy()
     df.rename(columns={"HUMAN_LABEL": f"HUMAN_LABEL_{name}"}, inplace=True)
     dfs.append(df)
 
-# merge همه فایل‌ها روی Key
+if not dfs:
+    raise FileNotFoundError("No HUMAN_LABELING_*.xlsx files found in the directory!")
+
+# Merge همه فایل‌ها روی Key
 merged = dfs[0]
 for d in dfs[1:]:
     merged = merged.merge(d, on="Key", how="inner")
@@ -122,3 +128,4 @@ plt.ylim(0,1)
 plt.show()
 
 print(f"Overall agreement rate: {agree_rate:.2%}")
+
