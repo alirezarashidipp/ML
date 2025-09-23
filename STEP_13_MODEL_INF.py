@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Inference + Feature Importance + SHAP + Active Learning shortlist
+# Inference + Active Learning split + SHAP for confident tickets
 # Requires: xgboost==2.1.*, shap>=0.44, scikit-learn, pandas, numpy, matplotlib, joblib
 
 import warnings, os, json, time
@@ -8,16 +8,15 @@ warnings.filterwarnings("ignore")
 import numpy as np
 import pandas as pd
 import joblib
-import matplotlib.pyplot as plt
 import shap
 
 # ========= Config =========
-UNLABELED_CSV = "STEP_10_UNLABELLED_DATA.csv"         # Input CSV
+UNLABELED_CSV = "STEP_10_UNLABELLED_DATA.csv"
 MODEL_JOBLIB  = "runs_train/xgb_train_xxxx_model.joblib"  
 OUTDIR        = "runs_infer"; os.makedirs(OUTDIR, exist_ok=True)
 SEED = 42
 
-# Uncertainty thresholds (Active Learning)
+# Uncertainty thresholds
 UNC_MAX_PROBA = 0.60
 UNC_MARGIN    = 0.20
 
@@ -28,20 +27,20 @@ le = artifacts["label_encoder"]
 FEATURES = artifacts["features"]
 classes = list(le.classes_)
 
-# ========= Load new data =========
-df_unlabeled = pd.read_csv(UNLABELED_CSV)
-X_new = df_unlabeled[FEATURES].copy()
+# ========= Load data =========
+df = pd.read_csv(UNLABELED_CSV)
+X = df[FEATURES].copy()
 
 # ========= Predict =========
-y_proba = model.predict_proba(X_new)
-y_pred = y_proba.argmax(axis=1)
-y_label = le.inverse_transform(y_pred)
+proba = model.predict_proba(X)
+pred_idx = proba.argmax(axis=1)
+pred_label = le.inverse_transform(pred_idx)
 
-df_unlabeled["PRED_LABEL"] = y_label
+df["PRED_LABEL"] = pred_label
 for i, c in enumerate(classes):
-    df_unlabeled[f"proba_{c}"] = y_proba[:, i]
+    df[f"proba_{c}"] = proba[:, i]
 
-# ========= Active Learning signals =========
+# ========= Uncertainty metrics =========
 def entropy_row(p, eps=1e-12):
     p = np.clip(p, eps, 1.0)
     return float(-(p * np.log(p)).sum())
@@ -50,63 +49,48 @@ def margin_row(p):
     s = np.sort(p)[::-1]
     return float(s[0] - s[1]) if len(s) >= 2 else float(s[0])
 
-maxp    = y_proba.max(axis=1)
-margin  = np.apply_along_axis(margin_row, 1, y_proba)
-entropy = np.apply_along_axis(entropy_row, 1, y_proba)
+maxp    = proba.max(axis=1)
+margin  = np.apply_along_axis(margin_row, 1, proba)
+entropy = np.apply_along_axis(entropy_row, 1, proba)
 
 uncertain_mask = (maxp < UNC_MAX_PROBA) | (margin < UNC_MARGIN)
 
-df_unlabeled["confidence"] = maxp
-df_unlabeled["margin"] = margin
-df_unlabeled["entropy"] = entropy
-df_unlabeled["uncertain_flag"] = uncertain_mask.astype(int)
+df["confidence"] = maxp
+df["margin"] = margin
+df["entropy"] = entropy
+df["uncertain_flag"] = uncertain_mask.astype(int)
 
-# Save predictions
-pred_path = os.path.join(OUTDIR, "inference_predictions.csv")
-df_unlabeled.to_csv(pred_path, index=False, encoding="utf-8")
+# ========= Split outputs =========
+confident_df = df[df["uncertain_flag"] == 0].copy()
+uncertain_df = df[df["uncertain_flag"] == 1].copy()
 
-# Save uncertain subset for labeling
-uncertain_df = df_unlabeled[df_unlabeled["uncertain_flag"] == 1].copy()
-uncertain_df = uncertain_df.sort_values(by=["margin", "confidence", "entropy"],
-                                        ascending=[True, True, False])
-uncertain_df.to_csv(os.path.join(OUTDIR, "uncertain_for_labeling.csv"),
-                    index=False, encoding="utf-8")
+# --- 1) Confident samples → add SHAP explanations ---
+if len(confident_df) > 0:
+    explainer = shap.TreeExplainer(model, feature_perturbation="tree_path_dependent")
+    shap_vals = explainer.shap_values(confident_df[FEATURES])
 
-print(f"[done] predictions -> {pred_path}")
-print(f"[done] uncertain  -> uncertain_for_labeling.csv ({len(uncertain_df)})")
+    fnames = FEATURES
+    shap_top_feats, shap_top_vals = [], []
+    for r in range(len(confident_df)):
+        c = pred_idx[confident_df.index[r]]
+        vec = shap_vals[c][r]
+        order = np.argsort(np.abs(vec))[::-1][:5]  # top-5 features
+        shap_top_feats.append("|".join(fnames[i] for i in order))
+        shap_top_vals.append("|".join(f"{vec[i]:+0.6f}" for i in order))
 
-# ========= Feature Importance =========
-booster = model.get_booster()
-fscore = booster.get_score(importance_type="gain")
-imp_vals = [fscore.get(feat, 0.0) for feat in FEATURES]
+    confident_df["shap_top5_features"] = shap_top_feats
+    confident_df["shap_top5_values"] = shap_top_vals
 
-fig = plt.figure()
-plt.barh(range(len(imp_vals)), imp_vals)
-plt.yticks(range(len(imp_vals)), FEATURES)
-plt.xlabel("Gain")
-plt.title("Feature Importance (gain)")
-plt.tight_layout()
-plt.savefig(os.path.join(OUTDIR, "feature_importance.png"), dpi=160)
-plt.close(fig)
+# ========= Save =========
+ts = time.strftime("%Y%m%d_%H%M%S")
+base = os.path.join(OUTDIR, f"infer_{ts}")
+os.makedirs(base, exist_ok=True)
 
-# ========= SHAP (subset) =========
-explainer = shap.TreeExplainer(model, feature_perturbation="tree_path_dependent")
-bg_idx = np.random.RandomState(SEED).choice(len(X_new), size=min(512, len(X_new)), replace=False)
-bg = X_new.iloc[bg_idx]
+confident_path = os.path.join(base, "confident_predictions.csv")
+confident_df.to_csv(confident_path, index=False, encoding="utf-8")
 
-k = min(100, len(X_new))
-X_slice = X_new.iloc[:k]
-shap_values = explainer.shap_values(X_slice)
+uncertain_path = os.path.join(base, "uncertain_for_labeling.csv")
+uncertain_df.to_csv(uncertain_path, index=False, encoding="utf-8")
 
-for c_idx, c_name in enumerate(classes):
-    try:
-        fig = plt.figure()
-        shap.summary_plot(shap_values[c_idx], X_slice, show=False)
-        plt.title(f"SHAP Summary - class: {c_name}")
-        plt.tight_layout()
-        plt.savefig(os.path.join(OUTDIR, f"shap_summary_class_{c_name}.png"), dpi=160)
-        plt.close(fig)
-    except Exception:
-        pass
-
-print("Feature importance + SHAP plots saved in:", OUTDIR)
+print(f"[done] confident -> {confident_path} ({len(confident_df)})")
+print(f"[done] uncertain -> {uncertain_path} ({len(uncertain_df)})")
