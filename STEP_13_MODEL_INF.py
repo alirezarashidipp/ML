@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-# Inference + Active Learning split + SHAP for confident tickets
-# Requires: xgboost==2.1.*, shap>=0.44, scikit-learn, pandas, numpy, matplotlib, joblib
-
 import warnings, os, json, time
 warnings.filterwarnings("ignore")
 
@@ -12,7 +8,7 @@ import shap
 
 # ========= Config =========
 UNLABELED_CSV = "STEP_10_UNLABELLED_DATA.csv"
-MODEL_JOBLIB  = "runs_train/xgb_train_xxxx_model.joblib"  # ← مسیر مدل ذخیره‌شده
+MODEL_JOBLIB  = "runs_train/xgb_train_xxxx_model.joblib"   # مسیر artifact
 OUTDIR        = "runs_infer"; os.makedirs(OUTDIR, exist_ok=True)
 SEED = 42
 
@@ -64,17 +60,22 @@ df["uncertain_flag"] = uncertain_mask.astype(int)
 confident_df = df[df["uncertain_flag"] == 0].copy()
 uncertain_df = df[df["uncertain_flag"] == 1].copy()
 
-# --- 1) Confident samples → add SHAP explanations ---
+# ========= SHAP for confident tickets =========
 if len(confident_df) > 0:
+    # Reset index برای هماهنگی
+    confident_X = confident_df[FEATURES].reset_index(drop=True)
+    confident_pred_idx = pred_idx[confident_df.index]
+
     explainer = shap.TreeExplainer(model, feature_perturbation="tree_path_dependent")
-    shap_vals = explainer.shap_values(confident_df[FEATURES])
+    shap_vals = explainer.shap_values(confident_X)
 
     fnames = FEATURES
     shap_top_feats, shap_top_vals = [], []
-    for r in range(len(confident_df)):
-        c = pred_idx[confident_df.index[r]]
-        vec = shap_vals[c][r]
-        order = np.argsort(np.abs(vec))[::-1][:5]  # top-5 features
+
+    for r in range(len(confident_X)):
+        c = confident_pred_idx[r]         # کلاس پیش‌بینی‌شده
+        vec = shap_vals[c][r]             # shap vector (d,)
+        order = np.argsort(np.abs(vec))[::-1][:5]   # top-5
         shap_top_feats.append("|".join(fnames[i] for i in order))
         shap_top_vals.append("|".join(f"{vec[i]:+0.6f}" for i in order))
 
@@ -92,5 +93,22 @@ confident_df.to_csv(confident_path, index=False, encoding="utf-8")
 uncertain_path = os.path.join(base, "uncertain_for_labeling.csv")
 uncertain_df.to_csv(uncertain_path, index=False, encoding="utf-8")
 
+# ========= Summary =========
+summary = {
+    "total_samples": int(len(df)),
+    "num_confident": int(len(confident_df)),
+    "num_uncertain": int(len(uncertain_df)),
+    "unc_max_proba": UNC_MAX_PROBA,
+    "unc_margin": UNC_MARGIN,
+    "avg_confidence": round(float(df["confidence"].mean()), 4),
+    "min_confidence": round(float(df["confidence"].min()), 4),
+    "max_confidence": round(float(df["confidence"].max()), 4)
+}
+summary_path = os.path.join(base, "inference_summary.json")
+with open(summary_path, "w", encoding="utf-8") as f:
+    json.dump(summary, f, ensure_ascii=False, indent=2)
+
 print(f"[done] confident -> {confident_path} ({len(confident_df)})")
 print(f"[done] uncertain -> {uncertain_path} ({len(uncertain_df)})")
+print(f"[done] summary   -> {summary_path}")
+print(json.dumps(summary, indent=2))
