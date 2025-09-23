@@ -23,7 +23,15 @@ merged["AGREEMENT"] = merged[label_cols].apply(
     lambda row: row.value_counts(normalize=True).max(), axis=1
 )
 
-merged["HUMAN_LABEL"] = merged[label_cols].mode(axis=1)[0]
+def majority_or_nan(row):
+    vc = row.value_counts()
+    if vc.empty:
+        return None
+    max_count = vc.max()
+    winners = vc[vc == max_count].index.tolist()
+    return winners[0] if len(winners) == 1 else None
+
+merged["HUMAN_LABEL"] = merged[label_cols].apply(majority_or_nan, axis=1)
 
 cats = [0,1,2]
 mat = []
