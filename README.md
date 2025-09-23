@@ -12,6 +12,7 @@ Feature Importance@
 Confusion Matrix@
 active learning details@
 ordinal classification, regression@
+ROC and AUC@
 (i start with 500 labeled data, as a baseline,
 then via inference (as active learning process) i get labelled new 200 ids, and re train the model based on 
 baseline+ and new labeled ids, but but i want to have lurning curve and drift detection and other needed things)
