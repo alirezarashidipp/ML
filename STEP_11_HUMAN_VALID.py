@@ -1,3 +1,44 @@
+Annotation Guideline (Plain Version)
+
+Task: For each ticket description, decide how easy it is to read and understand. Use the following scale:
+
+0 – Poor readability
+
+Very hard to read or understand.
+
+Sentences are broken, unclear, or incomplete.
+
+The main idea is missing or confusing.
+
+1 – Acceptable readability
+
+Can be read and understood, but not smooth.
+
+Some parts are unclear or awkward.
+
+The main idea is present, but details may be missing.
+
+2 – Good readability
+
+Easy to read and understand.
+
+Sentences are clear, complete, and logical.
+
+The main idea is expressed well and no extra effort is needed.
+
+Rules:
+
+Each ticket must have exactly one label: 0, 1, or 2.
+
+Do not leave any ticket blank.
+
+Focus only on readability, not on technical accuracy.
+
+
+
+
+
+
 import pandas as pd
 import glob
 import matplotlib.pyplot as plt
