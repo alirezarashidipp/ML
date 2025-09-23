@@ -12,7 +12,7 @@ import shap
 
 # ========= Config =========
 UNLABELED_CSV = "STEP_10_UNLABELLED_DATA.csv"
-MODEL_JOBLIB  = "runs_train/xgb_train_xxxx_model.joblib"  
+MODEL_JOBLIB  = "runs_train/xgb_train_xxxx_model.joblib"  # ← مسیر مدل ذخیره‌شده
 OUTDIR        = "runs_infer"; os.makedirs(OUTDIR, exist_ok=True)
 SEED = 42
 
