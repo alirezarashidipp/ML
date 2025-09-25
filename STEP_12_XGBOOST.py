@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 # Ordinal XGBoost training script (advanced, saves all outputs)
 # Requires: xgboost>=2.1.*, scikit-learn, pandas, numpy, joblib
+# CV + Hyperparameter tuning
+# Class imbalance handling
+# Early stopping
+# ALL METRICS
+# Feature importance
 
 import warnings, os, json
 warnings.filterwarnings("ignore")
