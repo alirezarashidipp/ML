@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
-# Ordinal XGBoost training script (advanced, saves all outputs)
+# Ordinal XGBoost training script (advanced, with management summary)
 # Requires: xgboost>=2.1.*, scikit-learn, pandas, numpy, joblib
-# CV + Hyperparameter tuning
-# Class imbalance handling
-# Early stopping
-# ALL METRICS
-# Feature importance
 
 import warnings, os, json
 warnings.filterwarnings("ignore")
@@ -110,10 +105,27 @@ conf_mat = confusion_matrix(y_test, y_pred)
 imp1 = pd.Series(model1.feature_importances_, index=FEATURES).sort_values(ascending=False)
 imp2 = pd.Series(model2.feature_importances_, index=FEATURES).sort_values(ascending=False)
 
+# ========= Management Summary =========
+errors = conf_mat.copy()
+np.fill_diagonal(errors, 0)
+max_error_idx = np.unravel_index(np.argmax(errors), errors.shape)
+error_summary = f"Most frequent error: True class {max_error_idx[0]} predicted as {max_error_idx[1]} ({errors[max_error_idx]} times)."
+
+top_feat1 = imp1.head(1).index[0]
+top_feat2 = imp2.head(1).index[0]
+
+summary_text = (
+    f"=== Management Summary ===\n"
+    f"Current accuracy is about {acc:.2f}.\n"
+    f"{error_summary}\n"
+    f"Most influential features: {top_feat1}, {top_feat2}.\n\n"
+)
+print(summary_text)
+
 # ========= Prepare outputs =========
 os.makedirs("runs_train", exist_ok=True)
 
-# JSON (structured metrics)
+# JSON
 metrics_dict = {
     "accuracy": acc,
     "precision_macro": prec,
@@ -126,13 +138,15 @@ metrics_dict = {
     "quadratic_weighted_kappa": qwk,
     "confusion_matrix": conf_mat.tolist(),
     "top_features_task1": imp1.head(10).to_dict(),
-    "top_features_task2": imp2.head(10).to_dict()
+    "top_features_task2": imp2.head(10).to_dict(),
+    "management_summary": summary_text
 }
 with open("runs_train/metrics.json", "w") as f:
     json.dump(metrics_dict, f, indent=2)
 
-# TXT (human-readable full report)
+# TXT
 with open("runs_train/eval_report.txt", "w") as f:
+    f.write(summary_text)
     f.write("=== Metrics on Test Set ===\n")
     f.write(f"Accuracy: {acc:.3f}\n")
     f.write(f"Precision (macro): {prec:.3f}, Recall (macro): {rec:.3f}, F1 (macro): {f1:.3f}\n")
