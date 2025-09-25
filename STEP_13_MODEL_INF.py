@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 # ========= Config =========
-UNLABELLED_CSV = "STEP_10_UNLABELLED_DATA.csv"  # input: must have Key + FEATURES
+UNLABELLED_CSV = "STEP_11_UNLABELLED.csv"  # input: must have Key + FEATURES
 MODEL_PATH     = "runs_train/xgb_ordinal_advanced.joblib"
 OUTDIR         = "runs_inference"
 
@@ -25,6 +25,7 @@ FEATURES = [
 ]
 
 LABEL_MAP = {0: "Poor", 1: "Acceptable", 2: "Good"}
+CONF_THRESHOLD = 0.8  # active learning cutoff
 
 # ========= Load =========
 os.makedirs(OUTDIR, exist_ok=True)
@@ -80,8 +81,14 @@ pred_df = pd.DataFrame({
     "Confidence": confidences,
     "Top5_SHAP_Features": top_features_list
 })
+
 pred_path = os.path.join(OUTDIR, "predictions.csv")
 pred_df.to_csv(pred_path, index=False)
+
+# ========= Save low-confidence samples for Active Learning =========
+lowconf_df = pred_df[pred_df["Confidence"] < CONF_THRESHOLD]
+lowconf_path = os.path.join(OUTDIR, "predictions_lowconf.csv")
+lowconf_df.to_csv(lowconf_path, index=False)
 
 # ========= Summary =========
 summary_path = os.path.join(OUTDIR, "summary.txt")
@@ -97,9 +104,12 @@ with open(summary_path, "w") as f:
 
     f.write(f"Average confidence: {confidences.mean():.3f}\n\n")
 
+    f.write(f"Low-confidence threshold: {CONF_THRESHOLD:.2f}\n")
+    f.write(f"Total low-confidence samples: {len(lowconf_df)}\n\n")
+
     low_conf = pred_df.nsmallest(10, "Confidence")
     f.write("10 samples with lowest confidence:\n")
     f.write(low_conf[["Key","Final_Label","Confidence"]].to_string(index=False))
     f.write("\n")
 
-print(f"Inference completed. Results saved to:\n- {pred_path}\n- {summary_path}")
+print(f"Inference completed. Results saved to:\n- {pred_path}\n- {lowconf_path}\n- {summary_path}")
