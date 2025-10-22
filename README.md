@@ -1,3 +1,23 @@
+I have developed a machine learning process to assess the clarity of Jira tickets.
+
+For each issue at the Story level, we use an XGBoost model to classify how plain and understandable the written description is — excluding the Acceptance Criteria section.
+
+Because readability in technical text is inherently subjective, we rely on the wisdom of the crowd. A group of domain experts reviews a small sample of tickets and assigns one of three ordinal labels:
+
+Plain
+
+Acceptable
+
+Complicated
+
+We then extract a wide range of linguistic and structural features from the text and train the XGBoost model in a supervised learning setup.
+Once trained, the model automatically assigns readability labels to unlabeled tickets.
+
+
+
+
+
+
 https://share.google/zDTnE50NCVm9vZaRz
 
 cross validation@
