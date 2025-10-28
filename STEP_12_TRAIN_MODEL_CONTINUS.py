@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Ordinal XGBoost – Method A (multi:softprob + calibration → continuous 0–100 score)
+# Ordinal XGBoost – Method A (multi:softprob + calibration + class weighting)
 # Requires: xgboost>=2.1.*, scikit-learn, pandas, numpy, joblib
 
 import warnings, os, json
@@ -10,7 +10,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.metrics import (
-    accuracy_score, f1_score, cohen_kappa_score, classification_report, confusion_matrix
+    accuracy_score, f1_score, cohen_kappa_score,
+    classification_report, confusion_matrix
 )
 from xgboost import XGBClassifier
 import joblib
@@ -38,6 +39,19 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, stratify=y, random_state=42
 )
 
+# ========= Class Weights (handling imbalance) =========
+cls, cnt = np.unique(y_train, return_counts=True)
+freq = dict(zip(cls, cnt))
+
+alpha = 1.0   # 0.5=light, 1.0=stronger, 1.5=very strong reweighting
+w_per_class = {c: (1.0 / (freq[c] ** alpha)) for c in freq}
+
+# normalize so average weight ≈ 1
+mean_w = np.mean(list(w_per_class.values()))
+w_per_class = {c: w_per_class[c] / mean_w for c in w_per_class}
+
+sample_w_train = y_train.map(w_per_class).astype(float).values
+
 # ========= Model =========
 xgb_params = dict(
     objective="multi:softprob",
@@ -54,16 +68,15 @@ xgb_params = dict(
 
 base = XGBClassifier(**xgb_params)
 
-# ========= Calibrate =========
+# ========= Calibrate (with weights) =========
 cal = CalibratedClassifierCV(base, method="isotonic", cv=3)
-cal.fit(X_train, y_train)
+cal.fit(X_train, y_train, sample_weight=sample_w_train)
 
 # ========= Predict Probabilities =========
-proba = cal.predict_proba(X_test)    # shape (n,3)
+proba = cal.predict_proba(X_test)  # shape (n,3)
 
 # ========= Continuous Score =========
-# define ordinal weights
-score_map = np.array([0.0, 0.5, 1.0])  # poor / acceptable / good
+score_map = np.array([0.0, 0.5, 1.0])  # ordinal weights poor/acceptable/good
 score = (proba * score_map).sum(axis=1)
 score_0_100 = np.clip(score * 100, 1, 99)
 
@@ -81,20 +94,20 @@ summary_text = (
     f"=== Method A Summary ===\n"
     f"Accuracy: {acc:.3f}\nF1-weighted: {f1_w:.3f}\nQuadratic Weighted Kappa: {qwk:.3f}\n"
     f"Mean continuous score: {score_0_100.mean():.2f}\n"
+    f"Class weights: {w_per_class}\n"
 )
-
 print(summary_text)
 print(report)
 
 # ========= Save Outputs =========
-os.makedirs("runs_train_methodA", exist_ok=True)
-joblib.dump(cal, "runs_train_methodA/xgb_softprob_calibrated.joblib")
+os.makedirs("runs_train_methodA_weighted", exist_ok=True)
+joblib.dump(cal, "runs_train_methodA_weighted/xgb_softprob_calibrated_weighted.joblib")
 
 pd.DataFrame({
     "true_label": y_test,
     "pred_label": y_pred,
     "score_0_100": score_0_100
-}).to_csv("runs_train_methodA/predictions.csv", index=False)
+}).to_csv("runs_train_methodA_weighted/predictions.csv", index=False)
 
 metrics_dict = {
     "accuracy": acc,
@@ -103,12 +116,13 @@ metrics_dict = {
     "classification_report": report,
     "confusion_matrix": cm.tolist(),
     "mean_score": float(score_0_100.mean()),
+    "class_weights": w_per_class,
     "management_summary": summary_text
 }
-with open("runs_train_methodA/metrics.json", "w") as f:
+with open("runs_train_methodA_weighted/metrics.json", "w") as f:
     json.dump(metrics_dict, f, indent=2)
 
-print("Model, metrics, and predictions saved to runs_train_methodA/")
+print("Model, metrics, and predictions saved to runs_train_methodA_weighted/")
 
 # ========= Inference Helper =========
 def predict_score_0_100(model, X_new):
