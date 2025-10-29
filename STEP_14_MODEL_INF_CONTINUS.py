@@ -81,7 +81,7 @@ for i in range(len(X)):
     top_feats = "; ".join(signed_pairs)
     top_features_list.append(top_feats)
 
-# ========= Save predictions =========
+# ========= Build full predictions frame (not saved yet) =========
 pred_df = pd.DataFrame({
     "Key": df["Key"],
     "Prediction": y_pred,
@@ -95,24 +95,24 @@ pred_df = pd.DataFrame({
     "Top5_SHAP_Features": top_features_list
 })
 
-pred_path = os.path.join(OUTDIR, "predictions.csv")
-pred_df.to_csv(pred_path, index=False)
+# ========= Low-confidence split =========
+lowconf_df = pred_df[pred_df["Confidence"] < CONF_THRESHOLD].copy()
 
-# ========= Save low-confidence samples =========
-lowconf_df = pred_df[pred_df["Confidence"] < CONF_THRESHOLD]
-lowconf_path = os.path.join(OUTDIR, "predictions_lowconf.csv")
-lowconf_df.to_csv(lowconf_path, index=False)
-
-# ========= Split for Active Learning (keys only) vs Main (exclude them) =========
+pred_path        = os.path.join(OUTDIR, "predictions.csv")
+lowconf_path     = os.path.join(OUTDIR, "predictions_lowconf.csv")
 al_keys_path     = os.path.join(OUTDIR, "active_learning_keys.csv")
 main_wo_al_path  = os.path.join(OUTDIR, "predictions_main_without_AL.csv")
 
 
+lowconf_df.to_csv(lowconf_path, index=False)
+
+
+pred_df_filtered = pred_df[~pred_df["Key"].isin(lowconf_df["Key"])].copy()
+pred_df_filtered.to_csv(pred_path, index=False)
+
+
 lowconf_df[["Key"]].drop_duplicates().to_csv(al_keys_path, index=False)
-
-
-pred_main_wo_al = pred_df[~pred_df["Key"].isin(lowconf_df["Key"])].copy()
-pred_main_wo_al.to_csv(main_wo_al_path, index=False)
+pred_df_filtered.to_csv(main_wo_al_path, index=False)
 
 # ========= Summary =========
 summary_path = os.path.join(OUTDIR, "summary.txt")
@@ -137,8 +137,14 @@ with open(summary_path, "w") as f:
     f.write(low_conf[cols].to_string(index=False))
     f.write("\n")
 
-  
-    f.write(f"\nActive-Learning keys saved to: {al_keys_path}\n")
-    f.write(f"Main predictions excluding AL saved to: {main_wo_al_path}\n")
+    f.write(f"\nFiles:\n- predictions (no lowconf): {pred_path}\n")
+    f.write(f"- predictions_lowconf: {lowconf_path}\n")
+    f.write(f"- active_learning_keys: {al_keys_path}\n")
+    f.write(f"- predictions_main_without_AL: {main_wo_al_path}\n")
 
-print(f"Inference completed. Results saved to:\n- {pred_path}\n- {lowconf_path}\n- {al_keys_path}\n- {main_wo_al_path}\n- {summary_path}")
+print("Inference completed. Results saved to:")
+print(f"- {pred_path}        (predictions WITHOUT low-confidence rows)")
+print(f"- {lowconf_path}     (low-confidence only)")
+print(f"- {al_keys_path}     (AL keys only)")
+print(f"- {main_wo_al_path}  (same as predictions without AL)")
+print(f"- {summary_path}")
