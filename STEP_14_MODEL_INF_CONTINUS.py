@@ -3,7 +3,6 @@
 # Inference with XGBoost multiclass (softprob) + SHAP explanations
 # Requires: xgboost>=2.1.*, shap>=0.44, pandas, numpy, joblib
 
-
 # method 2
 
 import warnings, os, shap, joblib
@@ -104,6 +103,17 @@ lowconf_df = pred_df[pred_df["Confidence"] < CONF_THRESHOLD]
 lowconf_path = os.path.join(OUTDIR, "predictions_lowconf.csv")
 lowconf_df.to_csv(lowconf_path, index=False)
 
+# ========= Split for Active Learning (keys only) vs Main (exclude them) =========
+al_keys_path     = os.path.join(OUTDIR, "active_learning_keys.csv")
+main_wo_al_path  = os.path.join(OUTDIR, "predictions_main_without_AL.csv")
+
+# فقط کلیدهای لازم برای Active Learning
+lowconf_df[["Key"]].drop_duplicates().to_csv(al_keys_path, index=False)
+
+
+pred_main_wo_al = pred_df[~pred_df["Key"].isin(lowconf_df["Key"])].copy()
+pred_main_wo_al.to_csv(main_wo_al_path, index=False)
+
 # ========= Summary =========
 summary_path = os.path.join(OUTDIR, "summary.txt")
 with open(summary_path, "w") as f:
@@ -127,4 +137,8 @@ with open(summary_path, "w") as f:
     f.write(low_conf[cols].to_string(index=False))
     f.write("\n")
 
-print(f"Inference completed. Results saved to:\n- {pred_path}\n- {lowconf_path}\n- {summary_path}")
+  
+    f.write(f"\nActive-Learning keys saved to: {al_keys_path}\n")
+    f.write(f"Main predictions excluding AL saved to: {main_wo_al_path}\n")
+
+print(f"Inference completed. Results saved to:\n- {pred_path}\n- {lowconf_path}\n- {al_keys_path}\n- {main_wo_al_path}\n- {summary_path}")
