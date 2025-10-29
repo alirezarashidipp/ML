@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-# Ordinal XGBoost – Method A (multi:softprob + calibration + class weighting)
+# Ordinal XGBoost training script (revised: unified multiclass softprob)
+# Author: Ali R.
 # Requires: xgboost>=2.1.*, scikit-learn, pandas, numpy, joblib
 
 import warnings, os, json
@@ -7,11 +8,11 @@ warnings.filterwarnings("ignore")
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.calibration import CalibratedClassifierCV
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import (
-    accuracy_score, f1_score, cohen_kappa_score,
-    classification_report, confusion_matrix
+    accuracy_score, precision_recall_fscore_support,
+    matthews_corrcoef, confusion_matrix, classification_report,
+    cohen_kappa_score
 )
 from xgboost import XGBClassifier
 import joblib
@@ -31,103 +32,105 @@ FEATURES = [
 
 # ========= Load Data =========
 df = pd.read_csv(CSV_PATH)
-X = df[FEATURES].fillna(df[FEATURES].mean())
-y = df[LABEL_COL].astype(int)
+X = df[FEATURES].copy()
+y = df[LABEL_COL].copy()
+X = X.fillna(X.mean())
 
-# ========= Split =========
+# ========= Train/Test Split =========
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, stratify=y, random_state=42
+    X, y, test_size=0.2, random_state=42, stratify=y
 )
 
-# ========= Class Weights (handling imbalance) =========
-cls, cnt = np.unique(y_train, return_counts=True)
-freq = dict(zip(cls, cnt))
-
-alpha = 1.0   # 0.5=light, 1.0=stronger, 1.5=very strong reweighting
-w_per_class = {c: (1.0 / (freq[c] ** alpha)) for c in freq}
-
-# normalize so average weight ≈ 1
-mean_w = np.mean(list(w_per_class.values()))
-w_per_class = {c: w_per_class[c] / mean_w for c in w_per_class}
-
-sample_w_train = y_train.map(w_per_class).astype(float).values
-
 # ========= Model =========
-xgb_params = dict(
+base_params = dict(
     objective="multi:softprob",
     num_class=3,
     eval_metric="mlogloss",
-    n_estimators=600,
-    learning_rate=0.05,
-    max_depth=6,
-    subsample=0.8,
-    colsample_bytree=0.8,
-    tree_method="hist",
-    random_state=42
+    random_state=42,
+    n_estimators=300,
+    learning_rate=0.1,
+    max_depth=6
 )
 
-base = XGBClassifier(**xgb_params)
+param_grid = {
+    "max_depth": [4, 6],
+    "learning_rate": [0.05, 0.1],
+    "n_estimators": [200, 300]
+}
 
-# ========= Calibrate (with weights) =========
-cal = CalibratedClassifierCV(base, method="isotonic", cv=3)
-cal.fit(X_train, y_train, sample_weight=sample_w_train)
+model = XGBClassifier(**base_params)
+grid = GridSearchCV(model, param_grid, cv=3, scoring="f1_macro")
+grid.fit(X_train, y_train, verbose=False)
+best_model = grid.best_estimator_
 
-# ========= Predict Probabilities =========
-proba = cal.predict_proba(X_test)  # shape (n,3)
-
-# ========= Continuous Score =========
-score_map = np.array([0.0, 0.5, 1.0])  # ordinal weights poor/acceptable/good
-score = (proba * score_map).sum(axis=1)
-score_0_100 = np.clip(score * 100, 1, 99)
-
-# ========= Discrete prediction (for reporting only) =========
-y_pred = proba.argmax(axis=1)
+# ========= Predict =========
+y_pred = best_model.predict(X_test)
+probs = best_model.predict_proba(X_test)
 
 # ========= Metrics =========
-acc  = accuracy_score(y_test, y_pred)
-f1_w = f1_score(y_test, y_pred, average="weighted")
-qwk  = cohen_kappa_score(y_test, y_pred, weights="quadratic")
-report = classification_report(y_test, y_pred, digits=3)
-cm = confusion_matrix(y_test, y_pred)
+acc = accuracy_score(y_test, y_pred)
+prec, rec, f1, _ = precision_recall_fscore_support(y_test, y_pred, average="macro")
+prec_w, rec_w, f1_w, _ = precision_recall_fscore_support(y_test, y_pred, average="weighted")
+mcc = matthews_corrcoef(y_test, y_pred)
+qwk = cohen_kappa_score(y_test, y_pred, weights="quadratic")
+
+cls_report = classification_report(y_test, y_pred, digits=3)
+conf_mat = confusion_matrix(y_test, y_pred)
+
+# Feature importance
+imp = pd.Series(best_model.feature_importances_, index=FEATURES).sort_values(ascending=False)
+
+# ========= Management Summary =========
+errors = conf_mat.copy()
+np.fill_diagonal(errors, 0)
+max_error_idx = np.unravel_index(np.argmax(errors), errors.shape)
+error_summary = f"Most frequent error: True class {max_error_idx[0]} predicted as {max_error_idx[1]} ({errors[max_error_idx]} times)."
+top_feat = imp.head(1).index[0]
 
 summary_text = (
-    f"=== Method A Summary ===\n"
-    f"Accuracy: {acc:.3f}\nF1-weighted: {f1_w:.3f}\nQuadratic Weighted Kappa: {qwk:.3f}\n"
-    f"Mean continuous score: {score_0_100.mean():.2f}\n"
-    f"Class weights: {w_per_class}\n"
+    f"=== Management Summary ===\n"
+    f"Current accuracy is about {acc:.2f}.\n"
+    f"{error_summary}\n"
+    f"Most influential feature: {top_feat}.\n\n"
 )
 print(summary_text)
-print(report)
 
-# ========= Save Outputs =========
-os.makedirs("runs_train_methodA_weighted", exist_ok=True)
-joblib.dump(cal, "runs_train_methodA_weighted/xgb_softprob_calibrated_weighted.joblib")
-
-pd.DataFrame({
-    "true_label": y_test,
-    "pred_label": y_pred,
-    "score_0_100": score_0_100
-}).to_csv("runs_train_methodA_weighted/predictions.csv", index=False)
+# ========= Prepare outputs =========
+os.makedirs("runs_train", exist_ok=True)
 
 metrics_dict = {
     "accuracy": acc,
+    "precision_macro": prec,
+    "recall_macro": rec,
+    "f1_macro": f1,
+    "precision_weighted": prec_w,
+    "recall_weighted": rec_w,
     "f1_weighted": f1_w,
+    "mcc": mcc,
     "quadratic_weighted_kappa": qwk,
-    "classification_report": report,
-    "confusion_matrix": cm.tolist(),
-    "mean_score": float(score_0_100.mean()),
-    "class_weights": w_per_class,
+    "confusion_matrix": conf_mat.tolist(),
+    "top_features": imp.head(10).to_dict(),
     "management_summary": summary_text
 }
-with open("runs_train_methodA_weighted/metrics.json", "w") as f:
+
+with open("runs_train/metrics.json", "w") as f:
     json.dump(metrics_dict, f, indent=2)
 
-print("Model, metrics, and predictions saved to runs_train_methodA_weighted/")
+with open("runs_train/eval_report.txt", "w") as f:
+    f.write(summary_text)
+    f.write("=== Metrics on Test Set ===\n")
+    f.write(f"Accuracy: {acc:.3f}\n")
+    f.write(f"Precision (macro): {prec:.3f}, Recall (macro): {rec:.3f}, F1 (macro): {f1:.3f}\n")
+    f.write(f"Precision (weighted): {prec_w:.3f}, Recall (weighted): {rec_w:.3f}, F1 (weighted): {f1_w:.3f}\n")
+    f.write(f"MCC: {mcc:.3f}\n")
+    f.write(f"Quadratic Weighted Kappa: {qwk:.3f}\n\n")
+    f.write("=== Classification Report ===\n")
+    f.write(cls_report + "\n\n")
+    f.write("=== Confusion Matrix ===\n")
+    f.write(str(conf_mat) + "\n\n")
+    f.write("=== Top Features ===\n")
+    f.write(str(imp.head(10)) + "\n\n")
 
-# ========= Inference Helper =========
-def predict_score_0_100(model, X_new):
-    """Return continuous readability score 0–100 for new data."""
-    proba = model.predict_proba(X_new)
-    score_map = np.array([0.0, 0.5, 1.0])
-    s = (proba * score_map).sum(axis=1)
-    return np.clip(s * 100, 1, 99)
+# ========= Save model =========
+joblib.dump(best_model, "runs_train/xgb_softprob_model.joblib")
+print("Model and reports saved to runs_train/")
