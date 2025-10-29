@@ -53,7 +53,8 @@ confidences = probs.max(axis=1)
 
 # ========= Continuous score (Expected Value) =========
 expected_score = probs @ np.array([0, 1, 2], dtype=float)
-expected_score_100 = (expected_score / 2.0) * 100.0
+# expected_score_100 = (expected_score / 2.0) * 100.0
+expected_score_100 = 5 + (expected_score / 2.0) * (92 - 5)
 
 # ========= SHAP explanations =========
 expl = shap.TreeExplainer(model)
