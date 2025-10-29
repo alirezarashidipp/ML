@@ -12,8 +12,9 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import (
     accuracy_score, precision_recall_fscore_support,
     matthews_corrcoef, confusion_matrix, classification_report,
-    cohen_kappa_score
+    cohen_kappa_score, make_scorer   # <-- ADDED: make_scorer
 )
+from sklearn.model_selection import StratifiedKFold, cross_validate  # <-- ADDED
 from xgboost import XGBClassifier
 import joblib
 
@@ -95,6 +96,35 @@ summary_text = (
 )
 print(summary_text)
 
+# ========= Cross-Validation (ADDED) =========
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+qwk_scorer = make_scorer(cohen_kappa_score, weights="quadratic")
+mcc_scorer = make_scorer(matthews_corrcoef)
+
+est_for_cv = XGBClassifier(**best_model.get_params())
+cv_scores = cross_validate(
+    est_for_cv, X, y, cv=cv, n_jobs=-1,
+    scoring={
+        "accuracy": "accuracy",
+        "f1_macro": "f1_macro",
+        "qwk": qwk_scorer,
+        "mcc": mcc_scorer
+    },
+    return_train_score=False
+)
+
+cv_summary = {
+    "cv_n_splits": 5,
+    "cv_accuracy_mean": float(np.mean(cv_scores["test_accuracy"])),
+    "cv_accuracy_std": float(np.std(cv_scores["test_accuracy"])),
+    "cv_f1_macro_mean": float(np.mean(cv_scores["test_f1_macro"])),
+    "cv_f1_macro_std": float(np.std(cv_scores["test_f1_macro"])),
+    "cv_qwk_mean": float(np.mean(cv_scores["test_qwk"])),
+    "cv_qwk_std": float(np.std(cv_scores["test_qwk"])),
+    "cv_mcc_mean": float(np.mean(cv_scores["test_mcc"])),
+    "cv_mcc_std": float(np.std(cv_scores["test_mcc"]))
+}
+
 # ========= Prepare outputs =========
 os.makedirs("runs_train", exist_ok=True)
 
@@ -110,7 +140,8 @@ metrics_dict = {
     "quadratic_weighted_kappa": qwk,
     "confusion_matrix": conf_mat.tolist(),
     "top_features": imp.head(10).to_dict(),
-    "management_summary": summary_text
+    "management_summary": summary_text,
+    "cross_validation": cv_summary   # <-- ADDED
 }
 
 with open("runs_train/metrics.json", "w") as f:
@@ -130,7 +161,11 @@ with open("runs_train/eval_report.txt", "w") as f:
     f.write(str(conf_mat) + "\n\n")
     f.write("=== Top Features ===\n")
     f.write(str(imp.head(10)) + "\n\n")
+    f.write("=== 5-Fold Stratified Cross-Validation ===\n")  # <-- ADDED
+    f.write(json.dumps(cv_summary, indent=2) + "\n")        # <-- ADDED
 
 # ========= Save model =========
 joblib.dump(best_model, "runs_train/xgb_softprob_model.joblib")
 print("Model and reports saved to runs_train/")
+
+
