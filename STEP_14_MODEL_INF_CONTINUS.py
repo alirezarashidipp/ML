@@ -107,7 +107,7 @@ lowconf_df.to_csv(lowconf_path, index=False)
 al_keys_path     = os.path.join(OUTDIR, "active_learning_keys.csv")
 main_wo_al_path  = os.path.join(OUTDIR, "predictions_main_without_AL.csv")
 
-# فقط کلیدهای لازم برای Active Learning
+
 lowconf_df[["Key"]].drop_duplicates().to_csv(al_keys_path, index=False)
 
 
