@@ -3,6 +3,9 @@
 # Inference with XGBoost multiclass (softprob) + SHAP explanations
 # Requires: xgboost>=2.1.*, shap>=0.44, pandas, numpy, joblib
 
+
+# method 2
+
 import warnings, os, shap, joblib
 warnings.filterwarnings("ignore")
 
