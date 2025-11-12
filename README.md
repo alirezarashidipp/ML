@@ -1,4 +1,4 @@
-I have developed a machine learning process to assess the clarity of Jira tickets.
+I have developed a machine learning process to assess the clarity(description plainess, ease of understanding) of Jira description tickets.
 
 For each issue at the Story level, we use an XGBoost model to classify how plain and understandable the written description is — excluding the Acceptance Criteria section.
 
@@ -10,8 +10,47 @@ Acceptable
 
 Complicated
 
-We then extract a wide range of linguistic and structural features from the text and train the XGBoost model in a supervised learning setup.
-Once trained, the model automatically assigns readability labels to unlabeled tickets.
+We then extract a wide range of linguistic and structural features from the text and train the XGBoost model in a supervised learning setup. Once trained, the model automatically assigns readability labels to unlabeled tickets.
+
+We use the concept of expected value to convert XGBoost’s class probabilities into a single continuous score.
+
+For each Jira ticket, XGBoost outputs class probabilities such as:
+
+Poor → 30%
+
+Acceptable → 20%
+
+Good → 50%
+
+
+We assign numeric weights to each class:
+
+Poor = 0
+
+Acceptable = 1
+
+Good = 2
+
+
+Then we calculate the expected score as follows:
+
+((50 × 2) + (20 × 1) + (30 × 0)) / 2 = 60
+
+So the final score for this ticket is 60 (on a 0–100 scale).
+
+
+On the dashboard, we define thresholds to translate the continuous score back into qualitative labels:
+
+Below 20 → Poor
+
+Between 20 and 80 → Acceptable
+
+Above 80 → Good
+
+
+
+
+This approach allows us to use XGBoost’s probabilistic output to generate a smooth, interpretable quality score for each ticket — not just a discrete label.
 
 
 
