@@ -2,7 +2,7 @@ I have developed a machine learning process to assess the clarity(description pl
 
 For each issue at the Story level, we use an XGBoost model to classify how plain and understandable the written description is — excluding the Acceptance Criteria section.
 
-Because readability in technical text is inherently subjective, we rely on the wisdom of the crowd (crowdlabelling). A group of company's domain experts reviews a sample of tickets and assigns one of three ordinal labels:
+Because readability in technical text is inherently subjective, we rely on the wisdom of the crowd (crowdlabelling and Krippendorff’s Alpha). A group of company's domain experts reviews a sample of tickets and assigns one of three ordinal labels:
 
 Plain
 
@@ -51,7 +51,6 @@ Above 80 → Good
 
 
 This approach allows us to use XGBoost’s probabilistic output to generate a smooth, interpretable quality score for each ticket — not just a discrete label.
-
 
 
 
