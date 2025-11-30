@@ -1,8 +1,12 @@
-I have developed a machine learning process to assess the clarity(description plainess, ease of understanding) of Jira description tickets.
+I have developed a machine learning process to assess the clarity(description plainness or ease of understanding) of Jira description tickets.
+
+
 
 For each issue at the Story level, we use an XGBoost model to classify how plain and understandable the written description is — excluding the Acceptance Criteria section.
 
-Because readability in technical text is inherently subjective, we rely on the wisdom of the crowd (crowdlabelling and Krippendorff’s Alpha). A group of company's domain experts reviews a sample of tickets and assigns one of three ordinal labels:
+
+
+Since readability in technical text is inherently subjective, we rely on the wisdom of the crowd (crowd labelling and Krippendorff’s Alpha). A group of company's domain experts reviews a sample of tickets and assigns one of three ordinal labels:
 
 Plain
 
@@ -10,7 +14,11 @@ Acceptable
 
 Complicated
 
-We then extract a wide range of linguistic and structural features (10 traditional readability formula + 15 linguistic features that all are numeric and standardized and normalized)  from the text  used human labels and train the XGBoost model in a supervised learning setup. Once trained, the model automatically assigns readability labels to unlabeled tickets.
+.
+
+We then extract a wide range of linguistic and structural features (10 traditional readability formula + 15 linguistic features that all are numeric and standardized and normalized) from the text used human labels and train the XGBoost model in a supervised learning setup. 
+
+Once trained, the model automatically assigns readability labels to unlabeled tickets.
 
 We use the concept of expected value to convert XGBoost’s class probabilities into a single continuous score.
 
@@ -22,7 +30,6 @@ Acceptable → 20%
 
 Good → 50%
 
-
 We assign numeric weights to each class:
 
 Poor = 0
@@ -31,13 +38,11 @@ Acceptable = 1
 
 Good = 2
 
-
 Then we calculate the expected score as follows:
 
 ((50 × 2) + (20 × 1) + (30 × 0)) / 2 = 60
 
 So the final score for this ticket is 60 (on a 0–100 scale).
-
 
 On the dashboard, we define thresholds to translate the continuous score back into qualitative labels:
 
@@ -47,10 +52,33 @@ Between 20 and 80 → Acceptable
 
 Above 80 → Good
 
-
-
-
 This approach allows us to use XGBoost’s probabilistic output to generate a smooth, interpretable quality score for each ticket — not just a discrete label.
+
+
+
+
+
+also i have 
+
+
+
+one code to get data from jira system, 
+
+one code for cleaning,
+
+one code for seperating English ticket, 
+
+one code for excluding Aceeptence Criteria,
+
+one code for using 10 traditional redability formula,
+
+one code for extracting 15 ligusitc features,
+
+one code for merging,  
+
+one code for train,
+
+one code for infrence,
 
 
 
