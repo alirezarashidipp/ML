@@ -1,84 +1,53 @@
-I have developed a machine learning process to assess the clarity(description plainness or ease of understanding) of Jira description tickets.
+Part 1: What You Have Done (The "Clarity Engine")
+You have successfully built a Supervised Machine Learning System designed to quantify the subjective quality of technical documentation (Jira User Stories).
 
+1. The Core Philosophy
+Objective: Transform the subjective feeling of "this ticket is hard to read" into an objective, actionable metric (0–100 Score).
 
+Scope: Focuses strictly on the Description field of Jira Stories, deliberately excluding Acceptance Criteria to isolate the "narrative" clarity.
 
-For each issue at the Story level, we use an XGBoost model to classify how plain and understandable the written description is — excluding the Acceptance Criteria section.
+The "Ground Truth": You rejected arbitrary rules in favor of Crowd Wisdom. You used domain experts to label data (Plain, Acceptable, Complicated) and validated their consensus using Krippendorff’s Alpha.
 
+2. The Feature Engineering (The "Hybrid" Approach)
+You are not relying on just one type of analysis. You combined two distinct linguistic approaches:
 
+Traditional Metrics: 10 established readability formulas (likely Flesch-Kincaid, Gunning Fog, etc.) that focus on syntax (sentence length, syllable count).
 
-Since readability in technical text is inherently subjective, we rely on the wisdom of the crowd (crowd labelling and Krippendorff’s Alpha). A group of company's domain experts reviews a sample of tickets and assigns one of three ordinal labels:
+Linguistic Features: 15 custom numeric features (normalized and standardized) that likely capture structural complexity, density, or vocabulary richness.
 
-Plain
+3. The Model & Inference Logic
+Algorithm: You used XGBoost, a gradient-boosted decision tree, known for high performance on tabular/numeric data.
 
-Acceptable
+The Innovation (Expected Value): instead of treating the output as a simple classification (Class A vs. Class B), you treated it as a probabilistic distribution.
 
-Complicated
+You capture the probabilities: 30% Poor, 20% Acceptable, 50% Good.
 
-.
+You map these to a linear scale (0, 1, 2).
 
-We then extract a wide range of linguistic and structural features (10 traditional readability formula + 15 linguistic features that all are numeric and standardized and normalized) from the text used human labels and train the XGBoost model in a supervised learning setup. 
+You calculate the weighted average to get a granular score (e.g., 60/100).
 
-Once trained, the model automatically assigns readability labels to unlabeled tickets.
+Business Value: This prevents "flickering" between categories and provides a smooth progress bar for quality.
 
-We use the concept of expected value to convert XGBoost’s class probabilities into a single continuous score.
+4. The Current Codebase
+You currently have a Research/PoC (Proof of Concept) codebase consisting of 9 discrete, functional scripts:
 
-For each Jira ticket, XGBoost outputs class probabilities such as:
+Jira Extraction (ETL)
 
-Poor → 30%
+Data Cleaning
 
-Acceptable → 20%
+Language Filtering (English only)
 
-Good → 50%
+Section Parsing (Removing Acceptance Criteria)
 
-We assign numeric weights to each class:
+Feature Eng A (Traditional Formulas)
 
-Poor = 0
+Feature Eng B (Linguistic Features)
 
-Acceptable = 1
+Data Merging
 
-Good = 2
+Model Training
 
-Then we calculate the expected score as follows:
-
-((50 × 2) + (20 × 1) + (30 × 0)) / 2 = 60
-
-So the final score for this ticket is 60 (on a 0–100 scale).
-
-On the dashboard, we define thresholds to translate the continuous score back into qualitative labels:
-
-Below 20 → Poor
-
-Between 20 and 80 → Acceptable
-
-Above 80 → Good
-
-This approach allows us to use XGBoost’s probabilistic output to generate a smooth, interpretable quality score for each ticket — not just a discrete label.
-
-
-
-
-
-also i have 
-
-
-
-one code to get data from jira system, 
-
-one code for cleaning,
-
-one code for seperating English ticket, 
-
-one code for excluding Aceeptence Criteria,
-
-one code for using 10 traditional redability formula,
-
-one code for extracting 15 ligusitc features,
-
-one code for merging,  
-
-one code for train,
-
-one code for infrence,
+Inference
 
 
 
