@@ -12,7 +12,7 @@ STAR_MIN = 1.0
 INPUT_FILE = "STEP_200_FINAL_DESC.csv"
 OUTPUT_FILE = "STEP_201_STAR.csv"
 
-COL_CLARITY = "Expected_Score_0-100"
+COL_CLARITY = "Expected_Score_0_100"
 COL_ROLE = "has_role_defined"
 COL_GOAL = "has_goal_defined"
 COL_VALUE = "has_reason_defined"
