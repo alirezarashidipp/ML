@@ -1,6 +1,7 @@
 import math
 import pandas as pd
 
+
 ALPHA = 0.7
 BETA = 0.3
 PENALTY_CAP = 3.0
