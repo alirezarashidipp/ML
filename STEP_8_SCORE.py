@@ -19,7 +19,7 @@ def normalize(raw, lo, hi, inverse=False):
 
 # readability map:  func , lower , upper , inverse?
 METRICS = {
-    "FRE":  (textstat.flesch_reading_ease,          -20, 100, False),  # higher = plainer
+    "FRE":  (textstat.flesch_reading_ease,          -20, 120, False),  # higher = plainer
     "FKGL": (textstat.flesch_kincaid_grade, 0, 18, True), # New
     "Fog":  (textstat.gunning_fog,                  0,  25,  True),  # lower = plainer
     "LW":   (textstat.linsear_write_formula,        0,  25,  True),
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     data = enrich(data, col="Description_clean")
     
     norm_cols = [c for c in data.columns if c.endswith("_norm")]
-    data = data[["Key", "Description_clean"] + norm_cols]
+    data = data[["Key", "ISSUE_DESC_STR_CLEANED"] + norm_cols]
     
     data.to_csv(out, index=False)
     print(f"✅  Added readability columns → {out}")
