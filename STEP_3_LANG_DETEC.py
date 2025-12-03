@@ -15,8 +15,8 @@ def detect_language(text: str):
         return "und", 0.0
 
 def main():
-    input_csv  = "STEP_0_DA_JIRA_MASTER.csv"
-    output_csv = "STEP_0_DA_JIRA_MASTER_with_lang.csv"
+    input_csv  = "STEP_2_CLEANING.csv"
+    output_csv = "STEP_3_LANG_DETECT.csv"
 
     # Read all three columns
     df = pd.read_csv(input_csv, usecols=["Key", "Description", "ISSUE_DESC_STR_CLEANED"])
