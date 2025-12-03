@@ -32,7 +32,7 @@ METRICS = {
 
 }
 
-def enrich(df: pd.DataFrame, col="Description_clean") -> pd.DataFrame:
+def enrich(df: pd.DataFrame, col="ISSUE_DESC_STR_CLEANED") -> pd.DataFrame:
     for tag, (func, lo, hi, inv) in METRICS.items():
         raw_col  = tag
         norm_col = f"{tag}_norm"
@@ -55,10 +55,10 @@ if __name__ == "__main__":
 
     inp, out = sys.argv[1], sys.argv[2]
     data = pd.read_csv(inp)
-    data = enrich(data, col="Description_clean")
+    data = enrich(data, col="ISSUE_DESC_STR_CLEANED")
     
     norm_cols = [c for c in data.columns if c.endswith("_norm")]
-    data = data[["Key", "ISSUE_DESC_STR_CLEANED"] + norm_cols]
+    data = data[["Key"]+ norm_cols]
     
     data.to_csv(out, index=False)
     print(f"✅  Added readability columns → {out}")
