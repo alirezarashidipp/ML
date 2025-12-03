@@ -25,6 +25,7 @@ FEATURE_KEYS = [
 PATTERNS = {
     "has_role_defined": [
         [{"LOWER": "as"}, {"LOWER": {"IN": ["a", "an", "the"]}}, {"POS": {"IN": ["NOUN", "PROPN"]}, "OP": "+"}],
+         "as a user",
     ],
     "has_goal_defined": [
         "i want to", "i would like to", "i need to", "i can", "i am able to", "wish to",
