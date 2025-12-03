@@ -36,12 +36,10 @@ PATTERNS = {
         "so that", "so i can", "in order to"
     ],
     "has_acceptance_criteria": [
-        "acceptance criteria", "acceptance criterion", "acc. crit."
+        "acceptance criteria", "acceptance criterion", "acc. crit.", "ac1", "ac"
     ],
 }
 
-# Regex for short forms like "AC:", "a/c:"
-_ACCEPTANCE_REGEX = re.compile(r"\b(?:ac|a/c)[:\-]?\b", re.I)
 
 # ---- Build matcher patterns ----
 def _phrase_to_pattern(phrase: str):
@@ -72,9 +70,6 @@ def flag_story_quality(text: str) -> Dict[str, int]:
     for match_id, start, end in matcher(doc):
         feature = nlp.vocab.strings[match_id]
         flags[feature] = 1
-
-    if _ACCEPTANCE_REGEX.search(clean_text):
-        flags["has_acceptance_criteria"] = 1
 
     return flags
 
