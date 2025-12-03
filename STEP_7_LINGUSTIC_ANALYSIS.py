@@ -161,7 +161,7 @@ def main():
     nlp = spacy.load(SPACY_MODEL)
 
     feats = []
-    for doc in nlp.pipe(df["DESC"].fillna("").astype(str).tolist(), batch_size=64):
+    for doc in nlp.pipe(df["ISSUE_DESC_STR_CLEANED"].fillna("").astype(str).tolist(), batch_size=64):
         feats.append(extract_15_features(doc))
 
     out = pd.DataFrame(feats)
