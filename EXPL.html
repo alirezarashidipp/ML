@@ -3,328 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Clarity: Plainness AI Pitch</title>
-    
-    <!-- 1. Tailwind CSS for Styling -->
+    <title>JIRA Ticket Readability Evaluation Pipeline</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- 2. Chart.js for the Graph -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- 3. Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .fade-in { animation: fadeIn 0.5s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .tab-active { background-color: white; color: #2563eb; border-top-width: 4px; border-color: #2563eb; }
-        .tab-inactive { color: #64748b; }
-        .tab-inactive:hover { color: #334155; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* Animations */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-400 { animation-delay: 0.4s; }
+        .delay-500 { animation-delay: 0.5s; }
+        .delay-600 { animation-delay: 0.6s; }
+        .delay-700 { animation-delay: 0.7s; }
+
+        /* Card Interactions */
+        .pipeline-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .pipeline-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            border-color: #3b82f6;
+        }
+
+        /* JIRA Ticket Styles */
+        .jira-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9em;
+        }
+        .jira-table th, .jira-table td {
+            border: 1px solid #dfe1e6;
+            padding: 8px;
+            text-align: left;
+        }
+        .jira-table th {
+            background-color: #f4f5f7;
+            font-weight: 600;
+            color: #172b4d;
+        }
+        .jira-link {
+            color: #0052cc;
+            text-decoration: none;
+        }
+        .jira-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Tab Active State */
+        .tab-btn.active {
+            border-bottom: 2px solid #0052cc;
+            color: #0052cc;
+            font-weight: 600;
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 font-sans p-4 md:p-8">
+<body class="min-h-screen text-slate-800">
 
-    <!-- HEADER -->
-    <header class="mb-8 max-w-5xl mx-auto">
-        <div class="flex items-center gap-3 mb-2">
-            <div class="bg-blue-600 text-white p-2 rounded-lg">
-                <i data-lucide="brain" class="w-6 h-6"></i>
-            </div>
-            <h1 class="text-3xl font-bold text-slate-800">Project Clarity: Plainness Classification</h1>
-        </div>
-        <p class="text-slate-600 text-lg">Leveraging Crowd Wisdom to Quantify Text Simplicity</p>
-    </header>
-
-    <!-- MAIN CARD -->
-    <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden border border-slate-200">
+    <!-- VIEW 1: MAIN PIPELINE -->
+    <div id="pipeline-view" class="flex flex-col items-center justify-center min-h-screen p-6 w-full transition-opacity duration-500">
         
-        <!-- NAVIGATION TABS -->
-        <div class="flex border-b border-slate-200 bg-slate-50">
-            <button onclick="switchTab('concept')" id="btn-concept" class="flex-1 py-4 px-6 text-sm font-semibold flex items-center justify-center gap-2 transition-colors tab-active">
-                <i data-lucide="users" class="w-4 h-4"></i> The Concept
-            </button>
-            <button onclick="switchTab('demo')" id="btn-demo" class="flex-1 py-4 px-6 text-sm font-semibold flex items-center justify-center gap-2 transition-colors tab-inactive">
-                <i data-lucide="bar-chart-2" class="w-4 h-4"></i> The Engine (Demo)
-            </button>
-            <button onclick="switchTab('impact')" id="btn-impact" class="flex-1 py-4 px-6 text-sm font-semibold flex items-center justify-center gap-2 transition-colors tab-inactive">
-                <i data-lucide="shield-check" class="w-4 h-4"></i> Business Value
-            </button>
-        </div>
+        <!-- Header -->
+        <header class="text-center mb-12 fade-in-up">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4 tracking-tight">
+                JIRA Ticket Readability <span class="text-blue-600">Evaluation Pipeline</span>
+            </h1>
+            <p class="text-lg text-slate-500 max-w-2xl mx-auto">
+                An automated workflow transforming raw text into human-aligned readability scores.
+            </p>
+        </header>
 
-        <!-- CONTENT AREA -->
-        <div class="p-6 md:p-8 min-h-[500px]">
-
-            <!-- TAB 1: CONCEPT -->
-            <div id="tab-concept" class="fade-in block">
-                <div class="grid md:grid-cols-2 gap-8">
-                    <!-- Traditional ML -->
-                    <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 opacity-60">
-                        <h3 class="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2">
-                            <span class="bg-slate-300 text-slate-600 w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span>
-                            Traditional Classification
-                        </h3>
-                        <div class="space-y-4">
-                            <div class="flex justify-center my-6">
-                                <div class="flex gap-4">
-                                    <div class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center border-2 border-green-500 relative text-2xl">
-                                        🐱 <div class="absolute -bottom-3 bg-green-500 text-white text-[10px] px-2 rounded-full font-bold">CAT</div>
-                                    </div>
-                                    <div class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center border-2 border-red-500 relative text-2xl">
-                                        🐶 <div class="absolute -bottom-3 bg-red-500 text-white text-[10px] px-2 rounded-full font-bold">NOT CAT</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="text-slate-600 text-sm">
-                                <strong>Objective Truth:</strong> An image is either a cat or it isn't. The label is binary and undisputed.
-                            </p>
-                        </div>
+        <div class="relative w-full max-w-6xl mx-auto">
+            
+            <!-- ROW 1 -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16 relative">
+                
+                <!-- Card 1: Raw Tickets (Clickable) -->
+                <div onclick="switchView('ticket-view')" class="pipeline-card fade-in-up delay-100 bg-white p-6 rounded-xl border border-slate-200 shadow-md relative z-10 flex flex-col items-center text-center h-full hover:ring-2 hover:ring-blue-400">
+                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
                     </div>
+                    <h3 class="font-bold text-lg mb-2 text-slate-800">Raw JIRA Tickets</h3>
+                    <p class="text-sm text-slate-500">Short, domain-specific issue descriptions and comments.</p>
+                    <span class="mt-auto text-xs font-semibold text-blue-500 pt-2 bg-blue-50 px-3 py-1 rounded-full mt-2">Click to View Scenarios</span>
+                </div>
 
-                    <!-- Our Approach -->
-                    <div class="bg-blue-50 p-6 rounded-xl border-2 border-blue-200 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 bg-blue-200 text-blue-800 text-xs font-bold px-3 py-1 rounded-bl-lg">OUR APPROACH</div>
-                        <h3 class="text-lg font-bold text-blue-800 mb-4 flex items-center gap-2">
-                            <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span>
-                            Subjective "Wisdom of Crowd"
-                        </h3>
-                        <div class="space-y-4">
-                            <div class="flex justify-center my-6 gap-2 items-center">
-                                <div class="flex flex-col items-center">
-                                    <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 mb-1"><i data-lucide="user" class="w-4 h-4"></i></div>
-                                    <div class="text-[10px] font-bold text-indigo-600">"Simple"</div>
-                                </div>
-                                <div class="flex flex-col items-center mt-4 mx-2">
-                                    <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 mb-1"><i data-lucide="user" class="w-4 h-4"></i></div>
-                                    <div class="text-[10px] font-bold text-purple-600">"Complex"</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <i data-lucide="arrow-right" class="text-slate-400 mx-2"></i>
-                                </div>
-                                <div class="w-24 h-24 bg-white rounded-full flex flex-col items-center justify-center border-4 border-blue-500 shadow-lg ml-2">
-                                    <span class="text-2xl font-bold text-slate-800">4.2</span>
-                                    <span class="text-[10px] uppercase tracking-wider text-slate-500">Truth Score</span>
-                                </div>
-                            </div>
-                            <p class="text-blue-900 text-sm">
-                                <strong>Subjective Truth:</strong> "Plainness" is an opinion. We aggregate hundreds of opinions to create a statistically stable <strong>Ground Truth Score</strong>.
-                            </p>
-                        </div>
+                <!-- Card 2: Feature Extraction -->
+                <div class="pipeline-card fade-in-up delay-200 bg-white p-6 rounded-xl border border-slate-200 shadow-md relative z-10 flex flex-col items-center text-center h-full cursor-default">
+                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
                     </div>
+                    <h3 class="font-bold text-lg mb-2">Feature Extraction</h3>
+                    <p class="text-sm text-slate-500">25 linguistic & readability features extracted per ticket.</p>
+                </div>
+
+                <!-- Card 3: Human Annotation -->
+                <div class="pipeline-card fade-in-up delay-300 bg-white p-6 rounded-xl border border-slate-200 shadow-md relative z-10 flex flex-col items-center text-center h-full cursor-default">
+                    <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Human Annotation</h3>
+                    <div class="text-xs font-mono bg-slate-100 px-3 py-1 rounded text-slate-600 mt-1">
+                        0 = Poor <br> 1 = Normal <br> 2 = Good
+                    </div>
+                </div>
+
+                <!-- Card 4: Agreement Check -->
+                <div class="pipeline-card fade-in-up delay-400 bg-blue-50 p-6 rounded-xl border-2 border-blue-200 shadow-sm relative z-10 flex flex-col items-center text-center h-full cursor-default">
+                    <div class="w-12 h-12 bg-white text-blue-600 rounded-full flex items-center justify-center mb-4 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2 text-blue-800">Agreement Check</h3>
+                    <p class="text-sm text-blue-600">Krippendorff's Alpha</p>
                 </div>
             </div>
 
-            <!-- TAB 2: DEMO -->
-            <div id="tab-demo" class="hidden fade-in">
-                <div class="grid lg:grid-cols-3 gap-6">
-                    
-                    <!-- Controls -->
-                    <div class="lg:col-span-1 space-y-4">
-                        <h3 class="font-bold text-slate-700">1. Select Input Text</h3>
-                        <div class="space-y-3" id="example-buttons">
-                            <!-- Buttons injected by JS -->
-                        </div>
+            <!-- ROW 2 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-3xl mx-auto mb-16 relative">
+                <!-- Card 5: ML Model -->
+                <div class="pipeline-card fade-in-up delay-500 bg-white p-8 rounded-xl border border-slate-200 shadow-lg relative z-10 flex flex-col items-center text-center cursor-default">
+                    <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                     </div>
+                    <h3 class="font-bold text-xl mb-2">ML Model: XGBoost</h3>
+                    <p class="text-sm text-slate-500">Learns relation between features & perception.</p>
+                </div>
 
-                    <!-- Visualization -->
-                    <div class="lg:col-span-2 bg-slate-50 rounded-xl p-6 border border-slate-200">
-                        <h3 class="font-bold text-slate-700 mb-2 flex items-center gap-2">
-                            2. Wisdom of the Crowd Aggregation
-                            <span id="simulation-status" class="text-xs text-blue-500 animate-pulse font-normal hidden">(Collecting votes...)</span>
-                        </h3>
-                        
-                        <div class="h-64 w-full bg-white rounded-lg border border-slate-200 p-2 shadow-inner relative">
-                            <canvas id="voteChart"></canvas>
-                        </div>
-
-                        <div class="mt-4 flex items-center justify-between bg-white p-4 rounded-lg border border-slate-200">
-                            <div class="flex items-center gap-3">
-                                <div class="bg-slate-100 p-2 rounded-full">
-                                    <i data-lucide="users" class="w-5 h-5 text-slate-500"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-slate-500 uppercase font-bold">Voters Processed</p>
-                                    <p class="font-mono font-bold text-slate-800">100 / 100</p>
-                                </div>
-                            </div>
-                            
-                            <div class="text-right">
-                                <p class="text-xs text-slate-500 uppercase font-bold">Calculated "Plainness" Label</p>
-                                <div class="flex items-center justify-end gap-2">
-                                    <span id="final-score" class="text-2xl font-bold text-slate-800">...</span>
-                                    <span class="text-xs text-slate-400">/ 10</span>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Card 6: Value Mapping -->
+                <div class="pipeline-card fade-in-up delay-600 bg-white p-8 rounded-xl border border-slate-200 shadow-lg relative z-10 flex flex-col items-center text-center cursor-default">
+                    <div class="w-14 h-14 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
                     </div>
+                    <h3 class="font-bold text-xl mb-2">Value Mapping</h3>
+                    <p class="text-sm text-slate-500">Transforms probabilities into Score (0–100).</p>
                 </div>
             </div>
 
-            <!-- TAB 3: IMPACT -->
-            <div id="tab-impact" class="hidden fade-in">
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-green-600 mb-4">
-                            <i data-lucide="file-text" class="w-6 h-6"></i>
-                        </div>
-                        <h3 class="font-bold text-lg text-slate-800 mb-2">Automated Quality Control</h3>
-                        <p class="text-slate-600 text-sm">We can scan thousands of internal documents instantly. The model flags content that exceeds our "Plainness Threshold" (e.g., score > 6.0) before it goes to customers.</p>
+            <!-- ROW 3 -->
+            <div class="max-w-md mx-auto relative">
+                <div class="pipeline-card fade-in-up delay-700 bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-8 rounded-2xl shadow-xl relative z-10 flex flex-col items-center text-center cursor-default">
+                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                     </div>
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 mb-4">
-                            <i data-lucide="zap" class="w-6 h-6"></i>
-                        </div>
-                        <h3 class="font-bold text-lg text-slate-800 mb-2">Bias Reduction</h3>
-                        <p class="text-slate-600 text-sm">A single editor might be biased. By training on the "Wisdom of the Crowd," our model represents a collective standard of clarity.</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600 mb-4">
-                            <i data-lucide="alert-triangle" class="w-6 h-6"></i>
-                        </div>
-                        <h3 class="font-bold text-lg text-slate-800 mb-2">Risk Mitigation</h3>
-                        <p class="text-slate-600 text-sm">Ambiguous language leads to compliance risks. This model acts as a "Complexity Heatmap," identifying confusing clauses in contracts.</p>
-                    </div>
-                    <div class="bg-blue-600 p-6 rounded-xl shadow-lg text-white flex flex-col justify-center items-center text-center">
-                        <h3 class="font-bold text-xl mb-2">Ready for Deployment</h3>
-                        <p class="text-blue-100 text-sm mb-4">The aggregation pipeline is built. The model is achieving 85% correlation with human crowds.</p>
-                    </div>
+                    <h3 class="font-bold text-2xl mb-2">Final Output</h3>
+                    <p class="text-blue-100">Human-aligned Readability Score</p>
                 </div>
             </div>
-
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-        // --- 1. SETUP DATA ---
-        const examples = [
-            { id: 0, text: "The quick brown fox jumps over the lazy dog.", type: "Simple", complexity: 1 },
-            { id: 1, text: "Utilization of the methodological approach necessitates further validation.", type: "Complex", complexity: 8 },
-            { id: 2, text: "Please ensure you fill out the attached form by Friday.", type: "Moderate", complexity: 3 }
-        ];
 
-        let voteChart;
+    <!-- VIEW 2: TICKET DETAILS (Initially Hidden) -->
+    <div id="ticket-view" class="hidden min-h-screen bg-white flex flex-col">
+        
+        <!-- Navbar -->
+        <div class="border-b border-gray-200 px-8 py-4 flex items-center justify-between sticky top-0 bg-white z-20">
+            <button onclick="switchView('pipeline-view')" class="flex items-center text-slate-600 hover:text-blue-600 transition-colors font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Pipeline
+            </button>
+            <div class="text-lg font-bold text-slate-800">Raw Data Inspection: PROJ-1024</div>
+        </div>
 
-        // --- 2. TAB LOGIC ---
-        function switchTab(tabName) {
-            // Hide all tabs
-            ['concept', 'demo', 'impact'].forEach(t => {
-                document.getElementById(`tab-${t}`).classList.add('hidden');
-                document.getElementById(`btn-${t}`).classList.remove('tab-active');
-                document.getElementById(`btn-${t}`).classList.add('tab-inactive');
-                // Remove bg/border styles
-                document.getElementById(`btn-${t}`).classList.remove('bg-white', 'text-blue-600', 'border-t-4', 'border-blue-600'); 
-                document.getElementById(`btn-${t}`).classList.add('text-slate-500');
-            });
-
-            // Show selected tab
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`btn-${tabName}`);
-            activeBtn.classList.remove('tab-inactive', 'text-slate-500');
-            activeBtn.classList.add('tab-active', 'bg-white', 'text-blue-600', 'border-t-4', 'border-blue-600');
-        }
-
-        // --- 3. CHART & SIMULATION LOGIC ---
-        function initApp() {
-            lucide.createIcons();
-            setupChart();
-            renderButtons();
-            // Start with first example
-            runSimulation(0);
-        }
-
-        function setupChart() {
-            const ctx = document.getElementById('voteChart').getContext('2d');
-            voteChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
-                    datasets: [{
-                        label: 'Votes',
-                        data: [],
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, grid: { display: false } },
-                        x: { grid: { display: false }, title: { display: true, text: 'Complexity Score (1=Plain, 10=Complex)' } }
-                    },
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    animation: {
-                        duration: 800
-                    }
-                }
-            });
-        }
-
-        function renderButtons() {
-            const container = document.getElementById('example-buttons');
-            container.innerHTML = examples.map((ex, idx) => `
-                <button onclick="runSimulation(${idx})" id="btn-ex-${idx}"
-                    class="w-full text-left p-4 rounded-lg border transition-all duration-200 border-slate-200 hover:border-blue-300 bg-white group">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-bold px-2 py-1 rounded ${
-                            ex.type === 'Simple' ? 'bg-green-100 text-green-700' : 
-                            ex.type === 'Complex' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}">
-                            ${ex.type} Case
-                        </span>
-                    </div>
-                    <p class="text-sm text-slate-700 italic group-hover:text-blue-800">"${ex.text}"</p>
-                </button>
-            `).join('');
-        }
-
-        function runSimulation(index) {
-            // UI Updates
-            const allBtns = document.querySelectorAll('#example-buttons button');
-            allBtns.forEach(b => b.classList.remove('border-blue-500', 'bg-blue-50', 'ring-1', 'ring-blue-500'));
-            const activeBtn = document.getElementById(`btn-ex-${index}`);
-            if(activeBtn) activeBtn.classList.add('border-blue-500', 'bg-blue-50', 'ring-1', 'ring-blue-500');
-
-            document.getElementById('simulation-status').classList.remove('hidden');
-            document.getElementById('final-score').innerText = '...';
-
-            const example = examples[index];
-            
-            // Logic: Generate votes around the complexity score
-            let votes = [];
-            const distribution = Array(10).fill(0);
-            
-            for (let i = 0; i < 100; i++) {
-                const noise = (Math.random() - 0.5) * 4; 
-                let vote = Math.round(example.complexity + noise);
-                vote = Math.max(1, Math.min(10, vote));
-                votes.push(vote);
-                distribution[vote - 1]++;
-            }
-
-            // Simulate delay
-            setTimeout(() => {
-                // Update Chart
-                voteChart.data.datasets[0].data = distribution;
-                voteChart.update();
-
-                // Calculate Score
-                const sum = votes.reduce((a, b) => a + b, 0);
-                const avg = (sum / 100).toFixed(1);
+        <!-- Content Area -->
+        <div class="flex-grow p-8 bg-slate-50 flex justify-center fade-in">
+            <div class="w-full max-w-4xl bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 
-                // Update Text
-                const scoreEl = document.getElementById('final-score');
-                scoreEl.innerText = avg;
-                scoreEl.className = `text-2xl font-bold ${avg < 4 ? 'text-green-600' : avg > 7 ? 'text-red-600' : 'text-yellow-600'}`;
+                <!-- Tabs -->
+                <div class="flex border-b border-gray-200 bg-gray-50">
+                    <button onclick="showTab('scenario-1', this)" class="tab-btn active px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 focus:outline-none transition-colors">Scenario 1: JIRA Front-End</button>
+                    <button onclick="showTab('scenario-2', this)" class="tab-btn px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 focus:outline-none transition-colors">Scenario 2: HTML Source</button>
+                    <button onclick="showTab('scenario-3', this)" class="tab-btn px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 focus:outline-none transition-colors">Scenario 3: Clean Text</button>
+                </div>
 
-                document.getElementById('simulation-status').classList.add('hidden');
-            }, 600);
+                <!-- Tab Content 1: Visual -->
+                <div id="scenario-1" class="tab-content p-8">
+                    <div class="border border-gray-200 rounded p-6 bg-white">
+                        <h2 class="text-xl font-semibold text-[#172b4d] mb-4">As a developer, I want to add a robust logging feature</h2>
+                        <div class="text-[#172b4d] text-base space-y-4">
+                            <p>We need to implement <strong>structured logging</strong> across the authentication service. This will help us debug issues in production more effectively.</p>
+                            
+                            <p>The logs should include timestamp, user ID, and request latency. <span style="color: #d04437; font-weight: bold;">Critical: Do not log passwords!</span></p>
+
+                            <h4 class="font-bold mt-4 text-sm uppercase text-gray-500">Acceptance Criteria</h4>
+                            <table class="jira-table">
+                                <thead>
+                                    <tr>
+                                        <th>Requirement</th>
+                                        <th>Priority</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>JSON Format Output</td>
+                                        <td>High</td>
+                                        <td>Pending</td>
+                                    </tr>
+                                    <tr>
+                                        <td>PII Masking</td>
+                                        <td>Critical</td>
+                                        <td>In Review</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="mt-6 pt-4 border-t border-gray-100 text-sm">
+                                <span class="font-semibold">Contact Owner:</span> 
+                                <a href="mailto:ali@example.com" class="jira-link">ali@example.com</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content 2: HTML -->
+                <div id="scenario-2" class="tab-content hidden p-0 bg-[#282c34]">
+                    <pre class="p-6 overflow-x-auto text-sm font-mono text-gray-300 leading-relaxed">
+&lt;h2&gt;As a developer, I want to add a robust logging feature&lt;/h2&gt;
+&lt;p&gt;We need to implement &lt;strong&gt;structured logging&lt;/strong&gt; across the authentication service.&lt;/p&gt;
+
+&lt;p&gt;The logs should include timestamp, user ID. &lt;span style="color: #d04437;"&gt;Critical: Do not log passwords!&lt;/span&gt;&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Requirement&lt;/th&gt;
+      &lt;th&gt;Priority&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;JSON Format Output&lt;/td&gt;
+      &lt;td&gt;High&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Contact: &lt;a href="mailto:ali@example.com"&gt;ali@example.com&lt;/a&gt;&lt;/p&gt;</pre>
+                </div>
+
+                <!-- Tab Content 3: Clean Text -->
+                <div id="scenario-3" class="tab-content hidden p-8 bg-white">
+                    <div class="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-7 bg-slate-50 p-6 rounded border border-slate-200">
+As a developer, I want to add a robust logging feature
+
+We need to implement structured logging across the authentication service. This will help us debug issues in production more effectively.
+
+The logs should include timestamp, user ID, and request latency. Critical: Do not log passwords!
+
+Acceptance Criteria:
+Requirement: JSON Format Output, Priority: High, Status: Pending
+Requirement: PII Masking, Priority: Critical, Status: In Review
+
+Contact Owner: ali@example.com
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for Interaction -->
+    <script>
+        function switchView(viewId) {
+            const pipeline = document.getElementById('pipeline-view');
+            const ticket = document.getElementById('ticket-view');
+
+            if (viewId === 'ticket-view') {
+                pipeline.classList.add('hidden');
+                ticket.classList.remove('hidden');
+                window.scrollTo(0, 0);
+            } else {
+                ticket.classList.add('hidden');
+                pipeline.classList.remove('hidden');
+            }
         }
 
-        // Initialize on load
-        window.addEventListener('DOMContentLoaded', initApp);
-
+        function showTab(tabId, btn) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active', 'border-b-2', 'border-blue-600', 'text-blue-600'));
+            
+            // Show selected content
+            document.getElementById(tabId).classList.remove('hidden');
+            
+            // Highlight selected button
+            btn.classList.add('active');
+        }
     </script>
 </body>
 </html>
