@@ -433,8 +433,13 @@ Requirement: PII Masking, Priority: Critical, Status: In Review.
                                 <div class="font-mono text-xs text-indigo-800 bg-white p-2 rounded border border-indigo-100 text-center">
                                     (0.39 × ASL) + (11.8 × ASW) - 15.59
                                 </div>
-                                <div class="text-[9px] text-indigo-400 mt-1 text-center">
+                                <div class="text-[9px] text-indigo-400 mt-1 text-center mb-2">
                                     ASL: Avg Sentence Length | ASW: Avg Syllables/Word
+                                </div>
+                                <!-- Interactive Toggle -->
+                                <div class="mt-auto border-t border-indigo-200 pt-2 flex justify-between items-center">
+                                    <span class="text-[10px] text-slate-500">Output Example:</span>
+                                    <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-indigo-200 rounded px-2 py-0.5 hover:bg-indigo-50 transition-colors text-indigo-600">View Score</button>
                                 </div>
                             </div>
 
@@ -445,8 +450,13 @@ Requirement: PII Masking, Priority: Critical, Status: In Review.
                                 <div class="font-mono text-xs text-indigo-800 bg-white p-2 rounded border border-indigo-100 text-center">
                                     (Words / Sentences) + (Long Words / Words × 100)
                                 </div>
-                                <div class="text-[9px] text-indigo-400 mt-1 text-center">
+                                <div class="text-[9px] text-indigo-400 mt-1 text-center mb-2">
                                     Long Words: >6 letters
+                                </div>
+                                <!-- Interactive Toggle -->
+                                <div class="mt-auto border-t border-indigo-200 pt-2 flex justify-between items-center">
+                                    <span class="text-[10px] text-slate-500">Output Example:</span>
+                                    <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-indigo-200 rounded px-2 py-0.5 hover:bg-indigo-50 transition-colors text-indigo-600">View Score</button>
                                 </div>
                             </div>
 
@@ -478,40 +488,75 @@ Requirement: PII Masking, Priority: Critical, Status: In Review.
                                         </span>
                                     </div>
                                 </div>
-                                <div class="text-[9px] text-indigo-400 mt-2 text-center">
+                                <div class="text-[9px] text-indigo-400 mt-2 text-center mb-2">
                                     n<sub>wsy&lt;3</sub>: Words &lt;3 syl | n<sub>wsy≥3</sub>: Words ≥3 syl | n<sub>st</sub>: Sentences | n<sub>w</sub>: Words
+                                </div>
+                                <!-- Interactive Toggle -->
+                                <div class="mt-auto border-t border-indigo-200 pt-2 flex justify-between items-center">
+                                    <span class="text-[10px] text-slate-500">Output Example:</span>
+                                    <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-indigo-200 rounded px-2 py-0.5 hover:bg-indigo-50 transition-colors text-indigo-600">View Score</button>
                                 </div>
                             </div>
                             
                             <!-- 4. Gunning Fog -->
                             <div class="flex flex-col p-3 bg-indigo-50 rounded border border-indigo-100">
                                 <div class="font-bold text-indigo-900 text-sm">Gunning Fog</div>
-                                <div class="text-[10px] text-indigo-500 font-medium">Business Writing, 1952</div>
+                                <div class="text-[10px] text-indigo-500 font-medium mb-2">Business Writing, 1952</div>
+                                <!-- Interactive Toggle -->
+                                <div class="mt-auto border-t border-indigo-200 pt-2 flex justify-between items-center">
+                                    <span class="text-[10px] text-slate-500">Output Example:</span>
+                                    <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-indigo-200 rounded px-2 py-0.5 hover:bg-indigo-50 transition-colors text-indigo-600">View Score</button>
+                                </div>
                             </div>
                             <!-- 5. ARI -->
                             <div class="flex flex-col p-3 bg-indigo-50 rounded border border-indigo-100">
                                 <div class="font-bold text-indigo-900 text-sm">Automated Readability Index (ARI)</div>
-                                <div class="text-[10px] text-indigo-500 font-medium">US Air Force, 1967</div>
+                                <div class="text-[10px] text-indigo-500 font-medium mb-2">US Air Force, 1967</div>
+                                <!-- Interactive Toggle -->
+                                <div class="mt-auto border-t border-indigo-200 pt-2 flex justify-between items-center">
+                                    <span class="text-[10px] text-slate-500">Output Example:</span>
+                                    <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-indigo-200 rounded px-2 py-0.5 hover:bg-indigo-50 transition-colors text-indigo-600">View Score</button>
+                                </div>
                             </div>
                             <!-- 6. SMOG -->
                             <div class="flex flex-col p-3 bg-indigo-50 rounded border border-indigo-100">
                                 <div class="font-bold text-indigo-900 text-sm">SMOG Index</div>
-                                <div class="text-[10px] text-indigo-500 font-medium">McLaughlin, 1969</div>
+                                <div class="text-[10px] text-indigo-500 font-medium mb-2">McLaughlin, 1969</div>
+                                <!-- Interactive Toggle -->
+                                <div class="mt-auto border-t border-indigo-200 pt-2 flex justify-between items-center">
+                                    <span class="text-[10px] text-slate-500">Output Example:</span>
+                                    <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-indigo-200 rounded px-2 py-0.5 hover:bg-indigo-50 transition-colors text-indigo-600">View Score</button>
+                                </div>
                             </div>
                             <!-- 7. CLI -->
                             <div class="flex flex-col p-3 bg-indigo-50 rounded border border-indigo-100">
                                 <div class="font-bold text-indigo-900 text-sm">Coleman-Liau Index (CLI)</div>
-                                <div class="text-[10px] text-indigo-500 font-medium">Linguistics, 1975</div>
+                                <div class="text-[10px] text-indigo-500 font-medium mb-2">Linguistics, 1975</div>
+                                <!-- Interactive Toggle -->
+                                <div class="mt-auto border-t border-indigo-200 pt-2 flex justify-between items-center">
+                                    <span class="text-[10px] text-slate-500">Output Example:</span>
+                                    <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-indigo-200 rounded px-2 py-0.5 hover:bg-indigo-50 transition-colors text-indigo-600">View Score</button>
+                                </div>
                             </div>
                             <!-- 8. Dale-Chall -->
                             <div class="flex flex-col p-3 bg-indigo-50 rounded border border-indigo-100">
                                 <div class="font-bold text-indigo-900 text-sm">Dale-Chall Score</div>
-                                <div class="text-[10px] text-indigo-500 font-medium">Ohio State, 1948</div>
+                                <div class="text-[10px] text-indigo-500 font-medium mb-2">Ohio State, 1948</div>
+                                <!-- Interactive Toggle -->
+                                <div class="mt-auto border-t border-indigo-200 pt-2 flex justify-between items-center">
+                                    <span class="text-[10px] text-slate-500">Output Example:</span>
+                                    <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-indigo-200 rounded px-2 py-0.5 hover:bg-indigo-50 transition-colors text-indigo-600">View Score</button>
+                                </div>
                             </div>
                             <!-- 9. Spache -->
                             <div class="flex flex-col p-3 bg-indigo-50 rounded border border-indigo-100">
                                 <div class="font-bold text-indigo-900 text-sm">Spache Formula</div>
-                                <div class="text-[10px] text-indigo-500 font-medium">Primary Grades, 1953</div>
+                                <div class="text-[10px] text-indigo-500 font-medium mb-2">Primary Grades, 1953</div>
+                                <!-- Interactive Toggle -->
+                                <div class="mt-auto border-t border-indigo-200 pt-2 flex justify-between items-center">
+                                    <span class="text-[10px] text-slate-500">Output Example:</span>
+                                    <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-indigo-200 rounded px-2 py-0.5 hover:bg-indigo-50 transition-colors text-indigo-600">View Score</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -522,93 +567,138 @@ Requirement: PII Masking, Priority: Critical, Status: In Review.
                         
                         <div class="grid grid-cols-1 gap-3">
                             <!-- 1. avg_sentence_length_tokens -->
-                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
-                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
-                                <span class="font-medium text-xs text-purple-900">Average tokens per sentence</span>
+                            <div class="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
+                                <div class="flex items-center">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                    <span class="font-medium text-xs text-purple-900">Average tokens per sentence</span>
+                                </div>
+                                <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-purple-200 rounded px-2 py-0.5 hover:bg-purple-100 transition-colors text-purple-600">View Score</button>
                             </div>
 
                             <!-- 2. sentence_length_cv -->
-                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
-                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
-                                <span class="font-medium text-xs text-purple-900">Sentence length variation</span>
+                            <div class="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
+                                <div class="flex items-center">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                    <span class="font-medium text-xs text-purple-900">Sentence length variation</span>
+                                </div>
+                                <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-purple-200 rounded px-2 py-0.5 hover:bg-purple-100 transition-colors text-purple-600">View Score</button>
                             </div>
 
                             <!-- 3. clause_density_finite_per_sentence -->
-                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
-                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
-                                <span class="font-medium text-xs text-purple-900">Finite clauses per sentence</span>
+                            <div class="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
+                                <div class="flex items-center">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                    <span class="font-medium text-xs text-purple-900">Finite clauses per sentence</span>
+                                </div>
+                                <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-purple-200 rounded px-2 py-0.5 hover:bg-purple-100 transition-colors text-purple-600">View Score</button>
                             </div>
 
                             <!-- 4. subordination_ratio -->
-                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
-                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
-                                <span class="font-medium text-xs text-purple-900">Ratio of subordinate clauses</span>
+                            <div class="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
+                                <div class="flex items-center">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                    <span class="font-medium text-xs text-purple-900">Ratio of subordinate clauses</span>
+                                </div>
+                                <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-purple-200 rounded px-2 py-0.5 hover:bg-purple-100 transition-colors text-purple-600">View Score</button>
                             </div>
 
                             <!-- 5. coordination_index_cconj_per_clause -->
-                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
-                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
-                                <span class="font-medium text-xs text-purple-900">Coordination index per clause</span>
+                            <div class="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
+                                <div class="flex items-center">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                    <span class="font-medium text-xs text-purple-900">Coordination index per clause</span>
+                                </div>
+                                <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-purple-200 rounded px-2 py-0.5 hover:bg-purple-100 transition-colors text-purple-600">View Score</button>
                             </div>
 
                             <!-- 6. avg_dependency_distance -->
-                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
-                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
-                                <span class="font-medium text-xs text-purple-900">Average word dependency distance</span>
+                            <div class="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
+                                <div class="flex items-center">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                    <span class="font-medium text-xs text-purple-900">Average word dependency distance</span>
+                                </div>
+                                <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-purple-200 rounded px-2 py-0.5 hover:bg-purple-100 transition-colors text-purple-600">View Score</button>
                             </div>
 
                             <!-- 7. np_mean_length_tokens -->
-                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
-                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
-                                <span class="font-medium text-xs text-purple-900">Average noun phrase length</span>
+                            <div class="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
+                                <div class="flex items-center">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                    <span class="font-medium text-xs text-purple-900">Average noun phrase length</span>
+                                </div>
+                                <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-purple-200 rounded px-2 py-0.5 hover:bg-purple-100 transition-colors text-purple-600">View Score</button>
                             </div>
 
                             <!-- 8. nominalization_density -->
-                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
-                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
-                                <span class="font-medium text-xs text-purple-900">Density of nominalizations</span>
+                            <div class="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
+                                <div class="flex items-center">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                    <span class="font-medium text-xs text-purple-900">Density of nominalizations</span>
+                                </div>
+                                <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-purple-200 rounded px-2 py-0.5 hover:bg-purple-100 transition-colors text-purple-600">View Score</button>
                             </div>
 
                             <!-- 9. noun_verb_ratio -->
-                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
-                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
-                                <span class="font-medium text-xs text-purple-900">Ratio of nouns to verbs</span>
+                            <div class="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
+                                <div class="flex items-center">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                    <span class="font-medium text-xs text-purple-900">Ratio of nouns to verbs</span>
+                                </div>
+                                <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-purple-200 rounded px-2 py-0.5 hover:bg-purple-100 transition-colors text-purple-600">View Score</button>
                             </div>
 
                             <!-- 10. passive_voice_percent_finite_verbs -->
-                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
-                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
-                                <span class="font-medium text-xs text-purple-900">Percentage of passive verbs</span>
+                            <div class="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
+                                <div class="flex items-center">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                    <span class="font-medium text-xs text-purple-900">Percentage of passive verbs</span>
+                                </div>
+                                <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-purple-200 rounded px-2 py-0.5 hover:bg-purple-100 transition-colors text-purple-600">View Score</button>
                             </div>
 
                             <!-- 11. mean_zipf_lemma -->
-                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
-                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
-                                <span class="font-medium text-xs text-purple-900">Average word frequency score</span>
+                            <div class="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
+                                <div class="flex items-center">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                    <span class="font-medium text-xs text-purple-900">Average word frequency score</span>
+                                </div>
+                                <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-purple-200 rounded px-2 py-0.5 hover:bg-purple-100 transition-colors text-purple-600">View Score</button>
                             </div>
 
                             <!-- 12. lexical_diversity_mattr -->
-                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
-                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
-                                <span class="font-medium text-xs text-purple-900">Vocabulary diversity score</span>
+                            <div class="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
+                                <div class="flex items-center">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                    <span class="font-medium text-xs text-purple-900">Vocabulary diversity score</span>
+                                </div>
+                                <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-purple-200 rounded px-2 py-0.5 hover:bg-purple-100 transition-colors text-purple-600">View Score</button>
                             </div>
 
                             <!-- 13. technical_jargon_density -->
-                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
-                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
-                                <span class="font-medium text-xs text-purple-900">Density of technical jargon</span>
+                            <div class="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
+                                <div class="flex items-center">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                    <span class="font-medium text-xs text-purple-900">Density of technical jargon</span>
+                                </div>
+                                <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-purple-200 rounded px-2 py-0.5 hover:bg-purple-100 transition-colors text-purple-600">View Score</button>
                             </div>
 
                             <!-- 14. negation_density_per_sentence -->
-                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
-                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
-                                <span class="font-medium text-xs text-purple-900">Negations per sentence</span>
+                            <div class="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
+                                <div class="flex items-center">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                    <span class="font-medium text-xs text-purple-900">Negations per sentence</span>
+                                </div>
+                                <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-purple-200 rounded px-2 py-0.5 hover:bg-purple-100 transition-colors text-purple-600">View Score</button>
                             </div>
 
                             <!-- 15. idea_density_predicates_per_10w -->
-                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
-                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
-                                <span class="font-medium text-xs text-purple-900">Idea density per ten words</span>
+                            <div class="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-100">
+                                <div class="flex items-center">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                    <span class="font-medium text-xs text-purple-900">Idea density per ten words</span>
+                                </div>
+                                <button onclick="toggleRandomScore(this)" class="text-[10px] bg-white border border-purple-200 rounded px-2 py-0.5 hover:bg-purple-100 transition-colors text-purple-600">View Score</button>
                             </div>
                         </div>
                     </div>
@@ -654,6 +744,20 @@ Requirement: PII Masking, Priority: Critical, Status: In Review.
             
             // Highlight selected button
             btn.classList.add('active');
+        }
+
+        function toggleRandomScore(btn) {
+            // Stop propagation so we don't trigger parent clicks if any
+            event.stopPropagation();
+            
+            if (btn.innerText === 'View Score') {
+                const score = Math.floor(Math.random() * 101);
+                btn.innerText = score.toString();
+                btn.classList.add('font-bold', 'text-indigo-600'); 
+            } else {
+                btn.innerText = 'View Score';
+                btn.classList.remove('font-bold', 'text-indigo-600');
+            }
         }
     </script>
 </body>
