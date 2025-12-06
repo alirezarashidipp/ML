@@ -424,32 +424,36 @@ Requirement: PII Masking, Priority: Critical, Status: In Review.
                     <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative w-full">
                         <h3 class="font-bold text-lg text-indigo-700 mb-4 border-b pb-2">Global Readability Formula</h3>
                         
-                        <div class="space-y-4">
-                            <!-- FRE Formula -->
-                            <div class="p-4 bg-indigo-50 rounded border border-indigo-100 transition-all hover:shadow-md">
-                                <div class="flex items-center mb-2">
-                                    <span class="w-2 h-2 bg-indigo-500 rounded-full mr-3"></span>
-                                    <span class="font-bold text-indigo-900 text-sm">Flesch Reading Ease (FRE)</span>
+                        <div class="grid grid-cols-1 gap-3">
+                            
+                            <!-- 1. Flesch-Kincaid Grade (MATH FORMULA) -->
+                            <div class="flex flex-col p-3 bg-indigo-50 rounded border border-indigo-100">
+                                <div class="font-bold text-indigo-900 text-sm mb-1">Flesch-Kincaid Grade</div>
+                                <div class="text-[10px] text-indigo-500 font-medium mb-2">US Navy, 1975</div>
+                                <div class="font-mono text-xs text-indigo-800 bg-white p-2 rounded border border-indigo-100 text-center">
+                                    (0.39 × ASL) + (11.8 × ASW) - 15.59
                                 </div>
-                                <div class="math-formula text-sm text-indigo-800 bg-white p-3 rounded border border-indigo-100 text-center w-full flex justify-center">
-                                    <span>206.835 - (1.015 × ASL) - (84.6 ×</span>
-                                    <div class="fraction">
-                                        <span class="numerator">n<span class="sub">sy</span></span>
-                                        <span class="denominator">n<span class="sub">w</span></span>
-                                    </div>
-                                    <span>)</span>
-                                </div>
-                                <div class="text-[10px] text-indigo-400 mt-2 text-center">
-                                    ASL: Avg Sentence Length | n<sub>sy</sub>: Total Syllables | n<sub>w</sub>: Total Words
+                                <div class="text-[9px] text-indigo-400 mt-1 text-center">
+                                    ASL: Avg Sentence Length | ASW: Avg Syllables/Word
                                 </div>
                             </div>
 
-                            <!-- Linsear Write Formula -->
-                            <div class="p-4 bg-indigo-50 rounded border border-indigo-100 transition-all hover:shadow-md">
-                                <div class="flex items-center mb-2">
-                                    <span class="w-2 h-2 bg-indigo-500 rounded-full mr-3"></span>
-                                    <span class="font-bold text-indigo-900 text-sm">Linsear Write Formula</span>
+                            <!-- 2. LIX Formula (MATH FORMULA) -->
+                            <div class="flex flex-col p-3 bg-indigo-50 rounded border border-indigo-100">
+                                <div class="font-bold text-indigo-900 text-sm mb-1">LIX Formula</div>
+                                <div class="text-[10px] text-indigo-500 font-medium mb-2">Sweden, 1968</div>
+                                <div class="font-mono text-xs text-indigo-800 bg-white p-2 rounded border border-indigo-100 text-center">
+                                    (Words / Sentences) + (Long Words / Words × 100)
                                 </div>
+                                <div class="text-[9px] text-indigo-400 mt-1 text-center">
+                                    Long Words: >6 letters
+                                </div>
+                            </div>
+
+                            <!-- 3. Linsear Write Formula (LW - MATH FORMULA ADDED) -->
+                            <div class="flex flex-col p-3 bg-indigo-50 rounded border border-indigo-100">
+                                <div class="font-bold text-indigo-900 text-sm mb-1">Linsear Write Formula (LW)</div>
+                                <div class="text-[10px] text-indigo-500 font-medium mb-2">US Navy, 1970</div>
                                 <div class="math-formula text-sm text-indigo-800 bg-white p-3 rounded border border-indigo-100 text-center w-full flex justify-center overflow-x-auto">
                                     <div class="fraction">
                                         <span class="numerator flex items-center">
@@ -474,15 +478,40 @@ Requirement: PII Masking, Priority: Critical, Status: In Review.
                                         </span>
                                     </div>
                                 </div>
-                                <div class="text-[10px] text-indigo-400 mt-2 text-center">
+                                <div class="text-[9px] text-indigo-400 mt-2 text-center">
                                     n<sub>wsy&lt;3</sub>: Words &lt;3 syl | n<sub>wsy≥3</sub>: Words ≥3 syl | n<sub>st</sub>: Sentences | n<sub>w</sub>: Words
                                 </div>
                             </div>
-
-                            <!-- Placeholder -->
-                            <div class="flex items-center p-3 bg-gray-50 rounded border border-gray-200 text-gray-400 dashed-border opacity-60">
-                                <span class="w-2 h-2 bg-gray-300 rounded-full mr-3"></span>
-                                <span class="font-medium text-sm italic">FK Grade Level (Future)</span>
+                            
+                            <!-- 4. Gunning Fog -->
+                            <div class="flex flex-col p-3 bg-indigo-50 rounded border border-indigo-100">
+                                <div class="font-bold text-indigo-900 text-sm">Gunning Fog</div>
+                                <div class="text-[10px] text-indigo-500 font-medium">Business Writing, 1952</div>
+                            </div>
+                            <!-- 5. ARI -->
+                            <div class="flex flex-col p-3 bg-indigo-50 rounded border border-indigo-100">
+                                <div class="font-bold text-indigo-900 text-sm">Automated Readability Index (ARI)</div>
+                                <div class="text-[10px] text-indigo-500 font-medium">US Air Force, 1967</div>
+                            </div>
+                            <!-- 6. SMOG -->
+                            <div class="flex flex-col p-3 bg-indigo-50 rounded border border-indigo-100">
+                                <div class="font-bold text-indigo-900 text-sm">SMOG Index</div>
+                                <div class="text-[10px] text-indigo-500 font-medium">McLaughlin, 1969</div>
+                            </div>
+                            <!-- 7. CLI -->
+                            <div class="flex flex-col p-3 bg-indigo-50 rounded border border-indigo-100">
+                                <div class="font-bold text-indigo-900 text-sm">Coleman-Liau Index (CLI)</div>
+                                <div class="text-[10px] text-indigo-500 font-medium">Linguistics, 1975</div>
+                            </div>
+                            <!-- 8. Dale-Chall -->
+                            <div class="flex flex-col p-3 bg-indigo-50 rounded border border-indigo-100">
+                                <div class="font-bold text-indigo-900 text-sm">Dale-Chall Score</div>
+                                <div class="text-[10px] text-indigo-500 font-medium">Ohio State, 1948</div>
+                            </div>
+                            <!-- 9. Spache -->
+                            <div class="flex flex-col p-3 bg-indigo-50 rounded border border-indigo-100">
+                                <div class="font-bold text-indigo-900 text-sm">Spache Formula</div>
+                                <div class="text-[10px] text-indigo-500 font-medium">Primary Grades, 1953</div>
                             </div>
                         </div>
                     </div>
@@ -491,18 +520,95 @@ Requirement: PII Masking, Priority: Critical, Status: In Review.
                     <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative">
                         <h3 class="font-bold text-lg text-purple-700 mb-4 border-b pb-2">Linguistic Analysis</h3>
                         
-                        <div class="space-y-3">
-                            <div class="flex items-center p-3 bg-purple-50 rounded border border-purple-100">
-                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
-                                <span class="font-medium text-sm">Avg. Vocab per Sentence</span>
+                        <div class="grid grid-cols-1 gap-3">
+                            <!-- 1. avg_sentence_length_tokens -->
+                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
+                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                <span class="font-medium text-xs text-purple-900">Average tokens per sentence</span>
                             </div>
-                            <div class="flex items-center p-3 bg-gray-50 rounded border border-gray-200 text-gray-400">
-                                <span class="w-2 h-2 bg-gray-300 rounded-full mr-3"></span>
-                                <span class="font-medium text-sm italic">Syllables per Word</span>
+
+                            <!-- 2. sentence_length_cv -->
+                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
+                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                <span class="font-medium text-xs text-purple-900">Sentence length variation</span>
                             </div>
-                            <div class="flex items-center p-3 bg-gray-50 rounded border border-gray-200 text-gray-400">
-                                <span class="w-2 h-2 bg-gray-300 rounded-full mr-3"></span>
-                                <span class="font-medium text-sm italic">Passive Voice Count</span>
+
+                            <!-- 3. clause_density_finite_per_sentence -->
+                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
+                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                <span class="font-medium text-xs text-purple-900">Finite clauses per sentence</span>
+                            </div>
+
+                            <!-- 4. subordination_ratio -->
+                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
+                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                <span class="font-medium text-xs text-purple-900">Ratio of subordinate clauses</span>
+                            </div>
+
+                            <!-- 5. coordination_index_cconj_per_clause -->
+                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
+                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                <span class="font-medium text-xs text-purple-900">Coordination index per clause</span>
+                            </div>
+
+                            <!-- 6. avg_dependency_distance -->
+                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
+                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                <span class="font-medium text-xs text-purple-900">Average word dependency distance</span>
+                            </div>
+
+                            <!-- 7. np_mean_length_tokens -->
+                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
+                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                <span class="font-medium text-xs text-purple-900">Average noun phrase length</span>
+                            </div>
+
+                            <!-- 8. nominalization_density -->
+                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
+                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                <span class="font-medium text-xs text-purple-900">Density of nominalizations</span>
+                            </div>
+
+                            <!-- 9. noun_verb_ratio -->
+                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
+                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                <span class="font-medium text-xs text-purple-900">Ratio of nouns to verbs</span>
+                            </div>
+
+                            <!-- 10. passive_voice_percent_finite_verbs -->
+                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
+                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                <span class="font-medium text-xs text-purple-900">Percentage of passive verbs</span>
+                            </div>
+
+                            <!-- 11. mean_zipf_lemma -->
+                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
+                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                <span class="font-medium text-xs text-purple-900">Average word frequency score</span>
+                            </div>
+
+                            <!-- 12. lexical_diversity_mattr -->
+                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
+                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                <span class="font-medium text-xs text-purple-900">Vocabulary diversity score</span>
+                            </div>
+
+                            <!-- 13. technical_jargon_density -->
+                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
+                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                <span class="font-medium text-xs text-purple-900">Density of technical jargon</span>
+                            </div>
+
+                            <!-- 14. negation_density_per_sentence -->
+                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
+                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                <span class="font-medium text-xs text-purple-900">Negations per sentence</span>
+                            </div>
+
+                            <!-- 15. idea_density_predicates_per_10w -->
+                            <div class="flex items-center p-2 bg-purple-50 rounded border border-purple-100">
+                                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2 flex-shrink-0"></span>
+                                <span class="font-medium text-xs text-purple-900">Idea density per ten words</span>
                             </div>
                         </div>
                     </div>
