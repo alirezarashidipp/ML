@@ -199,18 +199,21 @@
             <div class="w-full max-w-4xl bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 
                 <!-- Tabs -->
-                <div class="flex border-b border-gray-200 bg-gray-50">
+                <div class="flex border-b border-gray-200 bg-gray-50 flex-wrap">
                     <button onclick="showTab('scenario-1', this)" class="tab-btn active px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 focus:outline-none transition-colors">Scenario 1: JIRA Front-End</button>
-                    <button onclick="showTab('scenario-2', this)" class="tab-btn px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 focus:outline-none transition-colors">Scenario 2: HTML Source</button>
+                    <button onclick="showTab('scenario-2', this)" class="tab-btn px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 focus:outline-none transition-colors">Scenario 2: JIRA Markup</button>
                     <button onclick="showTab('scenario-3', this)" class="tab-btn px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 focus:outline-none transition-colors">Scenario 3: Clean Text</button>
+                    <button onclick="showTab('scenario-4', this)" class="tab-btn px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-100 focus:outline-none transition-colors">Scenario 4: Grammar Check</button>
                 </div>
 
                 <!-- Tab Content 1: Visual -->
                 <div id="scenario-1" class="tab-content p-8">
                     <div class="border border-gray-200 rounded p-6 bg-white">
+                        <!-- Intentionally missing period for Scenario 4 fix -->
                         <h2 class="text-xl font-semibold text-[#172b4d] mb-4">As a developer, I want to add a robust logging feature</h2>
                         <div class="text-[#172b4d] text-base space-y-4">
-                            <p>We need to implement <strong>structured logging</strong> across the authentication service. This will help us debug issues in production more effectively.</p>
+                            <!-- Intentionally misspelled 'loging' for Scenario 4 fix -->
+                            <p>We need to implement <strong>structured loging</strong> across the authentication service. This will help us debug issues in production more effectively.</p>
                             
                             <p>The logs should include timestamp, user ID, and request latency. <span style="color: #d04437; font-weight: bold;">Critical: Do not log passwords!</span></p>
 
@@ -245,36 +248,42 @@
                     </div>
                 </div>
 
-                <!-- Tab Content 2: HTML -->
+                <!-- Tab Content 2: JIRA Markup -->
                 <div id="scenario-2" class="tab-content hidden p-0 bg-[#282c34]">
                     <pre class="p-6 overflow-x-auto text-sm font-mono text-gray-300 leading-relaxed">
-&lt;h2&gt;As a developer, I want to add a robust logging feature&lt;/h2&gt;
-&lt;p&gt;We need to implement &lt;strong&gt;structured logging&lt;/strong&gt; across the authentication service.&lt;/p&gt;
+h2. As a developer, I want to add a robust logging feature
+We need to implement *structured loging* across the authentication service.
 
-&lt;p&gt;The logs should include timestamp, user ID. &lt;span style="color: #d04437;"&gt;Critical: Do not log passwords!&lt;/span&gt;&lt;/p&gt;
+The logs should include timestamp, user ID. {color:#d04437}Critical: Do not log passwords!{color}
 
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Requirement&lt;/th&gt;
-      &lt;th&gt;Priority&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;JSON Format Output&lt;/td&gt;
-      &lt;td&gt;High&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
+||Requirement||Priority||
+|JSON Format Output|High|
 
-&lt;p&gt;Contact: &lt;a href="mailto:ali@example.com"&gt;ali@example.com&lt;/a&gt;&lt;/p&gt;</pre>
+[Contact|mailto:ali@example.com]</pre>
                 </div>
 
-                <!-- Tab Content 3: Clean Text -->
+                <!-- Tab Content 3: Clean Text (Dirty) -->
                 <div id="scenario-3" class="tab-content hidden p-8 bg-white">
                     <div class="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-7 bg-slate-50 p-6 rounded border border-slate-200">
 As a developer, I want to add a robust logging feature
+
+We need to implement structured loging across the authentication service. This will help us debug issues in production more effectively.
+
+The logs should include timestamp, user ID, and request latency. Critical: Do not log passwords!
+
+Acceptance Criteria:
+Requirement: JSON Format Output, Priority: High, Status: Pending
+Requirement: PII Masking, Priority: Critical, Status: In Review
+
+Contact Owner: ali@example.com
+                    </div>
+                </div>
+
+                <!-- Tab Content 4: Grammar Check (Corrected) -->
+                <div id="scenario-4" class="tab-content hidden p-8 bg-white">
+                    <div class="font-mono text-sm text-slate-700 whitespace-pre-wrap leading-7 bg-green-50 p-6 rounded border border-green-200 relative">
+                        <div class="absolute top-2 right-2 bg-green-200 text-green-800 text-xs px-2 py-1 rounded font-semibold">Verified</div>
+As a developer, I want to add a robust logging feature.
 
 We need to implement structured logging across the authentication service. This will help us debug issues in production more effectively.
 
@@ -285,6 +294,13 @@ Requirement: JSON Format Output, Priority: High, Status: Pending
 Requirement: PII Masking, Priority: Critical, Status: In Review
 
 Contact Owner: ali@example.com
+                    </div>
+                    <div class="mt-4 text-sm text-slate-500">
+                        <span class="font-semibold text-green-600">Corrections applied:</span>
+                        <ul class="list-disc ml-5 mt-1">
+                            <li>Added missing period to title.</li>
+                            <li>Corrected spelling: "loging" &rarr; "logging".</li>
+                        </ul>
                     </div>
                 </div>
 
