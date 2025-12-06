@@ -201,8 +201,8 @@
                     <span class="mt-auto text-xs font-semibold text-indigo-500 pt-2 bg-indigo-50 px-3 py-1 rounded-full mt-2">Click to View Details</span>
                 </div>
 
-                <!-- Card 3: Human Annotation -->
-                <div class="pipeline-card fade-in-up delay-300 bg-white p-6 rounded-xl border border-slate-200 shadow-md relative z-10 flex flex-col items-center text-center h-full cursor-default">
+                <!-- Card 3: Human Annotation (Clickable Now) -->
+                <div onclick="switchView('annotation-view')" class="pipeline-card fade-in-up delay-300 bg-white p-6 rounded-xl border border-slate-200 shadow-md relative z-10 flex flex-col items-center text-center h-full hover:ring-2 hover:ring-purple-400">
                     <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mb-4">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     </div>
@@ -210,6 +210,7 @@
                     <div class="text-xs font-mono bg-slate-100 px-3 py-1 rounded text-slate-600 mt-1">
                         0 = Poor <br> 1 = Normal <br> 2 = Good
                     </div>
+                    <span class="mt-auto text-xs font-semibold text-purple-500 pt-2 bg-purple-50 px-3 py-1 rounded-full mt-2">Click to View Logic</span>
                 </div>
 
                 <!-- Card 4: Agreement Check -->
@@ -709,26 +710,91 @@ Requirement: PII Masking, Priority: Critical, Status: In Review.
         </div>
     </div>
 
+    <!-- VIEW 4: ANNOTATION LOGIC -->
+    <div id="annotation-view" class="hidden min-h-screen bg-slate-50 flex flex-col">
+        <!-- Navbar -->
+        <div class="border-b border-gray-200 px-8 py-4 flex items-center justify-between sticky top-0 bg-white z-20 shadow-sm">
+            <button onclick="switchView('pipeline-view')" class="flex items-center text-slate-600 hover:text-purple-600 transition-colors font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Pipeline
+            </button>
+            <div class="text-lg font-bold text-slate-800">Truth & Annotation Logic</div>
+        </div>
+
+        <!-- Tree Diagram Area -->
+        <div class="flex-grow p-8 flex items-center justify-center overflow-auto fade-in">
+            <div class="flex items-center gap-12 w-full max-w-5xl">
+                
+                <!-- Level 1: Truth Concept -->
+                <div class="flex-shrink-0 relative">
+                    <div class="bg-white p-8 rounded-lg shadow-md border-l-4 border-slate-500 w-48 text-center relative z-10">
+                        <div class="font-bold text-xl text-gray-800 mb-2">Truth Concept</div>
+                        <div class="text-xs text-gray-500">Evaluation Basis</div>
+                    </div>
+                    
+                    <!-- Connection Line Out -->
+                    <div class="absolute top-1/2 right-0 w-8 h-0.5 bg-slate-300 translate-x-full"></div>
+                </div>
+
+                <!-- Level 2: Truth Types (Split) -->
+                <div class="flex flex-col gap-8 flex-grow relative">
+                    
+                    <!-- Vertical Connector Spine -->
+                    <div class="absolute left-[-24px] top-[16%] bottom-[16%] w-6 border-l-2 border-slate-300 rounded-l-xl"></div>
+                    <!-- Connector dots/arms -->
+                    <div class="absolute left-[-24px] top-[16%] w-6 h-0.5 bg-slate-300"></div>
+                    <div class="absolute left-[-24px] bottom-[16%] w-6 h-0.5 bg-slate-300"></div>
+                    <!-- Middle arm -->
+                    <div class="absolute left-[-24px] top-1/2 w-6 h-0.5 bg-slate-300"></div>
+
+
+                    <!-- Top: Objective Truth -->
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm opacity-60 hover:opacity-100 transition-opacity">
+                        <h3 class="font-bold text-lg text-slate-700 mb-1">Objective / Ground Truth</h3>
+                        <p class="text-sm text-slate-500">Factual, verifiable reality. <br><span class="italic text-xs">Example: Cat vs Dog classification</span></p>
+                    </div>
+
+                    <!-- Middle: Subjective Truth -->
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm opacity-60 hover:opacity-100 transition-opacity">
+                        <h3 class="font-bold text-lg text-slate-700 mb-1">Subjective Truth</h3>
+                        <p class="text-sm text-slate-500">Personal opinion & preference. <br><span class="italic text-xs">Example: Beauty, Art appreciation</span></p>
+                    </div>
+
+                    <!-- Bottom: Inter-Subjective Truth (Selected) -->
+                    <div class="bg-purple-50 p-6 rounded-xl border-2 border-purple-500 shadow-md relative transform scale-105">
+                        <div class="absolute -top-3 right-4 bg-purple-600 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Method Used</div>
+                        <h3 class="font-bold text-lg text-purple-800 mb-1">Inter-Subjective Truth</h3>
+                        <p class="text-sm text-purple-700 mb-3">Consensus reality shared by a group.</p>
+                        
+                        <div class="inline-flex items-center bg-white border border-purple-200 rounded-full px-3 py-1 text-xs font-semibold text-purple-600 shadow-sm">
+                            <span class="mr-1">✨</span> Wisdom of the Crowd
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript for Interaction -->
     <script>
         function switchView(viewId) {
-            const pipeline = document.getElementById('pipeline-view');
-            const ticket = document.getElementById('ticket-view');
-            const feature = document.getElementById('feature-view');
+            const views = ['pipeline-view', 'ticket-view', 'feature-view', 'annotation-view'];
+            
+            // Hide all views first
+            views.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
 
-            // Hide all first
-            pipeline.classList.add('hidden');
-            ticket.classList.add('hidden');
-            feature.classList.add('hidden');
-
-            if (viewId === 'ticket-view') {
-                ticket.classList.remove('hidden');
+            // Show target view
+            const target = document.getElementById(viewId);
+            if (target) {
+                target.classList.remove('hidden');
                 window.scrollTo(0, 0);
-            } else if (viewId === 'feature-view') {
-                feature.classList.remove('hidden');
-                window.scrollTo(0, 0);
-            } else {
-                pipeline.classList.remove('hidden');
             }
         }
 
