@@ -213,13 +213,14 @@
                     <span class="mt-auto text-xs font-semibold text-purple-500 pt-2 bg-purple-50 px-3 py-1 rounded-full mt-2">Click to View Logic</span>
                 </div>
 
-                <!-- Card 4: Agreement Check -->
-                <div class="pipeline-card fade-in-up delay-400 bg-blue-50 p-6 rounded-xl border-2 border-blue-200 shadow-sm relative z-10 flex flex-col items-center text-center h-full cursor-default">
+                <!-- Card 4: Intelligent Ticket Selection -->
+                <div onclick="switchView('selection-view')" class="pipeline-card fade-in-up delay-400 bg-blue-50 p-6 rounded-xl border-2 border-blue-200 shadow-sm relative z-10 flex flex-col items-center text-center h-full hover:ring-2 hover:ring-blue-500 cursor-pointer">
                     <div class="w-12 h-12 bg-white text-blue-600 rounded-full flex items-center justify-center mb-4 shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                     </div>
-                    <h3 class="font-bold text-lg mb-2 text-blue-800">Agreement Check</h3>
-                    <p class="text-sm text-blue-600">Krippendorff's Alpha</p>
+                    <h3 class="font-bold text-lg mb-2 text-blue-800">Intelligent Ticket Selection</h3>
+                    <p class="text-sm text-blue-600">Smart Filtering</p>
+                    <span class="mt-auto text-xs font-semibold text-blue-600 pt-2 bg-white border border-blue-100 px-3 py-1 rounded-full mt-2">Click to View Example</span>
                 </div>
             </div>
 
@@ -885,10 +886,123 @@ Requirement: PII Masking, Priority: Critical, Status: In Review.
         </div>
     </div>
 
+    <!-- VIEW 5: INTELLIGENT SELECTION (Example) -->
+    <div id="selection-view" class="hidden min-h-screen bg-slate-50 flex flex-col">
+        <!-- Navbar -->
+        <div class="border-b border-gray-200 px-8 py-4 flex items-center justify-between sticky top-0 bg-white z-20 shadow-sm">
+            <button onclick="switchView('pipeline-view')" class="flex items-center text-slate-600 hover:text-blue-600 transition-colors font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Pipeline
+            </button>
+            <div class="text-lg font-bold text-slate-800">Intelligent Ticket Selection Example</div>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-grow p-8 flex flex-col items-center justify-start overflow-auto fade-in">
+            
+            <!-- Description Block -->
+            <div class="max-w-4xl w-full mb-8 text-center">
+                <h2 class="text-2xl font-bold text-slate-800 mb-4">Using Unsupervised Learning (ML-Clustering)</h2>
+                <p class="text-slate-600 text-lg leading-relaxed bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    "Identify groups (clusters) of tickets with similar linguistic patterns, enabling us to choose the most representative samples from each cluster for human labelling."
+                </p>
+            </div>
+
+            <!-- Graph Container -->
+            <div class="relative bg-white p-8 rounded-xl shadow-lg border border-slate-200 max-w-4xl w-full flex flex-col items-center">
+                
+                <!-- Y Axis Label -->
+                <div class="absolute left-4 top-1/2 -translate-y-1/2 -rotate-90 text-sm font-bold text-slate-500 tracking-wide">
+                    Total Sentence in ticket
+                </div>
+
+                <!-- Chart Area -->
+                <div class="relative w-[600px] h-[400px] border-l-2 border-b-2 border-slate-400 ml-8 mb-8">
+                    
+                    <!-- SVG Scatter Plot -->
+                    <svg width="100%" height="100%" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+                        
+                        <!-- Cluster 1 (Blue - Top Left) -->
+                        <g fill="#60a5fa" opacity="0.8">
+                            <circle cx="150" cy="80" r="5" />
+                            <circle cx="170" cy="90" r="5" />
+                            <circle cx="140" cy="110" r="5" />
+                            <circle cx="160" cy="120" r="5" />
+                            <circle cx="180" cy="100" r="5" />
+                            <circle cx="165" cy="70" r="5" />
+                            <circle cx="155" cy="130" r="5" />
+                            <circle cx="190" cy="115" r="5" />
+                            <!-- Circle Boundary -->
+                            <circle cx="160" cy="100" r="50" fill="none" stroke="#60a5fa" stroke-width="1.5" opacity="0.5"/>
+                        </g>
+
+                        <!-- Cluster 2 (Green - Middle Right) -->
+                        <g fill="#4ade80" opacity="0.8">
+                            <circle cx="400" cy="150" r="5" />
+                            <circle cx="420" cy="170" r="5" /> <!-- Target 1 -->
+                            <circle cx="390" cy="180" r="5" />
+                            <circle cx="430" cy="190" r="5" /> <!-- Target 2 -->
+                            <circle cx="410" cy="200" r="5" />
+                            <circle cx="440" cy="160" r="5" />
+                            <circle cx="380" cy="165" r="5" />
+                            <!-- Circle Boundary -->
+                            <circle cx="410" cy="175" r="50" fill="none" stroke="#4ade80" stroke-width="1.5" opacity="0.5"/>
+                        </g>
+
+                        <!-- Cluster 3 (Orange - Bottom Left) -->
+                        <g fill="#fb923c" opacity="0.8">
+                            <circle cx="120" cy="300" r="5" />
+                            <circle cx="140" cy="320" r="5" />
+                            <circle cx="110" cy="330" r="5" />
+                            <circle cx="150" cy="290" r="5" />
+                            <circle cx="130" cy="350" r="5" />
+                            <circle cx="160" cy="310" r="5" />
+                            <!-- Circle Boundary -->
+                            <circle cx="135" cy="315" r="45" fill="none" stroke="#fb923c" stroke-width="1.5" opacity="0.5"/>
+                        </g>
+
+                        <!-- Cluster 4 (Red - Bottom Center) -->
+                        <g fill="#f87171" opacity="0.8">
+                            <circle cx="300" cy="300" r="5" />
+                            <circle cx="320" cy="280" r="5" />
+                            <circle cx="290" cy="320" r="5" />
+                            <circle cx="310" cy="330" r="5" />
+                            <circle cx="330" cy="310" r="5" />
+                            <!-- Circle Boundary -->
+                            <circle cx="310" cy="310" r="40" fill="none" stroke="#f87171" stroke-width="1.5" opacity="0.5"/>
+                        </g>
+
+                        <!-- Callout Lines -->
+                        <line x1="480" y1="100" x2="425" y2="165" stroke="#64748b" stroke-width="1" />
+                        <line x1="480" y1="140" x2="435" y2="185" stroke="#64748b" stroke-width="1" />
+
+                    </svg>
+
+                    <!-- Labels (HTML Overlay for better styling) -->
+                    <div class="absolute top-[85px] right-[50px] bg-slate-200 text-slate-700 px-3 py-1 rounded text-xs font-bold shadow-sm">
+                        WPB-123
+                    </div>
+                    <div class="absolute top-[125px] right-[30px] bg-slate-200 text-slate-700 px-3 py-1 rounded text-xs font-bold shadow-sm">
+                        WPB-321
+                    </div>
+
+                </div>
+
+                <!-- X Axis Label -->
+                <div class="text-sm font-bold text-slate-500 tracking-wide mt-2">
+                    Total word in ticket
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript for Interaction -->
     <script>
         function switchView(viewId) {
-            const views = ['pipeline-view', 'ticket-view', 'feature-view', 'annotation-view'];
+            const views = ['pipeline-view', 'ticket-view', 'feature-view', 'annotation-view', 'selection-view'];
             
             // Hide all views first
             views.forEach(id => {
