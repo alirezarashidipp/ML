@@ -54,6 +54,61 @@ Inference
 
 
 https://share.google/zDTnE50NCVm9vZaRz
+====================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+
+Evaluating the Quality of Story-Level JIRA Tickets Based on Agile Standards
+
+This project aims to automatically assess the quality of JIRA story tickets to measure how clear, structured, and testable each ticket is according to Agile standards.
+The evaluation is performed across three main dimensions:
+
+1. Plain Description
+
+In this stage, the main text of the ticket description is analyzed.
+The system extracts 25 linguistic and structural features, including:
+
+10 global readability formulas (such as Flesch, Coleman-Liau, etc.)
+
+15 linguistic indicators, such as sentence length, lexical diversity, repetition, use of imperative verbs, and more.
+
+In a sense, this step extracts the “DNA” of the text.
+A machine learning model (XGBoost) is then trained on labeled data to generate a quality label for each new ticket.
+Using the mathematical concept of Expected Value, these labels are converted into a continuous readability score ranging from 0 to 100, representing the overall clarity and writing quality of the ticket.
+
+2. User-Focused Description
+
+This part checks whether the ticket follows the WHO / WHAT / WHY structure, which is standard in Agile user stories.
+In simple terms, the model identifies whether the author has clearly stated:
+
+WHO the feature is for,
+
+WHAT needs to be done, and
+
+WHY it is needed.
+
+The presence of these three elements indicates a user-centered perspective and well-defined requirements.
+This analysis is performed using Natural Language Processing (NLP) techniques implemented with the spaCy library.
+
+3. Acceptance Criteria
+
+In this stage, the system verifies whether the ticket includes explicit acceptance criteria.
+This check is applied to both the description field and the dedicated Acceptance Criteria field to ensure full coverage.
+The goal here is to assess how testable and clearly defined the success conditions of the ticket are.
+
+4. Final Aggregation and Scoring
+
+Finally, the results from all three layers are combined using a Cobb–Douglas–based mathematical model, which intelligently balances the contribution of each dimension.
+The system outputs a final quality index between 1 and 5 stars:
+
+1 star: weak or unclear ticket
+
+5 stars: well-structured, user-focused ticket with clear acceptance criteria
+
+This star-based index provides a quick and intuitive overview of ticket quality, helping managers and teams easily evaluate the clarity and completeness of their user stories — and continuously improve the overall quality of their Agile documentation.
+
+
+
+
+====================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
 cross validation@
 hyper parameters@
