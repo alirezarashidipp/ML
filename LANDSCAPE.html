@@ -11,11 +11,9 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
-            overflow-x: auto; /* Allow scrolling for wide layout */
-            display: flex;
-            justify-content: center;
             min-height: 100vh;
             margin: 0;
+            overflow-x: hidden; /* Prevent horizontal scrollbar flickering during transitions */
         }
 
         /* --- Animations --- */
@@ -36,10 +34,9 @@
         .delay-500 { animation-delay: 0.5s; }
 
         /* --- Standard Card Styling --- */
-        /* w-64 is 16rem (256px), h-32 is 8rem (128px) - STRICT ENFORCEMENT */
         .flow-card {
             width: 16rem;  /* w-64 */
-            height: 8rem;  /* h-32 */
+            height: 9rem;  /* Increased slightly to fit button */
             background-color: white;
             padding: 1rem;
             border-radius: 0.75rem;
@@ -48,8 +45,6 @@
             transition: all 0.3s ease;
             position: relative;
             z-index: 10;
-            
-            /* Flex center content */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -91,7 +86,7 @@
         .pipeline-container {
             display: flex;
             align-items: center;
-            gap: 60px; /* Horizontal gap between columns */
+            gap: 60px;
             padding: 60px;
             position: relative;
         }
@@ -99,17 +94,17 @@
         .column {
             display: flex;
             flex-direction: column;
-            gap: 40px; /* Vertical gap between rows */
+            gap: 40px;
             justify-content: center;
         }
 
         .sub-row {
             display: flex;
             align-items: center;
-            gap: 40px; /* Gap between Node and Detail Box inside a row */
+            gap: 40px;
         }
 
-        /* --- Stack Items inside User Detail Box --- */
+        /* --- Stack Items --- */
         .stack-item {
             width: 90%;
             background-color: #f1f5f9;
@@ -134,13 +129,22 @@
             margin-bottom: 6px;
             font-weight: 700;
         }
+
+        /* --- Star Rating Styles --- */
+        .star-row {
+            transition: background-color 0.2s;
+        }
+        .star-row:hover {
+            background-color: #f8fafc;
+        }
     </style>
 </head>
-<body>
+<body class="flex justify-center items-start pt-10">
 
-    <div class="flex flex-col items-center">
+    <!-- VIEW 1: Main Flow Diagram -->
+    <div id="main-view" class="flex flex-col items-center transition-opacity duration-500 ease-in-out">
         <!-- Header -->
-        <header class="text-center mb-4 mt-8 fade-in-up">
+        <header class="text-center mb-4 fade-in-up">
             <h1 class="text-3xl font-bold text-slate-900 tracking-tight">
                 Evolution of <span class="text-[#EE3524]">JIRA Descriptions</span>
             </h1>
@@ -150,29 +154,13 @@
         <div class="pipeline-container fade-in-up delay-100">
             
             <!-- SVG Connectors -->
-            <!-- Coordinates calibrated for w-64 (256px) boxes and 60px/40px gaps -->
             <svg class="connector-layer" overflow="visible">
-                <!-- 
-                   Start Node Right Edge: ~300px
-                   Branch Col Left Edge: ~360px
-                   
-                   Branch Row Y Centers: 
-                   Top: 100
-                   Mid: 268 
-                   Bot: 436
-                -->
-                
                 <!-- Start -> Branches -->
                 <path d="M 300 268 C 330 268, 330 100, 360 100" class="connector-path" />
                 <path d="M 300 268 L 360 268" class="connector-path" />
                 <path d="M 300 268 C 330 268, 330 436, 360 436" class="connector-path" />
 
                 <!-- Details -> Final -->
-                <!-- 
-                   Detail Col Right Edge: ~950px
-                   Final Node Left Edge: ~1010px
-                   Final Node Y Center: 268
-                -->
                 <path d="M 950 100 C 980 100, 980 268, 1010 268" class="connector-path" />
                 <path d="M 950 268 L 1010 268" class="connector-path" />
                 <path d="M 950 436 C 980 436, 980 268, 1010 268" class="connector-path" />
@@ -187,12 +175,11 @@
                 </div>
             </div>
 
-            <!-- COLUMN 2: Branches (Nodes + Details) -->
+            <!-- COLUMN 2: Branches -->
             <div class="column">
                 
                 <!-- ROW 1 -->
                 <div class="sub-row">
-                    <!-- Branch Node -->
                     <div class="flow-card node-plain delay-200">
                         <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mb-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>
@@ -200,12 +187,10 @@
                         <h4 class="font-bold text-md text-slate-800">Plain Description</h4>
                     </div>
 
-                    <!-- Arrow -->
                     <div class="text-slate-300">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                     </div>
 
-                    <!-- Detail Node (Same Size) -->
                     <div class="flow-card node-plain border-none shadow-sm delay-200">
                         <span class="text-xs font-bold text-slate-400 uppercase mb-2">Metric</span>
                         <div class="text-amber-600 font-bold text-3xl">SCORE</div>
@@ -215,7 +200,6 @@
 
                 <!-- ROW 2 -->
                 <div class="sub-row">
-                    <!-- Branch Node -->
                     <div class="flow-card node-user delay-300">
                          <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -223,12 +207,10 @@
                         <h4 class="font-bold text-md text-slate-800">User-Focused</h4>
                     </div>
 
-                    <!-- Arrow -->
                     <div class="text-slate-300">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                     </div>
 
-                    <!-- Detail Node (Stack Group - Same Size) -->
                     <div class="flow-card node-user border-none shadow-sm delay-300 bg-white">
                         <div class="stack-item">
                             <span>WHO</span>
@@ -247,7 +229,6 @@
 
                 <!-- ROW 3 -->
                 <div class="sub-row">
-                    <!-- Branch Node -->
                     <div class="flow-card node-acc delay-400">
                          <div class="w-10 h-10 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mb-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
@@ -255,12 +236,10 @@
                         <h4 class="font-bold text-md text-slate-800">Acceptance Criteria</h4>
                     </div>
 
-                    <!-- Arrow -->
                     <div class="text-slate-300">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                     </div>
 
-                    <!-- Detail Node (Same Size) -->
                     <div class="flow-card node-acc border-none shadow-sm delay-400">
                         <span class="text-xs font-bold text-slate-400 uppercase mb-1">Process</span>
                         <div class="text-purple-600 font-bold text-xl">Evaluation</div>
@@ -278,11 +257,146 @@
                     </div>
                     <h3 class="font-bold text-lg text-blue-900 leading-tight">FINAL QUALITY INDEX</h3>
                     <p class="text-sm font-bold text-blue-600 mt-1">IN STAR</p>
+                    
+                    <!-- CLICKABLE BUTTON -->
+                    <button onclick="toggleView(true)" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1.5 px-4 rounded-full shadow transition-all flex items-center gap-1 group">
+                        <span>Details</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-0.5 transition-transform"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
                 </div>
             </div>
-
         </div>
     </div>
 
+    <!-- VIEW 2: Details / Star Rating Chart (Hidden by Default) -->
+    <div id="details-view" class="hidden w-full max-w-4xl px-6 fade-in-up">
+        
+        <!-- Back Button -->
+        <button onclick="toggleView(false)" class="mb-8 flex items-center gap-2 text-slate-500 hover:text-blue-600 font-medium transition-colors">
+            <div class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </div>
+            Back to Flow
+        </button>
+
+        <!-- Card Container -->
+        <div class="bg-[#fcfdf9] border border-[#e5e7eb] rounded-2xl shadow-xl p-8 md:p-12 relative overflow-hidden">
+            <!-- Decorative background blob -->
+            <div class="absolute -top-20 -right-20 w-64 h-64 bg-yellow-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+            <div class="text-center mb-12 relative z-10">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">The Result: An Intuitive 5-Star Rating</h2>
+                <p class="text-slate-600 text-lg max-w-2xl mx-auto leading-relaxed">
+                    The system outputs a final quality index between 1 and 5 stars, providing a quick and intuitive overview of ticket quality for teams and managers.
+                </p>
+            </div>
+
+            <!-- Ratings Table -->
+            <div class="space-y-4 relative z-10">
+                
+                <!-- Rating 1 -->
+                <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg border-b border-slate-100 last:border-0">
+                    <div class="md:col-span-2 font-bold text-slate-800 text-lg">Rating 1</div>
+                    <div class="md:col-span-3 flex gap-1">
+                        <!-- 1 Filled, 4 Empty -->
+                        <svg class="w-8 h-8 text-orange-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </div>
+                    <div class="md:col-span-7 text-slate-700">
+                        <span class="font-bold text-slate-900">Weak.</span> The ticket is unclear, lacks user focus, or has no acceptance criteria. Requires significant revision.
+                    </div>
+                </div>
+
+                <!-- Rating 2 -->
+                <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg border-b border-slate-100 last:border-0">
+                    <div class="md:col-span-2 font-bold text-slate-800 text-lg">Rating 2</div>
+                    <div class="md:col-span-3 flex gap-1">
+                        <!-- 2 Filled, 3 Empty -->
+                        <svg class="w-8 h-8 text-orange-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-orange-300 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </div>
+                    <div class="md:col-span-7 text-slate-700">
+                        <span class="font-bold text-slate-900">Fair.</span> The ticket has major issues in at least one key area. Clarification and rework needed.
+                    </div>
+                </div>
+
+                <!-- Rating 3 -->
+                <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg border-b border-slate-100 last:border-0">
+                    <div class="md:col-span-2 font-bold text-slate-800 text-lg">Rating 3</div>
+                    <div class="md:col-span-3 flex gap-1">
+                        <!-- 3 Filled, 2 Empty -->
+                        <svg class="w-8 h-8 text-yellow-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-yellow-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-yellow-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </div>
+                    <div class="md:col-span-7 text-slate-700">
+                        <span class="font-bold text-slate-900">Acceptable.</span> The ticket is understandable but could be improved in clarity, user focus, or testability.
+                    </div>
+                </div>
+
+                <!-- Rating 4 -->
+                <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg border-b border-slate-100 last:border-0">
+                    <div class="md:col-span-2 font-bold text-slate-800 text-lg">Rating 4</div>
+                    <div class="md:col-span-3 flex gap-1">
+                        <!-- 4 Filled, 1 Empty -->
+                        <svg class="w-8 h-8 text-green-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-green-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-green-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-green-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </div>
+                    <div class="md:col-span-7 text-slate-700">
+                        <span class="font-bold text-slate-900">Good.</span> A solid, well-formed ticket with only minor room for improvement. Mostly ready for development.
+                    </div>
+                </div>
+
+                <!-- Rating 5 -->
+                <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg">
+                    <div class="md:col-span-2 font-bold text-slate-800 text-lg">Rating 5</div>
+                    <div class="md:col-span-3 flex gap-1">
+                        <!-- 5 Filled -->
+                        <svg class="w-8 h-8 text-emerald-500 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-emerald-500 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-emerald-500 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-emerald-500 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-emerald-500 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </div>
+                    <div class="md:col-span-7 text-slate-700">
+                        <span class="font-bold text-slate-900">Excellent.</span> A well-structured, user-focused ticket with clear and testable acceptance criteria. Ready for development.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript to toggle views -->
+    <script>
+        function toggleView(showDetails) {
+            const mainView = document.getElementById('main-view');
+            const detailsView = document.getElementById('details-view');
+
+            if (showDetails) {
+                // Hide Main, Show Details
+                mainView.classList.add('hidden');
+                detailsView.classList.remove('hidden');
+            } else {
+                // Hide Details, Show Main
+                detailsView.classList.add('hidden');
+                mainView.classList.remove('hidden');
+            }
+            
+            // Scroll to top for better UX
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
 </body>
 </html>
