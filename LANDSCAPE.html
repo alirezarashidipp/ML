@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolution of JIRA Descriptions</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            overflow-x: auto; /* Allow scrolling for wide layout */
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* --- Animations --- */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-400 { animation-delay: 0.4s; }
+        .delay-500 { animation-delay: 0.5s; }
+
+        /* --- Standard Card Styling --- */
+        /* w-64 is 16rem (256px), h-32 is 8rem (128px) - STRICT ENFORCEMENT */
+        .flow-card {
+            width: 16rem;  /* w-64 */
+            height: 8rem;  /* h-32 */
+            background-color: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 10;
+            
+            /* Flex center content */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .flow-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            border-color: #3b82f6;
+        }
+
+        /* --- Specific Node Colors --- */
+        .node-start { border-left: 5px solid #10b981; } /* Emerald */
+        .node-plain { border-left: 5px solid #f59e0b; } /* Amber */
+        .node-user  { border-left: 5px solid #6366f1; } /* Indigo */
+        .node-acc   { border-left: 5px solid #8b5cf6; } /* Purple */
+        .node-final { border-left: 5px solid #3b82f6; } /* Blue */
+
+        /* --- SVG Connector Layer --- */
+        .connector-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .connector-path {
+            fill: none;
+            stroke: #cbd5e1;
+            stroke-width: 2px;
+        }
+
+        /* --- Layout Grid --- */
+        .pipeline-container {
+            display: flex;
+            align-items: center;
+            gap: 60px; /* Horizontal gap between columns */
+            padding: 60px;
+            position: relative;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 40px; /* Vertical gap between rows */
+            justify-content: center;
+        }
+
+        .sub-row {
+            display: flex;
+            align-items: center;
+            gap: 40px; /* Gap between Node and Detail Box inside a row */
+        }
+
+        /* --- Stack Items inside User Detail Box --- */
+        .stack-item {
+            width: 90%;
+            background-color: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 2px 0;
+        }
+
+        .label-pill {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="flex flex-col items-center">
+        <!-- Header -->
+        <header class="text-center mb-4 mt-8 fade-in-up">
+            <h1 class="text-3xl font-bold text-slate-900 tracking-tight">
+                Evolution of <span class="text-[#EE3524]">JIRA Descriptions</span>
+            </h1>
+        </header>
+
+        <!-- Main Diagram -->
+        <div class="pipeline-container fade-in-up delay-100">
+            
+            <!-- SVG Connectors -->
+            <!-- Coordinates calibrated for w-64 (256px) boxes and 60px/40px gaps -->
+            <svg class="connector-layer" overflow="visible">
+                <!-- 
+                   Start Node Right Edge: ~300px
+                   Branch Col Left Edge: ~360px
+                   
+                   Branch Row Y Centers: 
+                   Top: 100
+                   Mid: 268 
+                   Bot: 436
+                -->
+                
+                <!-- Start -> Branches -->
+                <path d="M 300 268 C 330 268, 330 100, 360 100" class="connector-path" />
+                <path d="M 300 268 L 360 268" class="connector-path" />
+                <path d="M 300 268 C 330 268, 330 436, 360 436" class="connector-path" />
+
+                <!-- Details -> Final -->
+                <!-- 
+                   Detail Col Right Edge: ~950px
+                   Final Node Left Edge: ~1010px
+                   Final Node Y Center: 268
+                -->
+                <path d="M 950 100 C 980 100, 980 268, 1010 268" class="connector-path" />
+                <path d="M 950 268 L 1010 268" class="connector-path" />
+                <path d="M 950 436 C 980 436, 980 268, 1010 268" class="connector-path" />
+            </svg>
+
+            <!-- COLUMN 1: Root -->
+            <div class="column">
+                <div class="flow-card node-start">
+                    <div class="label-pill bg-emerald-100 text-emerald-700">Root Node</div>
+                    <h3 class="font-bold text-lg text-slate-800">Evolution of Descriptions</h3>
+                    <p class="text-xs text-slate-500 mt-1">Agile Context</p>
+                </div>
+            </div>
+
+            <!-- COLUMN 2: Branches (Nodes + Details) -->
+            <div class="column">
+                
+                <!-- ROW 1 -->
+                <div class="sub-row">
+                    <!-- Branch Node -->
+                    <div class="flow-card node-plain delay-200">
+                        <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>
+                        </div>
+                        <h4 class="font-bold text-md text-slate-800">Plain Description</h4>
+                    </div>
+
+                    <!-- Arrow -->
+                    <div class="text-slate-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </div>
+
+                    <!-- Detail Node (Same Size) -->
+                    <div class="flow-card node-plain border-none shadow-sm delay-200">
+                        <span class="text-xs font-bold text-slate-400 uppercase mb-2">Metric</span>
+                        <div class="text-amber-600 font-bold text-3xl">SCORE</div>
+                        <div class="text-sm text-slate-500 font-medium">0 – 100</div>
+                    </div>
+                </div>
+
+                <!-- ROW 2 -->
+                <div class="sub-row">
+                    <!-- Branch Node -->
+                    <div class="flow-card node-user delay-300">
+                         <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </div>
+                        <h4 class="font-bold text-md text-slate-800">User-Focused</h4>
+                    </div>
+
+                    <!-- Arrow -->
+                    <div class="text-slate-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </div>
+
+                    <!-- Detail Node (Stack Group - Same Size) -->
+                    <div class="flow-card node-user border-none shadow-sm delay-300 bg-white">
+                        <div class="stack-item">
+                            <span>WHO</span>
+                            <div class="w-2 h-2 bg-indigo-400 rounded-full"></div>
+                        </div>
+                        <div class="stack-item">
+                            <span>WHAT</span>
+                            <div class="w-2 h-2 bg-indigo-400 rounded-full"></div>
+                        </div>
+                        <div class="stack-item">
+                            <span>WHY</span>
+                            <div class="w-2 h-2 bg-indigo-400 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROW 3 -->
+                <div class="sub-row">
+                    <!-- Branch Node -->
+                    <div class="flow-card node-acc delay-400">
+                         <div class="w-10 h-10 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                        </div>
+                        <h4 class="font-bold text-md text-slate-800">Acceptance Criteria</h4>
+                    </div>
+
+                    <!-- Arrow -->
+                    <div class="text-slate-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </div>
+
+                    <!-- Detail Node (Same Size) -->
+                    <div class="flow-card node-acc border-none shadow-sm delay-400">
+                        <span class="text-xs font-bold text-slate-400 uppercase mb-1">Process</span>
+                        <div class="text-purple-600 font-bold text-xl">Evaluation</div>
+                        <div class="text-sm text-slate-500">Pass / Fail</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- COLUMN 3: Final -->
+            <div class="column">
+                <div class="flow-card node-final delay-500 bg-blue-50 border-blue-200">
+                    <div class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center mb-2 shadow-lg -mt-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    </div>
+                    <h3 class="font-bold text-lg text-blue-900 leading-tight">FINAL QUALITY INDEX</h3>
+                    <p class="text-sm font-bold text-blue-600 mt-1">IN STAR</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
