@@ -13,7 +13,7 @@
             background-color: #f8fafc;
             min-height: 100vh;
             margin: 0;
-            overflow-x: hidden; /* Prevent horizontal scrollbar flickering during transitions */
+            overflow-x: hidden;
         }
 
         /* --- Animations --- */
@@ -35,8 +35,8 @@
 
         /* --- Standard Card Styling --- */
         .flow-card {
-            width: 16rem;  /* w-64 */
-            height: 9rem;  /* Increased slightly to fit button */
+            width: 16rem;
+            height: 10rem;
             background-color: white;
             padding: 1rem;
             border-radius: 0.75rem;
@@ -59,11 +59,11 @@
         }
 
         /* --- Specific Node Colors --- */
-        .node-start { border-left: 5px solid #10b981; } /* Emerald */
-        .node-plain { border-left: 5px solid #f59e0b; } /* Amber */
-        .node-user  { border-left: 5px solid #6366f1; } /* Indigo */
-        .node-acc   { border-left: 5px solid #8b5cf6; } /* Purple */
-        .node-final { border-left: 5px solid #3b82f6; } /* Blue */
+        .node-start { border-left: 5px solid #10b981; }
+        .node-plain { border-left: 5px solid #f59e0b; }
+        .node-user  { border-left: 5px solid #6366f1; }
+        .node-acc   { border-left: 5px solid #8b5cf6; }
+        .node-final { border-left: 5px solid #3b82f6; }
 
         /* --- SVG Connector Layer --- */
         .connector-layer {
@@ -120,25 +120,7 @@
             margin: 2px 0;
         }
 
-        .label-pill {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 2px 8px;
-            border-radius: 9999px;
-            margin-bottom: 6px;
-            font-weight: 700;
-        }
-
-        /* --- Star Rating Styles --- */
-        .star-row {
-            transition: background-color 0.2s;
-        }
-        .star-row:hover {
-            background-color: #f8fafc;
-        }
-
-        /* --- Input Badge Styles for Cobb-Douglas --- */
+        /* --- Input Badge Styles --- */
         .input-badge {
             position: relative;
             padding: 0.5rem 1rem;
@@ -150,6 +132,39 @@
             text-align: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             z-index: 10;
+        }
+
+        .label-pill {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        /* --- NLP View Styles --- */
+        .nlp-box {
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            font-family: 'Courier New', monospace;
+            font-size: 1.25rem;
+            line-height: 2.5;
+            position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .nlp-tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            color: white;
+            font-weight: bold;
+            position: relative;
+            margin: 0 0.25rem;
         }
     </style>
 </head>
@@ -169,12 +184,10 @@
             
             <!-- SVG Connectors -->
             <svg class="connector-layer" overflow="visible">
-                <!-- Start -> Branches -->
                 <path d="M 300 268 C 330 268, 330 100, 360 100" class="connector-path" />
                 <path d="M 300 268 L 360 268" class="connector-path" />
                 <path d="M 300 268 C 330 268, 330 436, 360 436" class="connector-path" />
 
-                <!-- Details -> Final -->
                 <path d="M 950 100 C 980 100, 980 268, 1010 268" class="connector-path" />
                 <path d="M 950 268 L 1010 268" class="connector-path" />
                 <path d="M 950 436 C 980 436, 980 268, 1010 268" class="connector-path" />
@@ -238,6 +251,12 @@
                             <span>WHY</span>
                             <div class="w-2 h-2 bg-indigo-400 rounded-full"></div>
                         </div>
+
+                        <!-- BUTTON -->
+                        <button onclick="switchView('more-info-view')" class="mt-2 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 py-1.5 px-3 rounded-full transition-colors flex items-center gap-1">
+                            More Info
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        </button>
                     </div>
                 </div>
 
@@ -273,7 +292,7 @@
                     <p class="text-sm font-bold text-blue-600 mt-1">IN STAR</p>
                     
                     <!-- CLICKABLE BUTTON -->
-                    <button onclick="toggleView(true)" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1.5 px-4 rounded-full shadow transition-all flex items-center gap-1 group">
+                    <button onclick="switchView('details-view')" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1.5 px-4 rounded-full shadow transition-all flex items-center gap-1 group">
                         <span>Details</span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-0.5 transition-transform"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </button>
@@ -286,7 +305,7 @@
     <div id="details-view" class="hidden w-full max-w-4xl px-6 fade-in-up pb-20">
         
         <!-- Back Button -->
-        <button onclick="toggleView(false)" class="mb-6 flex items-center gap-2 text-slate-500 hover:text-blue-600 font-medium transition-colors">
+        <button onclick="switchView('main-view')" class="mb-6 flex items-center gap-2 text-slate-500 hover:text-blue-600 font-medium transition-colors">
             <div class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
             </div>
@@ -298,7 +317,7 @@
             <!-- Decorative background blob -->
             <div class="absolute -top-20 -right-20 w-64 h-64 bg-yellow-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
-            <!-- NEW: Cobb-Douglas Diagram -->
+            <!-- Cobb-Douglas Diagram -->
             <div class="relative z-10 mb-16">
                 <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-6 text-center">Quality Calculation Model</h3>
                 
@@ -306,32 +325,22 @@
                     
                     <!-- LEFT: Inputs -->
                     <div class="flex flex-col gap-6 relative z-10">
-                        <div class="input-badge bg-blue-700">Clarity Score</div>
+                        <div class="input-badge bg-blue-700">Plainness and Readability Score</div>
                         <div class="input-badge bg-emerald-500">User Focus Score</div>
-                        <div class="input-badge bg-amber-500">Testability Score</div>
+                        <div class="input-badge bg-amber-500">Acceptance Criteria Score</div>
                     </div>
 
                     <!-- CENTER: Diagram Flow & Process -->
                     <div class="relative flex items-center justify-center w-48 h-48 shrink-0">
-                        <!-- SVG CONNECTIONS (Desktop) -->
                         <svg class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[200px] pointer-events-none hidden md:block" overflow="visible">
-                            <!-- Blue to Center -->
                             <path d="M -90 -60 C -40 -60, -40 0, 0 0" fill="none" stroke="#1d4ed8" stroke-width="6" stroke-linecap="round" />
-                            <!-- Green to Center -->
                             <path d="M -90 0 L 0 0" fill="none" stroke="#10b981" stroke-width="6" stroke-linecap="round" />
-                            <!-- Amber to Center -->
                             <path d="M -90 60 C -40 60, -40 0, 0 0" fill="none" stroke="#f59e0b" stroke-width="6" stroke-linecap="round" />
                         </svg>
-
-                        <!-- Mobile Vertical connectors (simple fallback) -->
                         <div class="absolute h-full w-2 bg-slate-200 md:hidden top-0 -z-10"></div>
-
-                        <!-- Central Gear Node -->
                         <div class="w-32 h-32 bg-slate-800 rounded-full border-4 border-white shadow-xl flex flex-col items-center justify-center text-center p-2 z-20 relative">
-                            <!-- Tech circle ring decoration -->
                             <div class="absolute inset-1 rounded-full border border-slate-600 opacity-50"></div>
                             <div class="absolute inset-3 rounded-full border border-dashed border-slate-600 opacity-50 animate-[spin_10s_linear_infinite]"></div>
-                            
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white mb-1"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                             <span class="text-[0.65rem] font-bold text-slate-300 uppercase leading-tight">Cobb-Douglas<br>Model</span>
                         </div>
@@ -339,18 +348,14 @@
 
                     <!-- RIGHT: Output Funnel -->
                     <div class="relative flex items-center h-16 z-10">
-                         <!-- Output Arrow Shape -->
                          <div class="hidden md:block absolute right-full top-1/2 -translate-y-1/2 w-16 h-[60px]">
-                            <!-- Funnel Graphic -->
                              <svg width="100%" height="100%" viewBox="0 0 60 60" preserveAspectRatio="none">
                                 <path d="M0,0 Q30,30 60,20 L60,40 Q30,30 0,60" fill="#94a3b8" opacity="0.8" />
                              </svg>
                          </div>
-                         
                          <div class="h-12 bg-slate-500 text-white flex items-center pl-6 pr-8 clip-arrow shadow-md font-bold text-sm relative">
-                            <!-- Custom arrow shape via css or svg background is cleaner, simpler div here -->
-                            <div class="absolute inset-y-0 -left-4 w-4 bg-slate-500" style="clip-path: polygon(100% 0, 100% 100%, 0 50%);"></div> <!-- Triangle pointing left (joining) -->
-                            <div class="absolute inset-y-0 -right-4 w-4 bg-slate-500" style="clip-path: polygon(0 0, 0 100%, 100% 50%);"></div> <!-- Triangle pointing right -->
+                            <div class="absolute inset-y-0 -left-4 w-4 bg-slate-500" style="clip-path: polygon(100% 0, 100% 100%, 0 50%);"></div>
+                            <div class="absolute inset-y-0 -right-4 w-4 bg-slate-500" style="clip-path: polygon(0 0, 0 100%, 100% 50%);"></div>
                             Holistic Quality Index
                          </div>
                     </div>
@@ -366,107 +371,137 @@
             </div>
 
             <!-- Ratings Table -->
-            <div class="space-y-4 relative z-10">
-                
+             <div class="space-y-4 relative z-10">
                 <!-- Rating 1 -->
                 <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg border-b border-slate-100 last:border-0">
                     <div class="md:col-span-2 font-bold text-slate-800 text-lg">Rating 1</div>
                     <div class="md:col-span-3 flex gap-1">
-                        <!-- 1 Filled, 4 Empty -->
                         <svg class="w-8 h-8 text-orange-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                     </div>
-                    <div class="md:col-span-7 text-slate-700">
-                        <span class="font-bold text-slate-900">Weak.</span> The ticket is unclear, lacks user focus, or has no acceptance criteria. Requires significant revision.
-                    </div>
+                    <div class="md:col-span-7 text-slate-700"><span class="font-bold text-slate-900">Weak.</span> The ticket is unclear, lacks user focus, or has no acceptance criteria.</div>
                 </div>
-
-                <!-- Rating 2 -->
-                <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg border-b border-slate-100 last:border-0">
+                 <!-- Rating 2 -->
+                 <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg border-b border-slate-100 last:border-0">
                     <div class="md:col-span-2 font-bold text-slate-800 text-lg">Rating 2</div>
                     <div class="md:col-span-3 flex gap-1">
-                        <!-- 2 Filled, 3 Empty -->
                         <svg class="w-8 h-8 text-orange-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-orange-300 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                     </div>
-                    <div class="md:col-span-7 text-slate-700">
-                        <span class="font-bold text-slate-900">Fair.</span> The ticket has major issues in at least one key area. Clarification and rework needed.
-                    </div>
+                    <div class="md:col-span-7 text-slate-700"><span class="font-bold text-slate-900">Fair.</span> The ticket has major issues in at least one key area.</div>
                 </div>
-
-                <!-- Rating 3 -->
-                <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg border-b border-slate-100 last:border-0">
+                 <!-- Rating 3 -->
+                 <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg border-b border-slate-100 last:border-0">
                     <div class="md:col-span-2 font-bold text-slate-800 text-lg">Rating 3</div>
                     <div class="md:col-span-3 flex gap-1">
-                        <!-- 3 Filled, 2 Empty -->
                         <svg class="w-8 h-8 text-yellow-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-yellow-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-yellow-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                     </div>
-                    <div class="md:col-span-7 text-slate-700">
-                        <span class="font-bold text-slate-900">Acceptable.</span> The ticket is understandable but could be improved in clarity, user focus, or testability.
-                    </div>
+                    <div class="md:col-span-7 text-slate-700"><span class="font-bold text-slate-900">Acceptable.</span> The ticket is understandable but could be improved in clarity, user focus, or testability.</div>
                 </div>
-
-                <!-- Rating 4 -->
-                <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg border-b border-slate-100 last:border-0">
+                 <!-- Rating 4 -->
+                 <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg border-b border-slate-100 last:border-0">
                     <div class="md:col-span-2 font-bold text-slate-800 text-lg">Rating 4</div>
                     <div class="md:col-span-3 flex gap-1">
-                        <!-- 4 Filled, 1 Empty -->
                         <svg class="w-8 h-8 text-green-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-green-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-green-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-green-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                     </div>
-                    <div class="md:col-span-7 text-slate-700">
-                        <span class="font-bold text-slate-900">Good.</span> A solid, well-formed ticket with only minor room for improvement. Mostly ready for development.
-                    </div>
+                    <div class="md:col-span-7 text-slate-700"><span class="font-bold text-slate-900">Good.</span> A solid, well-formed ticket with only minor room for improvement.</div>
                 </div>
-
-                <!-- Rating 5 -->
+                 <!-- Rating 5 -->
                 <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg">
                     <div class="md:col-span-2 font-bold text-slate-800 text-lg">Rating 5</div>
                     <div class="md:col-span-3 flex gap-1">
-                        <!-- 5 Filled -->
                         <svg class="w-8 h-8 text-emerald-500 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-emerald-500 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-emerald-500 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-emerald-500 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         <svg class="w-8 h-8 text-emerald-500 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                     </div>
-                    <div class="md:col-span-7 text-slate-700">
-                        <span class="font-bold text-slate-900">Excellent.</span> A well-structured, user-focused ticket with clear and testable acceptance criteria. Ready for development.
+                    <div class="md:col-span-7 text-slate-700"><span class="font-bold text-slate-900">Excellent.</span> A well-structured, user-focused ticket with clear and testable acceptance criteria.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 3: More Info (NLP Analysis) -->
+    <div id="more-info-view" class="hidden w-full max-w-4xl px-6 fade-in-up pb-20">
+         <!-- Back Button -->
+         <button onclick="switchView('main-view')" class="mb-6 flex items-center gap-2 text-slate-500 hover:text-indigo-600 font-medium transition-colors">
+            <div class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </div>
+            Back to Flow
+        </button>
+
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-xl p-12 relative overflow-visible mt-12">
+            
+            <h2 class="text-2xl font-bold text-slate-800 mb-12 text-center">User Story Analysis</h2>
+
+            <!-- Diagram Container (Adjusted to Vertical) -->
+            <div class="flex flex-col gap-6 max-w-lg mx-auto py-8">
+    
+                <!-- WHO Block -->
+                <div class="flex items-center p-4 bg-slate-50 border border-slate-200 rounded-xl relative overflow-hidden group hover:border-yellow-400 transition-colors">
+                    <div class="absolute left-0 top-0 bottom-0 w-2 bg-yellow-400"></div>
+                    <div class="w-24 flex-shrink-0 font-bold text-yellow-600 text-xl pl-4">WHO</div>
+                    <div class="text-slate-600 text-lg">
+                        As a <span class="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded font-mono font-bold border border-yellow-200 shadow-sm ml-1">[ROLE]</span>
+                    </div>
+                </div>
+
+                <!-- WHAT Block -->
+                <div class="flex items-center p-4 bg-slate-50 border border-slate-200 rounded-xl relative overflow-hidden group hover:border-blue-600 transition-colors">
+                    <div class="absolute left-0 top-0 bottom-0 w-2 bg-blue-600"></div>
+                    <div class="w-24 flex-shrink-0 font-bold text-blue-800 text-xl pl-4">WHAT</div>
+                    <div class="text-slate-600 text-lg">
+                        I want to <span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded font-mono font-bold border border-blue-200 shadow-sm ml-1">[ACTION]</span>
+                    </div>
+                </div>
+
+                <!-- WHY Block -->
+                <div class="flex items-center p-4 bg-slate-50 border border-slate-200 rounded-xl relative overflow-hidden group hover:border-green-600 transition-colors">
+                    <div class="absolute left-0 top-0 bottom-0 w-2 bg-green-600"></div>
+                    <div class="w-24 flex-shrink-0 font-bold text-green-700 text-xl pl-4">WHY</div>
+                    <div class="text-slate-600 text-lg">
+                        so that <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded font-mono font-bold border border-green-200 shadow-sm ml-1">[BENEFIT]</span>
                     </div>
                 </div>
 
             </div>
+
+            <div class="mt-8 text-center text-slate-400 text-sm font-medium uppercase tracking-widest">
+                Analyzed via spaCy NLP
+            </div>
+
         </div>
     </div>
 
     <!-- JavaScript to toggle views -->
     <script>
-        function toggleView(showDetails) {
-            const mainView = document.getElementById('main-view');
-            const detailsView = document.getElementById('details-view');
-
-            if (showDetails) {
-                // Hide Main, Show Details
-                mainView.classList.add('hidden');
-                detailsView.classList.remove('hidden');
-            } else {
-                // Hide Details, Show Main
-                detailsView.classList.add('hidden');
-                mainView.classList.remove('hidden');
-            }
+        function switchView(viewId) {
+            const views = ['main-view', 'details-view', 'more-info-view'];
+            
+            views.forEach(id => {
+                const el = document.getElementById(id);
+                if (id === viewId) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
             
             // Scroll to top for better UX
             window.scrollTo({ top: 0, behavior: 'smooth' });
