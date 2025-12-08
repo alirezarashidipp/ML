@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XGBoost Supervised Learning - 3D Visualizer</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- OrbitControls -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; background-color: #f8fafc; }
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        
+        /* Glassmorphism UI */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 3D Canvas -->
+    <div id="canvas-container"></div>
+
+    <!-- UI Overlay -->
+    <div id="ui-layer" class="relative z-10 w-full h-full pointer-events-none flex flex-col justify-between p-6 md:p-8">
+        
+        <!-- Header -->
+        <div class="glass-panel p-6 rounded-2xl max-w-lg pointer-events-auto fade-in">
+            <div id="step-indicator" class="flex space-x-1 mb-4 h-1.5 w-full bg-slate-200 rounded-full overflow-hidden mt-1">
+                <div class="bg-emerald-500 h-full transition-all duration-700 ease-out" id="progress-bar-fill" style="width: 25%"></div>
+            </div>
+
+            <h2 id="step-title" class="text-lg font-bold text-slate-700 mb-2">1. The Training Data</h2>
+            <p id="step-desc" class="text-slate-600 text-sm leading-relaxed mb-0">
+                This is <b>Supervised Learning</b>.
+                <br><br>
+                Most dots are Gray (Unknown). But notice the 3 specific colored dots? These are the <b>Human Labeled</b> examples the model will learn from.
+            </p>
+        </div>
+
+        <!-- Tooltip -->
+        <div id="tooltip" class="hidden absolute top-1/2 left-1/2 glass-panel p-4 rounded-xl pointer-events-none transition-opacity duration-200 w-64 transform -translate-y-full -translate-x-1/2 mt-[-20px]">
+            <div class="flex justify-between items-center mb-2 border-b border-slate-100 pb-2">
+                <span id="tooltip-tag" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide">CLASS</span>
+                <span class="text-[10px] text-slate-400 font-mono">ID:<span id="tooltip-id">001</span></span>
+            </div>
+            <p id="tooltip-text" class="text-sm text-slate-800 font-serif leading-snug">"Sample text..."</p>
+            <div class="mt-2 pt-2 border-t border-slate-100 flex justify-between text-[10px] text-slate-400">
+                <span>Total Vocab: <span id="val-x" class="text-slate-600">High</span></span>
+                <span>Avg/Sentence: <span id="val-y" class="text-slate-600">Short</span></span>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="glass-panel p-4 rounded-2xl self-end pointer-events-auto flex items-center space-x-4 fade-in">
+            <button id="prev-btn" onclick="prevStep()" class="px-5 py-2.5 rounded-xl text-slate-500 hover:bg-slate-100 font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm" disabled>
+                Back
+            </button>
+            <button id="next-btn" onclick="nextStep()" class="btn-primary px-8 py-2.5 rounded-xl text-white font-bold shadow-lg text-sm tracking-wide">
+                Next Step
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA GENERATION ---
+        const POOR_TEXTS = ["Bad service.", "No info.", "Just empty."];
+        const ACCEPTABLE_TEXTS = ["The methodology requires resources.", "It is imperative that we facilitate."];
+        const GOOD_TEXTS = ["The plan works.", "Clear writing saves time."];
+
+        const dataPoints = [];
+        const labeledIndices = { 0: null, 1: null, 2: null }; // To store the index of the "Teacher" examples
+
+        function generateDataset(count) {
+            let pCount = 0, aCount = 0, gCount = 0;
+
+            for (let i = 0; i < count; i++) {
+                const rand = Math.random();
+                let category, text, x, y, z;
+                let isTeacher = false;
+
+                if (rand < 0.33) {
+                    category = 0; text = POOR_TEXTS[Math.floor(Math.random() * POOR_TEXTS.length)];
+                    x = Math.random() * 4; y = Math.random() * 10; z = Math.random() * 10;
+                    if (labeledIndices[0] === null) { labeledIndices[0] = i; isTeacher = true; }
+                } else if (rand < 0.66) {
+                    category = 1; text = ACCEPTABLE_TEXTS[Math.floor(Math.random() * ACCEPTABLE_TEXTS.length)];
+                    x = 6 + Math.random() * 4; y = 6 + Math.random() * 4; z = Math.random() * 10;
+                    if (labeledIndices[1] === null) { labeledIndices[1] = i; isTeacher = true; }
+                } else {
+                    category = 2; text = GOOD_TEXTS[Math.floor(Math.random() * GOOD_TEXTS.length)];
+                    x = 6 + Math.random() * 4; y = Math.random() * 4.5; z = Math.random() * 10;
+                    if (labeledIndices[2] === null) { labeledIndices[2] = i; isTeacher = true; }
+                }
+
+                dataPoints.push({
+                    id: i, category, text, isTeacher,
+                    finalPos: new THREE.Vector3(x, y, z),
+                    startPos: new THREE.Vector3((Math.random()-0.5)*40, (Math.random()-0.5)*40, (Math.random()-0.5)*40)
+                });
+            }
+        }
+        generateDataset(100);
+
+        // --- THREE.JS SETUP ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf8fafc);
+        scene.fog = new THREE.Fog(0xf8fafc, 30, 80);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(30, 20, 30);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.5;
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+        dirLight.position.set(15, 30, 15);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        const gridHelper = new THREE.GridHelper(24, 24, 0xcbd5e1, 0xe2e8f0);
+        gridHelper.position.set(5, 0, 5);
+        scene.add(gridHelper);
+
+        // --- LABELS & SPRITES ---
+        // Helper to create the floating "Human Label" text
+        function createLabelSprite(text, colorHex) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 512;
+            canvas.height = 128; // Rectangular
+            
+            // Background Pill
+            ctx.fillStyle = colorHex;
+            ctx.beginPath();
+            ctx.roundRect(10, 10, 490, 100, 50);
+            ctx.fill();
+
+            // Text
+            ctx.font = "bold 50px Inter, sans-serif";
+            ctx.fillStyle = "white";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(text, 256, 60);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, opacity: 0.9 });
+            const sprite = new THREE.Sprite(spriteMat);
+            sprite.scale.set(6, 1.5, 1);
+            return sprite;
+        }
+
+        // Axis Labels
+        function createAxisText(text) {
+             const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 600; canvas.height = 128;
+            ctx.font = "bold 36px Inter, sans-serif";
+            ctx.fillStyle = "#475569";
+            ctx.fillText(text, 10, 80);
+            const texture = new THREE.CanvasTexture(canvas);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, opacity: 0 }));
+            sprite.scale.set(10, 2, 1);
+            return sprite;
+        }
+        const labelX = createAxisText("X: TOTAL VOCABULARY");
+        labelX.position.set(14, 0, 0);
+        const labelY = createAxisText("Y: AVG VOCAB / SENTENCE");
+        labelY.position.set(0, 12, 0);
+        scene.add(labelX); scene.add(labelY);
+
+        // --- DATA VISUALIZATION ---
+        const geometry = new THREE.SphereGeometry(0.35, 32, 32);
+        const colorPoor = new THREE.Color(0xef4444); 
+        const colorAccept = new THREE.Color(0xfbbf24); 
+        const colorGood = new THREE.Color(0x10b981); 
+        const colorNeutral = new THREE.Color(0x94a3b8); 
+
+        const points = [];
+        const labelSprites = []; // Store the floating human labels
+
+        dataPoints.forEach(pt => {
+            let startColor = colorNeutral;
+            
+            // If this is a "Teacher" point, color it immediately
+            if (pt.isTeacher) {
+                if(pt.category === 0) startColor = colorPoor;
+                if(pt.category === 1) startColor = colorAccept;
+                if(pt.category === 2) startColor = colorGood;
+
+                // Add visual halo/marker
+                const ringGeo = new THREE.RingGeometry(0.5, 0.6, 32);
+                const ringMat = new THREE.MeshBasicMaterial({ color: startColor, side: THREE.DoubleSide });
+                const ring = new THREE.Mesh(ringGeo, ringMat);
+                ring.position.copy(pt.startPos);
+                ring.lookAt(camera.position);
+                ring.userData = { isHalo: true, parentId: pt.id }; // Mark to animate later
+                scene.add(ring);
+                
+                // Add Floating Label
+                let labelText = "LABEL: POOR";
+                let labelColor = "#ef4444";
+                if(pt.category === 1) { labelText = "LABEL: ACCEPTABLE"; labelColor = "#f59e0b"; }
+                if(pt.category === 2) { labelText = "LABEL: GOOD"; labelColor = "#10b981"; }
+                
+                const sprite = createLabelSprite(labelText, labelColor);
+                sprite.position.copy(pt.startPos);
+                sprite.position.y += 1.5; // Float above
+                scene.add(sprite);
+                labelSprites.push({ sprite: sprite, targetPos: pt.finalPos, startPos: pt.startPos, ring: ring });
+            }
+
+            const mat = new THREE.MeshStandardMaterial({ color: startColor, roughness: 0.4 });
+            const mesh = new THREE.Mesh(geometry, mat);
+            mesh.position.copy(pt.startPos);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            mesh.userData = pt;
+            
+            // Store target color in userData for the reveal phase
+            if (pt.category === 0) mesh.userData.finalColor = colorPoor;
+            else if (pt.category === 1) mesh.userData.finalColor = colorAccept;
+            else mesh.userData.finalColor = colorGood;
+
+            scene.add(mesh);
+            points.push(mesh);
+        });
+
+        // --- TREES ---
+        const planeGeo = new THREE.PlaneGeometry(24, 12);
+        const matTree1 = new THREE.MeshPhongMaterial({ color: 0xef4444, side: THREE.DoubleSide, transparent: true, opacity: 0.0, depthWrite: false });
+        const tree1 = new THREE.Mesh(planeGeo, matTree1);
+        tree1.rotation.y = Math.PI / 2;
+        tree1.position.set(5, 6, 5); 
+        scene.add(tree1);
+
+        const qtGeo = new THREE.PlaneGeometry(5, 10);
+        const matTree2 = new THREE.MeshPhongMaterial({ color: 0xfbbf24, side: THREE.DoubleSide, transparent: true, opacity: 0.0, depthWrite: false });
+        const qtTree2 = new THREE.Mesh(qtGeo, matTree2);
+        qtTree2.rotation.x = -Math.PI / 2;
+        qtTree2.position.set(7.5, 5.25, 5);
+        scene.add(qtTree2);
+
+        // --- STORY ---
+        const steps = [
+            {
+                title: "1. Supervised Learning: The Labels",
+                desc: `See the glowing dots? <br>These are <b>Human Labels</b>. A human has read these specific texts and told the model: "This is Poor", "This is Good". <br>The Gray dots are unknown.`,
+                action: () => {
+                    controls.autoRotate = true;
+                    points.forEach(p => {
+                        p.userData.targetPos = p.userData.startPos;
+                        p.userData.targetOpacity = 0.6;
+                        if (!p.userData.isTeacher) p.userData.targetColor = colorNeutral;
+                    });
+                    // Move labels to start
+                    labelSprites.forEach(l => {
+                        l.sprite.position.copy(l.startPos).add(new THREE.Vector3(0, 1.5, 0));
+                        l.ring.position.copy(l.startPos);
+                    });
+                    labelX.material.opacity = 0; labelY.material.opacity = 0;
+                    tree1.material.opacity = 0; qtTree2.material.opacity = 0;
+                }
+            },
+            {
+                title: "2. Vectorization",
+                desc: "We organize all data (Labeled and Unlabeled) onto the graph.<br>Notice how the Human Labeled points land in specific areas. The model observes this placement.",
+                action: () => {
+                    controls.autoRotate = false;
+                    moveCamera(20, 20, 40);
+                    points.forEach(p => {
+                        p.userData.targetPos = p.userData.finalPos;
+                        p.userData.targetOpacity = 1;
+                    });
+                    // Move labels to final
+                    labelSprites.forEach(l => {
+                        l.sprite.position.copy(l.targetPos).add(new THREE.Vector3(0, 1.5, 0));
+                        l.ring.position.copy(l.targetPos);
+                    });
+                    new TWEEN.Tween(labelX.material).to({opacity: 1}, 1000).start();
+                    new TWEEN.Tween(labelY.material).to({opacity: 1}, 1000).start();
+                    tree1.material.opacity = 0; qtTree2.material.opacity = 0;
+                }
+            },
+            {
+                title: "3. Learning from Examples (Tree 1)",
+                desc: "The model asks: <i>'Where is the Red Labeled point?'</i><br>It learns that the Red Label is always where <b>Vocabulary < 5</b>.<br>So, it builds a wall (Tree 1) there to capture all similar points.",
+                action: () => {
+                    moveCamera(5, 15, 30);
+                    tree1.material.opacity = 0.3; qtTree2.material.opacity = 0;
+                    points.forEach(p => {
+                        // Reveal prediction for Poor section only
+                        if (p.userData.finalPos.x < 5) p.userData.targetColor = colorPoor;
+                        else if (!p.userData.isTeacher) p.userData.targetColor = colorNeutral;
+                    });
+                }
+            },
+            {
+                title: "4. Refining the Rules (Tree 2)",
+                desc: "Now it looks at the Amber and Green Labels.<br>It sees the Amber Label is high up (Wordy) and the Green Label is low (Concise).<br>It builds a floor (Tree 2) to separate them.",
+                action: () => {
+                    moveCamera(25, 25, 10);
+                    qtTree2.material.opacity = 0.3;
+                    points.forEach(p => {
+                        // Reveal all
+                        p.userData.targetColor = p.userData.finalColor;
+                    });
+                }
+            }
+        ];
+
+        let currentStep = 0;
+
+        function updateUI() {
+            const step = steps[currentStep];
+            document.getElementById('step-title').innerText = step.title;
+            document.getElementById('step-desc').innerHTML = step.desc;
+            
+            const percent = ((currentStep + 1) / 4) * 100;
+            document.getElementById('progress-bar-fill').style.width = `${percent}%`;
+
+            document.getElementById('prev-btn').disabled = currentStep === 0;
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.innerText = currentStep === steps.length - 1 ? "Finish" : "Next Step";
+
+            step.action();
+        }
+
+        function nextStep() { if (currentStep < steps.length - 1) { currentStep++; updateUI(); } }
+        function prevStep() { if (currentStep > 0) { currentStep--; updateUI(); } }
+
+        // --- ANIMATION ENGINE ---
+        const TWEEN = {
+            tweens: [],
+            update: function() { this.tweens = this.tweens.filter(t => t.update()); },
+            Tween: function(target) {
+                this.target = target;
+                this.to = function(vals, duration) { this.toValues = vals; this.durationVal = duration; return this; }
+                this.start = function() {
+                    this.startValues = {}; for(let k in this.toValues) this.startValues[k] = this.target[k];
+                    this.startTime = performance.now(); TWEEN.tweens.push(this); return this;
+                }
+                this.update = function() {
+                    const progress = Math.min((performance.now() - this.startTime) / this.durationVal, 1);
+                    const ease = 1 - Math.pow(1 - progress, 3);
+                    for(let k in this.toValues) this.target[k] = this.startValues[k] + (this.toValues[k] - this.startValues[k]) * ease;
+                    return progress < 1;
+                }
+            }
+        };
+
+        function moveCamera(x, y, z) {
+            const current = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+            new TWEEN.Tween(current).to({ x: x, y: y, z: z }, 1500).start();
+            const updateCam = () => {
+                camera.position.set(current.x, current.y, current.z);
+                if (TWEEN.tweens.length > 0) requestAnimationFrame(updateCam);
+            };
+            updateCam();
+        }
+
+        // --- INTERACTION ---
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let hoveredObj = null;
+        const tooltip = document.getElementById('tooltip');
+        const tText = document.getElementById('tooltip-text');
+        const tTag = document.getElementById('tooltip-tag');
+        const tId = document.getElementById('tooltip-id');
+        const vX = document.getElementById('val-x');
+        const vY = document.getElementById('val-y');
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            if (!tooltip.classList.contains('hidden')) {
+                tooltip.style.left = e.clientX + 'px';
+                tooltip.style.top = e.clientY + 'px';
+            }
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            TWEEN.update();
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(points);
+
+            if (intersects.length > 0) {
+                const mesh = intersects[0].object;
+                if (hoveredObj !== mesh) {
+                    if (hoveredObj) hoveredObj.scale.set(1, 1, 1);
+                    hoveredObj = mesh;
+                    hoveredObj.scale.set(1.5, 1.5, 1.5);
+                    document.body.style.cursor = 'pointer';
+                    tooltip.classList.remove('hidden');
+                    
+                    const data = mesh.userData;
+                    let tagText = "UNKNOWN";
+                    let tagClass = "bg-slate-200 text-slate-500";
+                    
+                    if (data.isTeacher) {
+                         if (data.category === 0) { tagText = "TEACHER: POOR"; tagClass = "bg-red-600 text-white"; }
+                         else if (data.category === 1) { tagText = "TEACHER: ACCEPTABLE"; tagClass = "bg-amber-500 text-white"; }
+                         else { tagText = "TEACHER: GOOD"; tagClass = "bg-emerald-600 text-white"; }
+                    } else if (currentStep >= 3 || (currentStep >= 2 && data.category === 0)) {
+                         if (data.category === 0) { tagText = "POOR"; tagClass = "bg-red-100 text-red-600"; }
+                         else if (data.category === 1) { tagText = "ACCEPTABLE"; tagClass = "bg-amber-100 text-amber-600"; }
+                         else { tagText = "GOOD"; tagClass = "bg-emerald-100 text-emerald-600"; }
+                    }
+
+                    tTag.innerText = tagText;
+                    tTag.className = `px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ${tagClass}`;
+                    tId.innerText = data.id;
+                    tText.innerText = data.text;
+                    vX.innerText = data.finalPos.x > 5 ? "Rich" : "Limited";
+                    vY.innerText = data.finalPos.y > 5 ? "Wordy" : "Concise";
+                }
+            } else {
+                if (hoveredObj) {
+                    hoveredObj.scale.set(1, 1, 1);
+                    hoveredObj = null;
+                    document.body.style.cursor = 'default';
+                    tooltip.classList.add('hidden');
+                }
+            }
+
+            // Animate Points
+            points.forEach(p => {
+                p.position.lerp(p.userData.targetPos, 0.04);
+                p.material.color.lerp(p.userData.targetColor, 0.05);
+                p.material.opacity = THREE.MathUtils.lerp(p.material.opacity, p.userData.targetOpacity, 0.05);
+            });
+
+            // Animate Halos (Teachers)
+            labelSprites.forEach(l => {
+                l.sprite.position.lerp(new THREE.Vector3(l.ring.position.x, l.ring.position.y + 1.5, l.ring.position.z), 0.1);
+                l.ring.position.lerp(l.targetPos, 0.04); // Or startPos depending on state, managed by point parent implicitly or explicitly
+                // Actually ring needs to follow the point.
+                // We didn't link ring to point directly in loop, let's just cheat and find point pos
+                // Better: Update ring pos in loop based on its parent point
+                // But simplified:
+            });
+            
+            // Fix: Manual update of ring positions to match points
+            labelSprites.forEach(l => {
+                // Find associated point by some method or just use stored targetPos which is static.
+                // Since points move, we need rings to move with them.
+                // Let's iterate points and if isTeacher, update ring
+            });
+            
+            // Correct Loop:
+            points.forEach(p => {
+                if(p.userData.isTeacher) {
+                    // Find the label object associated
+                   const labelObj = labelSprites.find(item => item.ring.userData.parentId === p.userData.id);
+                   if(labelObj) {
+                       labelObj.ring.position.copy(p.position);
+                       labelObj.ring.lookAt(camera.position);
+                       labelObj.sprite.position.copy(p.position).add(new THREE.Vector3(0, 2, 0));
+                   }
+                }
+            });
+
+            tree1.material.opacity = THREE.MathUtils.lerp(tree1.material.opacity, 0.3 * (currentStep >= 2 ? 1 : 0), 0.05);
+            qtTree2.material.opacity = THREE.MathUtils.lerp(qtTree2.material.opacity, 0.3 * (currentStep >= 3 ? 1 : 0), 0.05);
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+        steps[0].action();
+
+    </script>
+</body>
+</html>
