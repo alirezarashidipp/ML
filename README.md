@@ -58,10 +58,10 @@ https://share.google/zDTnE50NCVm9vZaRz
 
 Evaluating the Quality of Story-Level JIRA Tickets Based on Agile Standards
 
-This project aims to automatically assess the quality of JIRA story tickets to measure how clear, structured, and testable each ticket is according to Agile standards.
+This project aims to automatically assess the quality of JIRA story tickets to measure how clear, structured, and presence of Accept criteria each ticket is according to Agile standards.
 The evaluation is performed across three main dimensions:
 
-1. Plain Description
+1. Plain Description calcualtion
 
 In this stage, the main text of the ticket description is analyzed.
 The system extracts 25 linguistic and structural features, including:
@@ -71,8 +71,9 @@ The system extracts 25 linguistic and structural features, including:
 15 linguistic indicators, such as sentence length, lexical diversity, repetition, use of imperative verbs, and more.
 
 In a sense, this step extracts the “DNA” of the text.
-A machine learning model (XGBoost) is then trained on labeled data to generate a quality label for each new ticket.
-Using the mathematical concept of Expected Value, these labels are converted into a continuous readability score ranging from 0 to 100, representing the overall clarity and writing quality of the ticket.
+A machine learning model (XGBoost) is then trained on labeled data from a group of experize that they gave label only on Plaineess and readability of Ticket to generate a quality label for each new ticket. (huamn label are in three class, Poor readability, Acceptable Readabiltiy, Good Readability)
+Using the mathematical concept of Expected Value, model output  are converted into a continuous readability score ranging from 0 to 100, representing the overall clarity and writing quality of the ticket.
+e.g. models predicts this 40% Poor, 0%Accepteble, 60% Good, final score in range of 0-100, will be: (0 * 40 + 1 * 0 + 60 * 2)/  2 = 60
 
 2. User-Focused Description
 
@@ -87,12 +88,13 @@ WHY it is needed.
 
 The presence of these three elements indicates a user-centered perspective and well-defined requirements.
 This analysis is performed using Natural Language Processing (NLP) techniques implemented with the spaCy library.
+these three flagged.
 
 3. Acceptance Criteria
 
 In this stage, the system verifies whether the ticket includes explicit acceptance criteria.
 This check is applied to both the description field and the dedicated Acceptance Criteria field to ensure full coverage.
-The goal here is to assess how testable and clearly defined the success conditions of the ticket are.
+
 
 4. Final Aggregation and Scoring
 
