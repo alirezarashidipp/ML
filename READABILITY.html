@@ -210,11 +210,11 @@
 
         <div class="relative w-full max-w-6xl mx-auto">
             
-            <!-- ROW 1 -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16 relative">
+            <!-- ROW 1: CHANGED FROM GRID TO FLEX TO ADD ARROWS -->
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 relative">
                 
                 <!-- Card 1: Raw Tickets (Clickable) -->
-                <div onclick="switchView('ticket-view')" class="pipeline-card fade-in-up delay-100 bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative z-10 flex flex-col items-center text-center h-full group">
+                <div onclick="switchView('ticket-view')" class="w-full md:flex-1 pipeline-card fade-in-up delay-100 bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative z-10 flex flex-col items-center text-center h-full group min-h-[200px]">
                     <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-file-alt text-xl"></i>
                     </div>
@@ -223,8 +223,13 @@
                     <span class="mt-auto text-xs font-semibold text-blue-600 pt-2 bg-blue-50 px-3 py-1 rounded-full mt-4">View Scenarios</span>
                 </div>
 
+                <!-- ARROW 1 -->
+                <div class="hidden md:block text-gray-300 fade-in-up delay-100">
+                    <i class="fas fa-chevron-right text-xl"></i>
+                </div>
+
                 <!-- Card 2: Feature Extraction (Clickable Now) -->
-                <div onclick="switchView('feature-view')" class="pipeline-card fade-in-up delay-200 bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative z-10 flex flex-col items-center text-center h-full group">
+                <div onclick="switchView('feature-view')" class="w-full md:flex-1 pipeline-card fade-in-up delay-200 bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative z-10 flex flex-col items-center text-center h-full group min-h-[200px]">
                     <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-flask text-xl"></i>
                     </div>
@@ -233,8 +238,13 @@
                     <span class="mt-auto text-xs font-semibold text-indigo-600 pt-2 bg-indigo-50 px-3 py-1 rounded-full mt-4">View Details</span>
                 </div>
 
+                <!-- ARROW 2 -->
+                <div class="hidden md:block text-gray-300 fade-in-up delay-200">
+                    <i class="fas fa-chevron-right text-xl"></i>
+                </div>
+
                 <!-- Card 3: Human Annotation (Clickable Now) -->
-                <div onclick="switchView('annotation-view')" class="pipeline-card fade-in-up delay-300 bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative z-10 flex flex-col items-center text-center h-full group">
+                <div onclick="switchView('annotation-view')" class="w-full md:flex-1 pipeline-card fade-in-up delay-300 bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative z-10 flex flex-col items-center text-center h-full group min-h-[200px]">
                     <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-users text-xl"></i>
                     </div>
@@ -245,8 +255,13 @@
                     <span class="mt-auto text-xs font-semibold text-purple-600 pt-2 bg-purple-50 px-3 py-1 rounded-full mt-4">View Logic</span>
                 </div>
 
+                <!-- ARROW 3 -->
+                <div class="hidden md:block text-gray-300 fade-in-up delay-300">
+                    <i class="fas fa-chevron-right text-xl"></i>
+                </div>
+
                 <!-- Card 4: Intelligent Ticket Selection -->
-                <div onclick="switchView('selection-view')" class="pipeline-card fade-in-up delay-400 bg-blue-50 p-6 rounded-xl border border-blue-200 shadow-sm relative z-10 flex flex-col items-center text-center h-full group">
+                <div onclick="switchView('selection-view')" class="w-full md:flex-1 pipeline-card fade-in-up delay-400 bg-blue-50 p-6 rounded-xl border border-blue-200 shadow-sm relative z-10 flex flex-col items-center text-center h-full group min-h-[200px]">
                     <div class="w-12 h-12 bg-white text-blue-600 rounded-full flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform">
                         <i class="fas fa-filter text-xl"></i>
                     </div>
@@ -256,10 +271,18 @@
                 </div>
             </div>
 
-            <!-- ROW 2 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-3xl mx-auto mb-16 relative">
+            <!-- VERTICAL CONNECTOR (Row 1 to Row 2) -->
+            <div class="flex justify-center mb-8 fade-in-up delay-400">
+                <div class="bg-white p-2 rounded-full border border-gray-200 shadow-sm text-gray-300">
+                    <i class="fas fa-arrow-down text-xl"></i>
+                </div>
+            </div>
+
+            <!-- ROW 2: CHANGED TO FLEX FOR CONNECTOR -->
+            <div class="flex flex-col md:flex-row items-center justify-center gap-4 max-w-4xl mx-auto mb-16 relative">
+                
                 <!-- Card 5: ML Model (UPDATED) -->
-                <div onclick="switchView('ml-view')" class="pipeline-card fade-in-up delay-500 bg-white p-8 rounded-xl border border-slate-200 shadow-sm relative z-10 flex flex-col items-center text-center cursor-pointer group">
+                <div onclick="switchView('ml-view')" class="w-full md:w-5/12 pipeline-card fade-in-up delay-500 bg-white p-8 rounded-xl border border-slate-200 shadow-sm relative z-10 flex flex-col items-center text-center cursor-pointer group min-h-[220px]">
                     <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-brain text-2xl"></i>
                     </div>
@@ -267,8 +290,14 @@
                     <p class="text-sm text-slate-500">Learns relation between features & perception.</p>
                     <span class="mt-auto text-xs font-semibold text-emerald-600 pt-2 bg-emerald-50 px-3 py-1 rounded-full mt-4">View Model</span>
                 </div>
+
+                <!-- ARROW (Row 2 Internal) -->
+                <div class="hidden md:block text-gray-300 fade-in-up delay-500">
+                    <i class="fas fa-chevron-right text-xl"></i>
+                </div>
+
                 <!-- Card 6: Value Mapping (UPDATED) -->
-                <div onclick="switchView('mapping-view')" class="pipeline-card fade-in-up delay-600 bg-white p-8 rounded-xl border border-slate-200 shadow-sm relative z-10 flex flex-col items-center text-center cursor-pointer group">
+                <div onclick="switchView('mapping-view')" class="w-full md:w-5/12 pipeline-card fade-in-up delay-600 bg-white p-8 rounded-xl border border-slate-200 shadow-sm relative z-10 flex flex-col items-center text-center cursor-pointer group min-h-[220px]">
                     <div class="w-14 h-14 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-chart-line text-2xl"></i>
                     </div>
@@ -1076,7 +1105,7 @@ Requirement: PII Masking, Priority: Critical, Status: In Review.
                             <div class="w-8 h-1 bg-slate-300 mb-1 rounded"></div>
                             <div class="w-10 h-1 bg-slate-300 rounded"></div>
                         </div>
-                        <p class="text-xs text-center text-slate-600 uppercase">New data without human label but having 25 linguistic features</p>
+                        <p class="text-xs text-center text-slate-600 uppercase">jira tickets without human labels but with 25 linguistic features</p>
                     </div>
 
                     <!-- Arrow -->
@@ -1096,8 +1125,8 @@ Requirement: PII Masking, Priority: Critical, Status: In Review.
 
                     <!-- Output -->
                     <div class="w-1/4 text-center">
-                        <div class="font-bold text-slate-800 text-sm mb-1 uppercase">Label like Human gave it,</div>
-                        <p class="text-xs text-slate-600">e.g. "Good (0.822 probability human would agree)"</p>
+                        <div class="font-bold text-slate-800 text-sm mb-1 uppercase">Label as a human would give it,</div>
+                        <p class="text-xs text-slate-600">e.g., 'Good (0.822 probability of human agreement)'</p>
                     </div>
                 </div>
             </div>
