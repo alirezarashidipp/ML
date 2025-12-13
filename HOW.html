@@ -195,13 +195,21 @@
                 
                 <!-- SVG Connectors -->
                 <svg class="connector-layer" overflow="visible">
-                    <path d="M 300 268 C 330 268, 330 100, 360 100" class="connector-path" />
-                    <path d="M 300 268 L 360 268" class="connector-path" />
-                    <path d="M 300 268 C 330 268, 330 436, 360 436" class="connector-path" />
+                    <!-- Connection 1: Root to Branches (Left to Middle) -->
+                    <!-- Top Branch -->
+                    <path d="M 316 340 C 346 340, 346 140, 376 140" class="connector-path" />
+                    <!-- Middle Branch -->
+                    <path d="M 316 340 L 376 340" class="connector-path" />
+                    <!-- Bottom Branch -->
+                    <path d="M 316 340 C 346 340, 346 540, 376 540" class="connector-path" />
 
-                    <path d="M 950 100 C 980 100, 980 268, 1010 268" class="connector-path" />
-                    <path d="M 950 268 L 1010 268" class="connector-path" />
-                    <path d="M 950 436 C 980 436, 980 268, 1010 268" class="connector-path" />
+                    <!-- Connection 2: Branches to Final (Middle to Right) -->
+                    <!-- Top to Final -->
+                    <path d="M 1000 140 C 1030 140, 1030 340, 1060 340" class="connector-path" />
+                    <!-- Middle to Final -->
+                    <path d="M 1000 340 L 1060 340" class="connector-path" />
+                    <!-- Bottom to Final -->
+                    <path d="M 1000 540 C 1030 540, 1030 340, 1060 340" class="connector-path" />
                 </svg>
 
                 <!-- COLUMN 1: Root -->
@@ -363,6 +371,9 @@
                                 <path d="M -160 0 L 0 0" fill="none" stroke="#6366f1" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 4"/>
                                 <!-- Bottom Line (Materials) -->
                                 <path d="M -160 85 C -80 85, -80 0, 0 0" fill="none" stroke="#8b5cf6" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 4"/>
+                                
+                                <!-- NEW: Output Line (Connecting to Result) -->
+                                <path d="M 0 0 L 180 0" fill="none" stroke="#db0011" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 4" />
                             </svg>
                             
                             <!-- Central Node -->
@@ -373,7 +384,7 @@
                         </div>
 
                         <!-- RIGHT: Output -->
-                         <div class="flex items-center">
+                         <div class="flex items-center relative z-30">
                              <div class="bg-gray-100 px-6 py-4 rounded-lg border-l-4 border-hsbc-red shadow-sm">
                                  <div class="text-xs text-gray-500 uppercase font-bold">Output</div>
                                  <div class="text-xl font-bold text-gray-900">Quality of Ticket in Star</div>
