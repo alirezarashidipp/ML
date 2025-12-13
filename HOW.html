@@ -340,26 +340,29 @@
                         <!-- LEFT: Inputs -->
                         <div class="flex flex-col gap-4 relative z-10">
                             <div class="input-badge bg-amber-500">
-                                <span class="block text-xs opacity-75 uppercase">Labor (L)</span>
-                                Readability
+                                <span class="block text-xs opacity-75 uppercase">Plainness Score</span>
+                                Labor (L)
                             </div>
                             <div class="input-badge bg-indigo-500">
-                                <span class="block text-xs opacity-75 uppercase">Capital (K)</span>
-                                Structure
+                                <span class="block text-xs opacity-75 uppercase">Having Agile Structure</span>
+                                Capital (K)
                             </div>
                             <div class="input-badge bg-purple-500">
-                                <span class="block text-xs opacity-75 uppercase">Materials (M)</span>
-                                Criteria
+                                <span class="block text-xs opacity-75 uppercase">Presence of AC</span>
+                                Materials (M)
                             </div>
                         </div>
 
                         <!-- CENTER: Diagram Flow & Process -->
                         <div class="relative flex items-center justify-center w-48 h-48 shrink-0">
                             <!-- Curved Lines (SVG) -->
-                            <svg class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[200px] pointer-events-none hidden md:block" overflow="visible">
-                                <path d="M -90 -60 C -40 -60, -40 0, 0 0" fill="none" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 4" />
-                                <path d="M -90 0 L 0 0" fill="none" stroke="#6366f1" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 4"/>
-                                <path d="M -90 60 C -40 60, -40 0, 0 0" fill="none" stroke="#8b5cf6" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 4"/>
+                            <svg class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[200px] pointer-events-none hidden md:block" viewBox="-150 -100 300 200" overflow="visible">
+                                <!-- Top Line (Labor) -->
+                                <path d="M -160 -85 C -80 -85, -80 0, 0 0" fill="none" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 4" />
+                                <!-- Middle Line (Capital) -->
+                                <path d="M -160 0 L 0 0" fill="none" stroke="#6366f1" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 4"/>
+                                <!-- Bottom Line (Materials) -->
+                                <path d="M -160 85 C -80 85, -80 0, 0 0" fill="none" stroke="#8b5cf6" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 4"/>
                             </svg>
                             
                             <!-- Central Node -->
