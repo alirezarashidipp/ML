@@ -3,226 +3,600 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Strategic Narrative: Automated Quality Gatekeeper</title>
+    <title>Evolution of JIRA Descriptions</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Light Grey Background */
+            background-color: #f8fafc;
+            min-height: 100vh;
+            margin: 0;
             overflow-x: hidden;
         }
-        
-        /* HSBC Brand Colors Hint */
-        :root {
-            --hsbc-red: #db0011;
-            --hsbc-dark: #2d2d2d;
-        }
 
-        .hsbc-red-text { color: var(--hsbc-red); }
-        .hsbc-red-bg { background-color: var(--hsbc-red); }
-
-        /* Animations */
+        /* --- Animations --- */
         .fade-in-up {
-            animation: fadeInUp 0.8s ease-out forwards;
             opacity: 0;
             transform: translateY(20px);
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .delay-100 { animation-delay: 0.1s; }
         .delay-200 { animation-delay: 0.2s; }
         .delay-300 { animation-delay: 0.3s; }
+        .delay-400 { animation-delay: 0.4s; }
         .delay-500 { animation-delay: 0.5s; }
 
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* --- Standard Card Styling --- */
+        .flow-card {
+            width: 16rem;
+            height: 10rem;
+            background-color: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
         }
 
-        /* Card Hover Effects */
-        .feature-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .feature-card:hover {
+        .flow-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border-bottom: 4px solid var(--hsbc-red);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            border-color: #3b82f6;
         }
 
-        /* Hero Split Transition */
-        .hidden-content {
-            display: none;
-            opacity: 0;
-            transition: opacity 1s ease;
+        /* --- Specific Node Colors --- */
+        .node-start { border-left: 5px solid #10b981; }
+        .node-plain { border-left: 5px solid #f59e0b; }
+        .node-user  { border-left: 5px solid #6366f1; }
+        .node-acc   { border-left: 5px solid #8b5cf6; }
+        .node-final { border-left: 5px solid #3b82f6; }
+
+        /* --- SVG Connector Layer --- */
+        .connector-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
         }
         
-        .show-content {
-            display: block;
-            animation: fadeIn 1s forwards;
+        .connector-path {
+            fill: none;
+            stroke: #cbd5e1;
+            stroke-width: 2px;
         }
 
-        @keyframes fadeIn {
-            to { opacity: 1; }
+        /* --- Layout Grid --- */
+        .pipeline-container {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            padding: 60px;
+            position: relative;
         }
 
-        .pulse-btn {
-            box-shadow: 0 0 0 0 rgba(219, 0, 17, 0.7);
-            animation: pulse-red 2s infinite;
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            justify-content: center;
         }
 
-        @keyframes pulse-red {
-            0% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(219, 0, 17, 0.7);
-            }
-            70% {
-                transform: scale(1);
-                box-shadow: 0 0 0 10px rgba(219, 0, 17, 0);
-            }
-            100% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(219, 0, 17, 0);
-            }
+        .sub-row {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        /* --- Stack Items --- */
+        .stack-item {
+            width: 90%;
+            background-color: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 2px 0;
+        }
+
+        /* --- Input Badge Styles --- */
+        .input-badge {
+            position: relative;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+            width: 160px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .label-pill {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        /* --- NLP View Styles --- */
+        .nlp-box {
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            font-family: 'Courier New', monospace;
+            font-size: 1.25rem;
+            line-height: 2.5;
+            position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .nlp-tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            color: white;
+            font-weight: bold;
+            position: relative;
+            margin: 0 0.25rem;
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="flex justify-center items-start pt-10">
 
-    <!-- Navbar / Header (Simple Branding) -->
-    <nav class="w-full bg-white shadow-sm py-4 px-8 flex justify-between items-center fixed top-0 z-50">
-        <div class="flex items-center gap-4">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/a/aa/HSBC_logo_%282018%29.svg" alt="HSBC Logo" class="h-10 w-auto">
-            <div class="text-xl font-bold tracking-tight text-gray-900 border-l-2 border-gray-200 pl-4">
-                <span class="hsbc-red-text">Agile</span> Quality Assurance
-            </div>
-        </div>
-        <div class="text-sm text-gray-500 uppercase tracking-widest font-semibold">Strategic Overview</div>
-    </nav>
-
-    <!-- Main Content Container -->
-    <main class="min-h-screen flex flex-col justify-center items-center pt-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-
-        <!-- STEP 1: THE PROBLEM (The Hook) -->
-        <div id="problem-section" class="text-center max-w-4xl mx-auto transition-all duration-700">
-            <div class="fade-in-up">
-                <span class="inline-block py-1 px-3 rounded-full bg-red-100 text-red-800 text-xs font-bold tracking-wide uppercase mb-4">
-                    The Challenge
-                </span>
-            </div>
-            
-            <h1 class="fade-in-up delay-100 text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 tracking-tight leading-tight">
-                The Cost of <span class="hsbc-red-text relative">Ambiguity
-                    <svg class="absolute w-full h-3 -bottom-1 left-0 text-red-200 opacity-50" viewBox="0 0 100 10" preserveAspectRatio="none">
-                        <path d="M0 5 Q 50 10 100 5" stroke="currentColor" stroke-width="8" fill="none" />
-                    </svg>
-                </span>
+    <!-- VIEW 1: Main Flow Diagram -->
+    <div id="main-view" class="flex flex-col items-center transition-opacity duration-500 ease-in-out">
+        <!-- Header -->
+        <header class="text-center mb-4 fade-in-up">
+            <h1 class="text-3xl font-bold text-slate-900 tracking-tight">
+                Evolution of <span class="text-[#EE3524]">JIRA Descriptions</span>
             </h1>
-            
-            <p class="fade-in-up delay-200 text-xl md:text-2xl text-gray-600 mb-10 leading-relaxed font-light">
-                In software delivery, the most expensive bugs are not in the code—they are in the requirements. 
-                <br><br>
-                <span class="font-semibold text-gray-800">"Garbage in, Garbage out"</span> costs us millions in rework, delayed cycles, and developer frustration.
-            </p>
+        </header>
 
-            <div class="fade-in-up delay-300">
-                <button onclick="revealSolution()" class="pulse-btn bg-black hover:bg-gray-800 text-white font-bold py-4 px-8 rounded-lg transition-all transform hover:scale-105 flex items-center mx-auto gap-3 text-lg">
-                    <span>Reveal The Solution</span>
-                    <i class="fas fa-arrow-down"></i>
-                </button>
+        <!-- Main Diagram -->
+        <div class="pipeline-container fade-in-up delay-100">
+            
+            <!-- SVG Connectors -->
+            <svg class="connector-layer" overflow="visible">
+                <path d="M 300 268 C 330 268, 330 100, 360 100" class="connector-path" />
+                <path d="M 300 268 L 360 268" class="connector-path" />
+                <path d="M 300 268 C 330 268, 330 436, 360 436" class="connector-path" />
+
+                <path d="M 950 100 C 980 100, 980 268, 1010 268" class="connector-path" />
+                <path d="M 950 268 L 1010 268" class="connector-path" />
+                <path d="M 950 436 C 980 436, 980 268, 1010 268" class="connector-path" />
+            </svg>
+
+            <!-- COLUMN 1: Root -->
+            <div class="column">
+                <div class="flow-card node-start">
+                    <div class="label-pill bg-emerald-100 text-emerald-700">Root Node</div>
+                    <h3 class="font-bold text-lg text-slate-800">Evaluation of Jira Description</h3>
+                    <p class="text-xs text-slate-500 mt-1">Agile Standard</p>
+                    
+                    <!-- New Button -->
+                    <button onclick="switchView('root-info-view')" class="mt-3 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 py-1.5 px-3 rounded-full transition-colors flex items-center gap-1 border border-emerald-200">
+                        Click for more info
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- COLUMN 2: Branches -->
+            <div class="column">
+                
+                <!-- ROW 1 -->
+                <div class="sub-row">
+                    <div class="flow-card node-plain delay-200">
+                        <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>
+                        </div>
+                        <h4 class="font-bold text-md text-slate-800">Plain Description</h4>
+                    </div>
+
+                    <div class="text-slate-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </div>
+
+                    <div class="flow-card node-plain border-none shadow-sm delay-200">
+                        <span class="text-xs font-bold text-slate-400 uppercase mb-2">Metric</span>
+                        <div class="text-amber-600 font-bold text-3xl">SCORE</div>
+                        <div class="text-sm text-slate-500 font-medium">0 – 100</div>
+                    </div>
+                </div>
+
+                <!-- ROW 2 -->
+                <div class="sub-row">
+                    <div class="flow-card node-user delay-300">
+                         <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </div>
+                        <h4 class="font-bold text-md text-slate-800">User-Focused</h4>
+                    </div>
+
+                    <div class="text-slate-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </div>
+
+                    <div class="flow-card node-user border-none shadow-sm delay-300 bg-white">
+                        <div class="stack-item">
+                            <span>WHO</span>
+                            <div class="w-2 h-2 bg-indigo-400 rounded-full"></div>
+                        </div>
+                        <div class="stack-item">
+                            <span>WHAT</span>
+                            <div class="w-2 h-2 bg-indigo-400 rounded-full"></div>
+                        </div>
+                        <div class="stack-item">
+                            <span>WHY</span>
+                            <div class="w-2 h-2 bg-indigo-400 rounded-full"></div>
+                        </div>
+
+                        <!-- BUTTON -->
+                        <button onclick="switchView('more-info-view')" class="mt-2 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 py-1.5 px-3 rounded-full transition-colors flex items-center gap-1">
+                            More Info
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ROW 3 -->
+                <div class="sub-row">
+                    <div class="flow-card node-acc delay-400">
+                         <div class="w-10 h-10 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                        </div>
+                        <h4 class="font-bold text-md text-slate-800">Acceptance Criteria</h4>
+                    </div>
+
+                    <div class="text-slate-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </div>
+
+                    <div class="flow-card node-acc border-none shadow-sm delay-400">
+                        <span class="text-xs font-bold text-slate-400 uppercase mb-1">Process</span>
+                        <div class="text-purple-600 font-bold text-xl">Evaluation</div>
+                        <div class="text-sm text-slate-500">Pass / Fail</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- COLUMN 3: Final -->
+            <div class="column">
+                <div class="flow-card node-final delay-500 bg-blue-50 border-blue-200">
+                    <div class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center mb-2 shadow-lg -mt-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    </div>
+                    <h3 class="font-bold text-lg text-blue-900 leading-tight">FINAL QUALITY INDEX</h3>
+                    <p class="text-sm font-bold text-blue-600 mt-1">IN STAR</p>
+                    
+                    <!-- CLICKABLE BUTTON -->
+                    <button onclick="switchView('details-view')" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1.5 px-4 rounded-full shadow transition-all flex items-center gap-1 group">
+                        <span>Details</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-0.5 transition-transform"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                </div>
             </div>
         </div>
+    </div>
 
-        <!-- STEP 2: THE SOLUTION (Hidden by default) -->
-        <div id="solution-section" class="hidden-content w-full mt-12 pb-20">
-            
-            <!-- Definition -->
-            <div class="text-center mb-16 border-t border-gray-200 pt-12">
-                <span class="inline-block py-1 px-3 rounded-full bg-green-100 text-green-800 text-xs font-bold tracking-wide uppercase mb-4">
-                    The Solution
-                </span>
-                <h2 class="text-4xl font-bold text-gray-900 mb-6">Automated Quality Gatekeeper</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                    An AI-driven system that acts as an <span class="font-bold text-gray-900">always-on analyst</span>. It reads every single JIRA ticket the moment it is created and objectively scores it against Global Agile Standards.
+    <!-- VIEW 2: Details / Star Rating Chart (Hidden by Default) -->
+    <div id="details-view" class="hidden w-full max-w-4xl px-6 fade-in-up pb-20">
+        
+        <!-- Back Button -->
+        <button onclick="switchView('main-view')" class="mb-6 flex items-center gap-2 text-slate-500 hover:text-blue-600 font-medium transition-colors">
+            <div class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </div>
+            Back to Flow
+        </button>
+
+        <!-- Card Container -->
+        <div class="bg-[#fcfdf9] border border-[#e5e7eb] rounded-2xl shadow-xl p-8 md:p-12 relative overflow-hidden">
+            <!-- Decorative background blob -->
+            <div class="absolute -top-20 -right-20 w-64 h-64 bg-yellow-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+            <!-- Cobb-Douglas Diagram -->
+            <div class="relative z-10 mb-16">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-6 text-center">Quality Calculation Model</h3>
+                
+                <div class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
+                    
+                    <!-- LEFT: Inputs -->
+                    <div class="flex flex-col gap-6 relative z-10">
+                        <div class="input-badge bg-blue-700">Plainness and Readability Score</div>
+                        <div class="input-badge bg-emerald-500">User Focus Score</div>
+                        <div class="input-badge bg-amber-500">Acceptance Criteria Score</div>
+                    </div>
+
+                    <!-- CENTER: Diagram Flow & Process -->
+                    <div class="relative flex items-center justify-center w-48 h-48 shrink-0">
+                        <svg class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[200px] pointer-events-none hidden md:block" overflow="visible">
+                            <path d="M -90 -60 C -40 -60, -40 0, 0 0" fill="none" stroke="#1d4ed8" stroke-width="6" stroke-linecap="round" />
+                            <path d="M -90 0 L 0 0" fill="none" stroke="#10b981" stroke-width="6" stroke-linecap="round" />
+                            <path d="M -90 60 C -40 60, -40 0, 0 0" fill="none" stroke="#f59e0b" stroke-width="6" stroke-linecap="round" />
+                        </svg>
+                        <div class="absolute h-full w-2 bg-slate-200 md:hidden top-0 -z-10"></div>
+                        <div class="w-32 h-32 bg-slate-800 rounded-full border-4 border-white shadow-xl flex flex-col items-center justify-center text-center p-2 z-20 relative">
+                            <div class="absolute inset-1 rounded-full border border-slate-600 opacity-50"></div>
+                            <div class="absolute inset-3 rounded-full border border-dashed border-slate-600 opacity-50 animate-[spin_10s_linear_infinite]"></div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white mb-1"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            <span class="text-[0.65rem] font-bold text-slate-300 uppercase leading-tight">Cobb-Douglas<br>Model</span>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: Output Funnel -->
+                    <div class="relative flex items-center h-16 z-10">
+                         <div class="hidden md:block absolute right-full top-1/2 -translate-y-1/2 w-16 h-[60px]">
+                             <svg width="100%" height="100%" viewBox="0 0 60 60" preserveAspectRatio="none">
+                                <path d="M0,0 Q30,30 60,20 L60,40 Q30,30 0,60" fill="#94a3b8" opacity="0.8" />
+                             </svg>
+                         </div>
+                         <div class="h-12 bg-slate-500 text-white flex items-center pl-6 pr-8 clip-arrow shadow-md font-bold text-sm relative">
+                            <div class="absolute inset-y-0 -left-4 w-4 bg-slate-500" style="clip-path: polygon(100% 0, 100% 100%, 0 50%);"></div>
+                            <div class="absolute inset-y-0 -right-4 w-4 bg-slate-500" style="clip-path: polygon(0 0, 0 100%, 100% 50%);"></div>
+                            Holistic Quality Index
+                         </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="text-center mb-12 relative z-10">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">The Result: An Intuitive 5-Star Rating</h2>
+                <p class="text-slate-600 text-lg max-w-2xl mx-auto leading-relaxed">
+                    The system outputs a final quality index between 1 and 5 stars, providing a quick and intuitive overview of ticket quality for teams and managers.
                 </p>
             </div>
 
-            <!-- The 3 Pillars (Cards) -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full px-4">
-                
-                <!-- Card 1: Objectivity -->
-                <div class="feature-card bg-white p-8 rounded-2xl shadow-lg border border-gray-100 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i class="fas fa-balance-scale text-6xl text-gray-800"></i>
+            <!-- Ratings Table -->
+             <div class="space-y-4 relative z-10">
+                <!-- Rating 1 -->
+                <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg border-b border-slate-100 last:border-0">
+                    <div class="md:col-span-2 font-bold text-slate-800 text-lg">Rating 1</div>
+                    <div class="md:col-span-3 flex gap-1">
+                        <svg class="w-8 h-8 text-orange-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                     </div>
-                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6 text-blue-700">
-                        <i class="fas fa-calculator text-xl"></i>
+                    <div class="md:col-span-7 text-slate-700"><span class="font-bold text-slate-900">Weak.</span> The ticket is unclear, lacks user focus, or has no acceptance criteria.</div>
+                </div>
+                 <!-- Rating 2 -->
+                 <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg border-b border-slate-100 last:border-0">
+                    <div class="md:col-span-2 font-bold text-slate-800 text-lg">Rating 2</div>
+                    <div class="md:col-span-3 flex gap-1">
+                        <svg class="w-8 h-8 text-orange-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-orange-300 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Objectivity</h3>
-                    <p class="text-gray-600 leading-relaxed">
-                        Replacing subjective human opinion ("I think this is clear") with <span class="font-semibold text-gray-900">objective mathematical scoring</span>.
-                    </p>
+                    <div class="md:col-span-7 text-slate-700"><span class="font-bold text-slate-900">Fair.</span> The ticket has major issues in at least one key area.</div>
+                </div>
+                 <!-- Rating 3 -->
+                 <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg border-b border-slate-100 last:border-0">
+                    <div class="md:col-span-2 font-bold text-slate-800 text-lg">Rating 3</div>
+                    <div class="md:col-span-3 flex gap-1">
+                        <svg class="w-8 h-8 text-yellow-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-yellow-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-yellow-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </div>
+                    <div class="md:col-span-7 text-slate-700"><span class="font-bold text-slate-900">Acceptable.</span> The ticket is understandable but could be improved in clarity, user focus, or testability.</div>
+                </div>
+                 <!-- Rating 4 -->
+                 <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg border-b border-slate-100 last:border-0">
+                    <div class="md:col-span-2 font-bold text-slate-800 text-lg">Rating 4</div>
+                    <div class="md:col-span-3 flex gap-1">
+                        <svg class="w-8 h-8 text-green-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-green-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-green-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-green-400 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-slate-200 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </div>
+                    <div class="md:col-span-7 text-slate-700"><span class="font-bold text-slate-900">Good.</span> A solid, well-formed ticket with only minor room for improvement.</div>
+                </div>
+                 <!-- Rating 5 -->
+                <div class="star-row grid grid-cols-1 md:grid-cols-12 gap-4 items-start p-4 rounded-lg">
+                    <div class="md:col-span-2 font-bold text-slate-800 text-lg">Rating 5</div>
+                    <div class="md:col-span-3 flex gap-1">
+                        <svg class="w-8 h-8 text-emerald-500 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-emerald-500 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-emerald-500 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-emerald-500 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg class="w-8 h-8 text-emerald-500 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </div>
+                    <div class="md:col-span-7 text-slate-700"><span class="font-bold text-slate-900">Excellent.</span> A well-structured, user-focused ticket with clear and testable acceptance criteria.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 3: More Info (NLP Analysis) -->
+    <div id="more-info-view" class="hidden w-full max-w-4xl px-6 fade-in-up pb-20">
+         <!-- Back Button -->
+         <button onclick="switchView('main-view')" class="mb-6 flex items-center gap-2 text-slate-500 hover:text-indigo-600 font-medium transition-colors">
+            <div class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </div>
+            Back to Flow
+        </button>
+
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-xl p-12 relative overflow-visible mt-12">
+            
+            <h2 class="text-2xl font-bold text-slate-800 mb-12 text-center">User Story Analysis</h2>
+
+            <!-- Diagram Container (Adjusted to Vertical) -->
+            <div class="flex flex-col gap-6 max-w-lg mx-auto py-8">
+    
+                <!-- WHO Block -->
+                <div class="flex items-center p-4 bg-slate-50 border border-slate-200 rounded-xl relative overflow-hidden group hover:border-yellow-400 transition-colors">
+                    <div class="absolute left-0 top-0 bottom-0 w-2 bg-yellow-400"></div>
+                    <div class="w-24 flex-shrink-0 font-bold text-yellow-600 text-xl pl-4">WHO</div>
+                    <div class="text-slate-600 text-lg">
+                        As a <span class="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded font-mono font-bold border border-yellow-200 shadow-sm ml-1">[ROLE]</span>
+                    </div>
                 </div>
 
-                <!-- Card 2: Standardization -->
-                <div class="feature-card bg-white p-8 rounded-2xl shadow-lg border border-gray-100 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i class="fas fa-globe text-6xl text-gray-800"></i>
+                <!-- WHAT Block -->
+                <div class="flex items-center p-4 bg-slate-50 border border-slate-200 rounded-xl relative overflow-hidden group hover:border-blue-600 transition-colors">
+                    <div class="absolute left-0 top-0 bottom-0 w-2 bg-blue-600"></div>
+                    <div class="w-24 flex-shrink-0 font-bold text-blue-800 text-xl pl-4">WHAT</div>
+                    <div class="text-slate-600 text-lg">
+                        I want to <span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded font-mono font-bold border border-blue-200 shadow-sm ml-1">[ACTION]</span>
                     </div>
-                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-6 text-red-700">
-                        <i class="fas fa-map-marked-alt text-xl"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Standardization</h3>
-                    <p class="text-gray-600 leading-relaxed">
-                        Ensuring that whether a ticket is written in <span class="font-semibold text-gray-900">London, Hong Kong, or Poland</span>, it meets the same high standard.
-                    </p>
                 </div>
 
-                <!-- Card 3: Efficiency -->
-                <div class="feature-card bg-white p-8 rounded-2xl shadow-lg border border-gray-100 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i class="fas fa-tachometer-alt text-6xl text-gray-800"></i>
+                <!-- WHY Block -->
+                <div class="flex items-center p-4 bg-slate-50 border border-slate-200 rounded-xl relative overflow-hidden group hover:border-green-600 transition-colors">
+                    <div class="absolute left-0 top-0 bottom-0 w-2 bg-green-600"></div>
+                    <div class="w-24 flex-shrink-0 font-bold text-green-700 text-xl pl-4">WHY</div>
+                    <div class="text-slate-600 text-lg">
+                        so that <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded font-mono font-bold border border-green-200 shadow-sm ml-1">[BENEFIT]</span>
                     </div>
-                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6 text-green-700">
-                        <i class="fas fa-bolt text-xl"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Efficiency</h3>
-                    <p class="text-gray-600 leading-relaxed">
-                        Stopping ambiguous requirements <span class="font-semibold text-gray-900">before</span> they reach developers, preventing the "ping-pong" that slows down sprints.
-                    </p>
                 </div>
 
             </div>
-            
-            <div class="text-center mt-12 text-gray-400 text-sm">
-                Powered by AI & Cobb-Douglas Economic Modeling
+
+            <div class="mt-8 text-center text-slate-400 text-sm font-medium uppercase tracking-widest">
+                Analyzed via spaCy NLP
             </div>
 
         </div>
+    </div>
 
-    </main>
+    <!-- VIEW 4: Root Info (Agile Context) -->
+    <div id="root-info-view" class="hidden w-full max-w-5xl px-6 fade-in-up pb-20">
+        <!-- Back Button -->
+        <button onclick="switchView('main-view')" class="mb-6 flex items-center gap-2 text-slate-500 hover:text-emerald-600 font-medium transition-colors">
+            <div class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </div>
+            Back to Flow
+        </button>
 
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-xl p-8 md:p-12 relative overflow-visible mt-4">
+            <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">Agile Communication</h2>
+            
+            <p class="text-center text-lg text-slate-600 max-w-3xl mx-auto mb-12 leading-relaxed">
+                Clear communication is one of the core characteristics and foundational pillars of the Agile Framework.
+            </p>
+
+            <h3 class="text-xl font-bold text-slate-800 mb-6 border-l-4 border-red-500 pl-4">The Cost of Poor Tickets</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Rework -->
+                <div class="p-5 bg-slate-50 rounded-xl border border-slate-100 hover:border-red-200 hover:shadow-md transition-all group">
+                    <div class="text-red-500 font-bold mb-2 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+                        Rework
+                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed">Doing the work twice because the first attempt was based on a guess.</p>
+                </div>
+
+                <!-- Delays -->
+                <div class="p-5 bg-slate-50 rounded-xl border border-slate-100 hover:border-red-200 hover:shadow-md transition-all group">
+                    <div class="text-red-500 font-bold mb-2 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Delays
+                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed">Progress halts while developers chase down answers.</p>
+                </div>
+
+                <!-- Confusion -->
+                <div class="p-5 bg-slate-50 rounded-xl border border-slate-100 hover:border-red-200 hover:shadow-md transition-all group">
+                    <div class="text-red-500 font-bold mb-2 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        Confusion
+                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed">Lacks a shared understanding of the goal.</p>
+                </div>
+
+                <!-- Misalignment -->
+                <div class="p-5 bg-slate-50 rounded-xl border border-slate-100 hover:border-red-200 hover:shadow-md transition-all group">
+                    <div class="text-red-500 font-bold mb-2 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v12"/><path d="M18 9v12"/><path d="M21 21l-3-3-3 3"/><path d="M3 15l3 3 3-3"/></svg>
+                        Misalignment
+                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed">A feature that works technically but fails to solve the stakeholder's problem.</p>
+                </div>
+
+                <!-- Unreliable Planning -->
+                <div class="p-5 bg-slate-50 rounded-xl border border-slate-100 hover:border-red-200 hover:shadow-md transition-all group">
+                    <div class="text-red-500 font-bold mb-2 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="10" y1="16" x2="14" y2="20"/><line x1="14" y1="16" x2="10" y2="20"/></svg>
+                        Unreliable Planning
+                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed">No accurate estimation possible.</p>
+                </div>
+
+                <!-- Testing Paralysis -->
+                <div class="p-5 bg-slate-50 rounded-xl border border-slate-100 hover:border-red-200 hover:shadow-md transition-all group">
+                    <div class="text-red-500 font-bold mb-2 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                        Testing Paralysis
+                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed">There is no clear "Definition of Done."</p>
+                </div>
+
+                <!-- Team Frustration -->
+                <div class="p-5 bg-slate-50 rounded-xl border border-slate-100 hover:border-red-200 hover:shadow-md transition-all group md:col-span-2 lg:col-span-3">
+                    <div class="text-red-500 font-bold mb-2 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                        Team Frustration
+                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed">Morale drops as developers feel they are constantly hitting moving targets.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript to toggle views -->
     <script>
-        function revealSolution() {
-            // Smooth scroll or transition logic
-            const problemSection = document.getElementById('problem-section');
-            const solutionSection = document.getElementById('solution-section');
-            const btn = document.querySelector('button');
-
-            // Hide button
-            btn.style.opacity = '0';
-            btn.style.pointerEvents = 'none';
-
-            // Show solution with animation
-            solutionSection.classList.remove('hidden-content');
-            solutionSection.classList.add('show-content');
-
-            // Optional: Scroll to solution lightly
-            setTimeout(() => {
-                solutionSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 300);
+        function switchView(viewId) {
+            const views = ['main-view', 'details-view', 'more-info-view', 'root-info-view'];
+            
+            views.forEach(id => {
+                const el = document.getElementById(id);
+                if (id === viewId) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+            
+            // Scroll to top for better UX
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     </script>
 </body>
