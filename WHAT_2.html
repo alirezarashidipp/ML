@@ -218,58 +218,87 @@
             </div>
         </div>
 
-        <!-- SLIDE 5: Smart Remediation (NEW) -->
+        <!-- SLIDE 5: Smart Remediation (Interactive) -->
         <div id="slide-5" class="hidden absolute inset-0 flex flex-col items-center justify-center p-10">
-            <div class="text-center mb-16">
+            <div class="text-center mb-12">
                 <span class="text-[#db0011] font-bold tracking-widest uppercase text-sm mb-3 block">Beyond Scoring</span>
                 <h2 class="text-5xl font-bold text-gray-900">Smart Remediation & Coaching</h2>
                 <p class="text-xl text-gray-500 mt-4 max-w-2xl mx-auto">We don't just find problems; we fix them. The system acts as a real-time agile coach for your team.</p>
             </div>
 
-            <div class="flex gap-10 w-full max-w-5xl">
-                <!-- Concept 1: Feedback -->
-                <div class="w-1/2 bg-white rounded-2xl shadow-xl border border-gray-100 p-10 relative overflow-hidden group hover:border-blue-300 transition-colors">
-                    <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i class="fas fa-comments text-8xl text-blue-600"></i>
+            <div class="flex gap-8 w-full max-w-6xl">
+                
+                <!-- Interactive Feedback Loop -->
+                <div class="w-1/2 bg-white rounded-2xl shadow-xl border border-gray-200 p-8 flex flex-col relative overflow-hidden">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
+                            <i class="fas fa-comments text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800">Actionable Feedback</h3>
                     </div>
-                    <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6 text-blue-700">
-                        <i class="fas fa-chalkboard-teacher text-3xl"></i>
+                    
+                    <!-- Simulation Area -->
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 mb-4">
+                        <div class="text-xs text-gray-400 uppercase font-bold mb-1">User Input</div>
+                        <div class="text-gray-700 font-mono text-sm">"I want a report page."</div>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Actionable Feedback Loops</h3>
-                    <p class="text-gray-600 leading-relaxed mb-6">
-                        We provide constructive guidance for every submission. Instead of a simple "Rejected", users get specific reasons:
-                    </p>
-                    <div class="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-500 text-sm text-gray-700 italic">
-                        "This ticket lacks a clear 'WHY'. Please specify the business value for the end-user."
+
+                    <button onclick="simulateFeedback()" id="btn-feedback" class="self-start bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold mb-4 hover:bg-blue-700 transition flex items-center gap-2">
+                        <i class="fas fa-search"></i> Analyze
+                    </button>
+
+                    <!-- Feedback Output (Hidden initially) -->
+                    <div id="feedback-output" class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg opacity-0 transition-all duration-500 transform translate-y-4">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-robot text-blue-600 mt-1"></i>
+                            <div>
+                                <div class="font-bold text-blue-800 text-sm mb-1">AI Coach Says:</div>
+                                <p class="text-blue-700 text-sm italic" id="feedback-text-content"></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Concept 2: Rewrite -->
-                <div class="w-1/2 bg-white rounded-2xl shadow-xl border border-gray-100 p-10 relative overflow-hidden group hover:border-purple-300 transition-colors">
-                    <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i class="fas fa-wand-magic-sparkles text-8xl text-purple-600"></i>
-                    </div>
-                    <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-6 text-purple-700">
-                        <i class="fas fa-magic text-3xl"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Generative AI Remediation</h3>
-                    <p class="text-gray-600 leading-relaxed mb-6">
-                        For low-quality tickets, the system automatically rewrites them into a "Gold Standard" format so the user learns by example.
-                    </p>
-                    <div class="flex gap-2 text-xs font-mono">
-                        <div class="w-1/2 bg-red-50 p-3 rounded text-red-800 border border-red-100">
-                            <strong>Before:</strong><br>"Fix login button."
+                <!-- Interactive Rewrite -->
+                <div class="w-1/2 bg-white rounded-2xl shadow-xl border border-gray-200 p-8 flex flex-col relative overflow-hidden">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600">
+                            <i class="fas fa-magic text-2xl"></i>
                         </div>
-                        <div class="flex items-center text-gray-400"><i class="fas fa-arrow-right"></i></div>
-                        <div class="w-1/2 bg-green-50 p-3 rounded text-green-800 border border-green-100">
-                            <strong>After:</strong><br>"As a user, I want..."
+                        <h3 class="text-2xl font-bold text-gray-800">Generative Rewrite</h3>
+                    </div>
+
+                    <div class="relative flex-grow flex flex-col justify-center">
+                        <!-- Before State -->
+                        <div id="rewrite-before" class="absolute inset-0 flex flex-col transition-all duration-700">
+                            <div class="bg-red-50 rounded-lg p-6 border border-red-100 h-full flex flex-col justify-center items-center text-center">
+                                <div class="text-xs text-red-400 uppercase font-bold mb-2">Original (Weak)</div>
+                                <div class="text-red-800 font-mono text-lg">"Fix login button."</div>
+                            </div>
+                        </div>
+
+                        <!-- After State -->
+                        <div id="rewrite-after" class="absolute inset-0 flex flex-col opacity-0 scale-95 transition-all duration-700">
+                            <div class="bg-green-50 rounded-lg p-6 border border-green-100 h-full flex flex-col justify-center items-center text-center">
+                                <div class="text-xs text-green-500 uppercase font-bold mb-2">AI Rewritten (Gold Standard)</div>
+                                <div class="text-green-800 font-mono text-sm leading-relaxed text-left w-full">
+                                    "<strong>As a</strong> user,<br>
+                                    <strong>I want</strong> to see a visible login button,<br>
+                                    <strong>So that</strong> I can access my account."
+                                </div>
+                            </div>
                         </div>
                     </div>
+
+                    <button onclick="simulateRewrite()" id="btn-rewrite" class="mt-6 w-full bg-purple-600 text-white px-4 py-3 rounded-lg text-sm font-bold hover:bg-purple-700 transition flex items-center justify-center gap-2 z-10">
+                        <i class="fas fa-wand-magic-sparkles"></i> Auto-Fix Ticket
+                    </button>
                 </div>
+
             </div>
         </div>
 
-        <!-- SLIDE 6: The AI Gatekeeper Demo (Formerly Slide 5) -->
+        <!-- SLIDE 6: The AI Gatekeeper Demo -->
         <div id="slide-6" class="hidden absolute inset-0 flex flex-col justify-center p-4">
             <h2 class="text-3xl font-bold mb-8 text-center text-gray-900">Live Demo: <span class="hsbc-red-text">Engine in Action</span></h2>
             
@@ -321,15 +350,15 @@
                     <p class="text-sm text-gray-500 px-4 leading-relaxed h-16 flex items-center justify-center font-medium" id="feedback-text">System ready. Awaiting input.</p>
                     <div id="star-rating" class="mt-6 flex gap-2 text-2xl text-gray-200 transition-colors duration-500"><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i></div>
                     
-                    <!-- Stamps -->
-                    <div id="stamp" class="absolute inset-0 flex items-center justify-center opacity-0 transform scale-150 transition-all duration-300 pointer-events-none bg-white/90 backdrop-blur-sm z-20">
+                    <!-- Stamps (No blur) -->
+                    <div id="stamp" class="absolute inset-0 flex items-center justify-center opacity-0 transform scale-150 transition-all duration-300 pointer-events-none z-20">
                         <!-- Content injected via JS -->
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- SLIDE 7: Culture Shift (Formerly Slide 6) -->
+        <!-- SLIDE 7: Culture Shift -->
         <div id="slide-7" class="hidden absolute inset-0 flex flex-col items-center justify-center p-10">
             <h2 class="text-2xl uppercase tracking-widest text-gray-400 mb-12 font-bold">Cultural Transformation</h2>
             <div class="flex items-center gap-12 text-5xl font-black">
@@ -350,7 +379,7 @@
             <p class="mt-20 text-xl text-gray-500 text-center font-light">Shifting mindset from "fixing bugs" to <span class="text-gray-900 font-bold">"preventing ambiguity"</span>.</p>
         </div>
 
-        <!-- SLIDE 8: ROI (Formerly Slide 7) -->
+        <!-- SLIDE 8: ROI -->
         <div id="slide-8" class="hidden absolute inset-0 flex flex-col items-center justify-center p-10">
             <h2 class="text-4xl font-bold mb-12 text-gray-900">Financial Impact & ROI</h2>
             <div class="grid grid-cols-3 gap-8 w-full max-w-5xl mt-4">
@@ -380,6 +409,66 @@
             </button>
         </div>
 
+        <!-- SLIDE 9: Operational Readiness & Governance -->
+        <div id="slide-9" class="hidden absolute inset-0 flex flex-col items-center justify-center p-10">
+            <div class="text-center mb-16">
+                <span class="text-green-600 bg-green-50 px-4 py-1 rounded-full font-bold uppercase text-xs mb-4 inline-block border border-green-200 tracking-wider">Board Assurance</span>
+                <h2 class="text-5xl font-bold text-gray-900">Operational Readiness & Governance</h2>
+                <p class="text-xl text-gray-500 mt-4 max-w-3xl mx-auto">Designed for banking standards: Secure, Scalable, and Human-Centric.</p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-8 w-full max-w-6xl px-4">
+                
+                <!-- Card 1: Security -->
+                <div class="bg-white p-8 rounded-2xl shadow-lg border-t-4 border-gray-800 relative group hover:-translate-y-2 transition-transform duration-300">
+                    <div class="absolute top-4 right-4 text-gray-200 group-hover:text-gray-300 transition-colors"><i class="fas fa-lock text-6xl"></i></div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2"><i class="fas fa-shield-alt text-gray-700"></i> Data Privacy</h3>
+                    <ul class="space-y-4 text-sm text-gray-600">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check text-green-500 mt-1"></i>
+                            <span><strong>Local Models:</strong> No data leaves HSBC perimeter. All processing is on-premise.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card 2: Rollout -->
+                <div class="bg-white p-8 rounded-2xl shadow-lg border-t-4 border-[#db0011] relative group hover:-translate-y-2 transition-transform duration-300">
+                    <div class="absolute top-4 right-4 text-red-50 group-hover:text-red-100 transition-colors"><i class="fas fa-road text-6xl"></i></div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2"><i class="fas fa-tasks text-[#db0011]"></i> Phased Rollout</h3>
+                    <div class="space-y-4 relative">
+                        <!-- Connecting Line -->
+                        <div class="absolute left-[11px] top-2 bottom-2 w-0.5 bg-gray-200"></div>
+                        
+                        <div class="flex items-center gap-3 relative z-10">
+                            <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-600">1</div>
+                            <span class="text-sm font-medium text-gray-500"><strong>Silent Mode:</strong> Monitor only.</span>
+                        </div>
+                        <div class="flex items-center gap-3 relative z-10">
+                            <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-bold text-blue-600">2</div>
+                            <span class="text-sm font-medium text-gray-700"><strong>Advisory:</strong> Suggestions visible.</span>
+                        </div>
+                        <div class="flex items-center gap-3 relative z-10">
+                            <div class="w-6 h-6 rounded-full bg-[#db0011] flex items-center justify-center text-[10px] font-bold text-white">3</div>
+                            <span class="text-sm font-medium text-[#db0011]"><strong>Quality Gate:</strong> Enforced standards.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Human Oversight -->
+                <div class="bg-white p-8 rounded-2xl shadow-lg border-t-4 border-blue-600 relative group hover:-translate-y-2 transition-transform duration-300">
+                    <div class="absolute top-4 right-4 text-blue-50 group-hover:text-blue-100 transition-colors"><i class="fas fa-user-check text-6xl"></i></div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2"><i class="fas fa-users-cog text-blue-600"></i> Human in Loop</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed mb-4">
+                        AI acts as a <strong>co-pilot</strong>, not a blocker. Developers retain final decision authority with a "manager override" capability.
+                    </p>
+                    <div class="bg-blue-50 p-3 rounded text-xs text-blue-800 font-mono border border-blue-100 text-center">
+                        Risk Level: LOW (Advisory System)
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 
     <!-- Navigation -->
@@ -392,12 +481,12 @@
         </button>
     </div>
     <div class="fixed bottom-10 left-10 text-gray-400 text-sm font-mono bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100">
-        Slide <span id="slide-number" class="text-gray-900 font-bold">1</span> / 8
+        Slide <span id="slide-number" class="text-gray-900 font-bold">1</span> / 9
     </div>
 
     <script>
         let currentSlide = 1;
-        const totalSlides = 8;
+        const totalSlides = 9;
 
         function updateSlide() {
             document.getElementById('progress-bar').style.width = `${((currentSlide - 1) / (totalSlides - 1)) * 100}%`;
@@ -423,7 +512,6 @@
             const left = document.getElementById('s2-left');
             const right = document.getElementById('s2-right');
             
-            // Highlight Code (to show it's not the problem)
             left.classList.add('opacity-40', 'blur-sm', 'scale-95');
             left.classList.remove('border-[#db0011]', 'shadow-2xl', 'scale-110');
             left.querySelector('h3').classList.remove('text-[#db0011]');
@@ -432,7 +520,6 @@
             right.classList.add('scale-110', 'border-gray-300', 'shadow-xl');
             
             setTimeout(() => {
-                // Switch focus to the real problem (Sentences)
                 right.classList.add('opacity-40', 'blur-sm', 'scale-95');
                 right.classList.remove('scale-110', 'border-gray-300', 'shadow-xl');
 
@@ -441,11 +528,55 @@
                 left.querySelector('h3').classList.remove('text-gray-800');
                 left.querySelector('h3').classList.add('text-[#db0011]');
                 
-                // Add icon highlight
                 left.querySelector('.w-20').classList.remove('bg-gray-50', 'text-gray-400');
                 left.querySelector('.w-20').classList.add('bg-red-50', 'text-[#db0011]');
-                
             }, 1500);
+        }
+
+        /* --- SLIDE 5 LOGIC (Remediation) --- */
+        function simulateFeedback() {
+            const btn = document.getElementById('btn-feedback');
+            const output = document.getElementById('feedback-output');
+            const textContent = document.getElementById('feedback-text-content');
+            const message = "This ticket lacks a clear 'WHY'. Please specify the business value for the end-user.";
+            
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+            
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-check"></i> Done';
+                output.classList.remove('opacity-0', 'translate-y-4');
+                
+                let i = 0;
+                textContent.innerHTML = "";
+                function typeWriter() {
+                    if (i < message.length) {
+                        textContent.innerHTML += message.charAt(i);
+                        i++;
+                        setTimeout(typeWriter, 30);
+                    }
+                }
+                typeWriter();
+            }, 1000);
+        }
+
+        function simulateRewrite() {
+            const btn = document.getElementById('btn-rewrite');
+            const before = document.getElementById('rewrite-before');
+            const after = document.getElementById('rewrite-after');
+            
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Magic in progress...';
+            
+            setTimeout(() => {
+                before.classList.add('opacity-0', 'scale-90');
+                
+                setTimeout(() => {
+                    after.classList.remove('opacity-0', 'scale-95');
+                    after.classList.add('opacity-100', 'scale-100');
+                    btn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> Fixed!';
+                    btn.classList.replace('bg-purple-600', 'bg-green-600');
+                }, 400);
+            }, 1000);
         }
 
         /* --- DEMO LOGIC --- */
@@ -483,7 +614,8 @@
                     document.getElementById('feedback-text').innerText = "Standard Ticket. Ready for Sprint.";
                     document.getElementById('star-rating').innerHTML = '<i class="fas fa-star text-yellow-400"></i><i class="fas fa-star text-yellow-400"></i><i class="fas fa-star text-yellow-400"></i><i class="fas fa-star text-yellow-400"></i><i class="fas fa-star text-yellow-400"></i>';
                     
-                    stamp.innerHTML = '<div class="border-8 border-green-500 text-green-600 font-black text-5xl p-6 rounded-xl uppercase -rotate-12 bg-white shadow-2xl">APPROVED</div>';
+                    // Made stamp smaller and removed huge padding
+                    stamp.innerHTML = '<div class="border-4 border-green-500 text-green-600 font-black text-3xl px-4 py-2 rounded-lg uppercase -rotate-12 bg-white/90 shadow-xl">APPROVED</div>';
                     stamp.style.opacity = '1'; stamp.style.transform = 'scale(1)';
                 } else {
                     document.querySelectorAll('.node').forEach(n => n.classList.add('error'));
@@ -494,7 +626,8 @@
                     document.getElementById('feedback-text').className = "text-sm text-red-600 px-4 leading-relaxed h-16 flex items-center justify-center font-bold";
                     document.getElementById('star-rating').innerHTML = '<i class="fas fa-star text-[#db0011]"></i><i class="far fa-star text-gray-300"></i><i class="far fa-star text-gray-300"></i><i class="far fa-star text-gray-300"></i><i class="far fa-star text-gray-300"></i>';
                     
-                    stamp.innerHTML = '<div class="border-8 border-[#db0011] text-[#db0011] font-black text-5xl p-6 rounded-xl uppercase -rotate-12 bg-white shadow-2xl">REJECTED</div>';
+                    // Made stamp smaller and removed huge padding
+                    stamp.innerHTML = '<div class="border-4 border-[#db0011] text-[#db0011] font-black text-3xl px-4 py-2 rounded-lg uppercase -rotate-12 bg-white/90 shadow-xl">REJECTED</div>';
                     stamp.style.opacity = '1'; stamp.style.transform = 'scale(1)';
                 }
             }, 1500);
