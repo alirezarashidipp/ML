@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSBC Quality Strategy - The Master Deck</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* HSBC Light Grey */
+            color: #2d2d2d;
+            overflow: hidden;
+        }
+
+        /* HSBC Brand Colors */
+        :root {
+            --hsbc-red: #db0011;
+            --hsbc-dark: #2d2d2d;
+        }
+
+        .hsbc-red-text { color: var(--hsbc-red); }
+        .hsbc-red-bg { background-color: var(--hsbc-red); }
+
+        /* Animations */
+        .slide-enter { animation: fadeIn 0.8s ease-out forwards; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glow-text {
+            text-shadow: 0 0 20px rgba(219, 0, 17, 0.3);
+        }
+
+        .counter-box {
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+        }
+
+        /* Demo Slide Styles */
+        .scanner-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: #db0011; box-shadow: 0 0 10px #db0011;
+            animation: scan 2s linear infinite; display: none;
+        }
+        @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
+        
+        .node { transition: all 0.5s ease; }
+        .node.active { background-color: #10b981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); border-color: #10b981; color: white; }
+        .node.error { background-color: #db0011; box-shadow: 0 0 15px rgba(219, 0, 17, 0.4); color: white; border-color: #db0011; }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col items-center justify-center relative">
+
+    <!-- Navbar / Header (Consistent Branding) -->
+    <nav class="w-full bg-white shadow-sm py-4 px-8 flex justify-between items-center fixed top-0 z-50 h-[72px]">
+        <div class="flex items-center gap-4">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/aa/HSBC_logo_%282018%29.svg" alt="HSBC Logo" class="h-10 w-auto">
+            <div class="text-xl font-bold tracking-tight text-gray-900 border-l-2 border-gray-200 pl-4">
+                <span class="hsbc-red-text">Agile</span> Transformation
+            </div>
+        </div>
+        <div class="text-sm text-gray-500 uppercase tracking-widest font-semibold">Executive Summary</div>
+    </nav>
+
+    <!-- Progress Bar -->
+    <div class="absolute bottom-0 left-0 h-1.5 bg-gray-200 w-full z-40">
+        <div class="h-full bg-[#db0011] transition-all duration-500" id="progress-bar" style="width: 0%"></div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="w-full max-w-7xl h-[85vh] relative flex items-center justify-center pt-16">
+
+        <!-- SLIDE 1: The Insight -->
+        <div id="slide-1" class="absolute inset-0 flex flex-col items-center justify-center text-center p-10 slide-enter">
+            <div class="mb-8 p-3 px-6 rounded-full bg-red-50 border border-red-100 text-[#db0011] font-bold uppercase tracking-wide text-xs shadow-sm animate-pulse">
+                <i class="fas fa-chart-line mr-2"></i> Strategic Insight
+            </div>
+            <h1 class="text-5xl md:text-6xl font-black mb-8 leading-tight text-gray-900">
+                We spend millions finding bugs in <span class="text-blue-600 relative inline-block">
+                    code
+                    <svg class="absolute w-full h-3 -bottom-1 left-0 text-blue-200 opacity-50" viewBox="0 0 100 10" preserveAspectRatio="none"><path d="M0 5 Q 50 10 100 5" stroke="currentColor" stroke-width="8" fill="none" /></svg>
+                </span>.
+            </h1>
+            <p class="text-2xl md:text-3xl text-gray-500 max-w-4xl leading-relaxed font-light">
+                But statistics show the most expensive bugs aren't in the code.<br>
+                <span class="text-gray-900 font-bold mt-6 block text-4xl">They are <span class="hsbc-red-text">Requirement Bugs</span>.</span>
+            </p>
+        </div>
+
+        <!-- SLIDE 2: Garbage In -->
+        <div id="slide-2" class="hidden absolute inset-0 flex flex-col items-center justify-center p-10">
+            <h2 class="text-4xl font-bold mb-16 text-center text-gray-900">The Hidden Cost Structure</h2>
+            
+            <div class="flex items-center justify-center gap-16 w-full">
+                <!-- Left: Sentences -->
+                <div class="text-center transform transition-all duration-700 p-8 rounded-2xl bg-white border border-gray-100 shadow-xl" id="s2-left">
+                    <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-400">
+                        <i class="fas fa-align-left text-4xl"></i>
+                    </div>
+                    <h3 class="text-3xl font-bold text-gray-800 mb-2">Wrong Sentences</h3>
+                    <p class="text-gray-500 uppercase text-sm font-semibold tracking-wider">Ambiguous Tickets</p>
+                </div>
+
+                <!-- Arrow -->
+                <div class="text-4xl text-gray-300">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+
+                <!-- Right: Code -->
+                <div class="text-center opacity-40 blur-sm transform transition-all duration-700 p-8 rounded-2xl bg-white border border-gray-100 shadow-sm" id="s2-right">
+                    <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-400">
+                        <i class="fas fa-code text-4xl"></i>
+                    </div>
+                    <h3 class="text-3xl font-bold text-gray-400 mb-2">Wrong Code</h3>
+                    <p class="text-gray-400 uppercase text-sm font-semibold tracking-wider">Development Waste</p>
+                </div>
+            </div>
+
+            <div class="mt-20 relative max-w-3xl">
+                <div class="absolute -left-4 top-0 bottom-0 w-1 bg-[#db0011]"></div>
+                <p class="text-2xl text-center text-gray-600 italic">
+                    "In any software organization, the biggest hidden cost comes not from wrong code, but from <span class="text-gray-900 font-bold not-italic">wrong sentences</span>."
+                </p>
+            </div>
+            
+            <button onclick="revealTruth()" class="mt-12 px-8 py-3 bg-black text-white rounded-full hover:bg-gray-800 transition text-sm uppercase font-bold tracking-widest shadow-lg">
+                Analyze Impact
+            </button>
+        </div>
+
+        <!-- SLIDE 3: The Origin of Quality -->
+        <div id="slide-3" class="hidden absolute inset-0 flex flex-row items-center justify-center gap-16 p-10">
+            <div class="w-1/2">
+                <span class="text-[#db0011] font-bold tracking-widest uppercase text-sm mb-2 block">Shift Left Strategy</span>
+                <h2 class="text-5xl font-bold mb-8 text-gray-900">The Origin of Quality</h2>
+                <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+                    Ticket quality in JIRA is the <span class="text-blue-600 font-bold">starting point</span> of the entire product's quality.
+                    <br><br>
+                    <strong class="text-gray-900">Our Innovation:</strong> We brought AI to the "Pre-Development" stage. We measure requirement quality <span class="text-[#db0011] font-bold underline decoration-red-200">before</span> a single line of code is written.
+                </p>
+                <div class="flex gap-4">
+                    <div class="px-6 py-3 bg-white rounded-lg border border-gray-200 shadow-sm flex items-center font-semibold text-gray-700">
+                        <i class="fas fa-robot text-blue-600 mr-3"></i> AI-Powered
+                    </div>
+                    <div class="px-6 py-3 bg-white rounded-lg border border-gray-200 shadow-sm flex items-center font-semibold text-gray-700">
+                        <i class="fas fa-filter text-green-600 mr-3"></i> Pre-Screening
+                    </div>
+                </div>
+            </div>
+            <div class="w-1/2 flex justify-center">
+                <div class="relative w-80 h-80 bg-white rounded-full shadow-2xl flex items-center justify-center border border-gray-100">
+                    <div class="absolute inset-0 border-2 border-dashed border-gray-300 rounded-full animate-[spin_20s_linear_infinite]"></div>
+                    <div class="absolute inset-6 border-2 border-blue-100 rounded-full"></div>
+                    <div class="flex flex-col items-center z-10">
+                        <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-4xl mb-4 shadow-sm">
+                            <i class="fab fa-jira"></i>
+                        </div>
+                        <span class="font-bold text-2xl text-gray-900">Input</span>
+                        <span class="text-sm text-gray-500 uppercase tracking-wide mt-1">Ticket Source</span>
+                    </div>
+                    <!-- Scanning Effect -->
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/10 to-transparent h-full w-full animate-[pulse_3s_infinite] rounded-full"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: The AI Gatekeeper Demo -->
+        <div id="slide-4" class="hidden absolute inset-0 flex flex-col justify-center p-4">
+            <h2 class="text-3xl font-bold mb-8 text-center text-gray-900">The Solution: <span class="hsbc-red-text">AI Gatekeeper Engine</span></h2>
+            
+            <div class="flex flex-row gap-6 h-[500px]">
+                <!-- Panel 1: Input -->
+                <div class="w-1/3 bg-white rounded-xl border border-gray-200 p-6 flex flex-col shadow-lg relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-600"></div>
+                    <div class="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
+                        <div class="flex items-center gap-3 font-bold text-xl text-gray-800">
+                            <i class="fab fa-jira text-blue-600"></i> New Ticket
+                        </div>
+                        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded font-mono font-bold">PROJ-1024</span>
+                    </div>
+                    <label class="text-xs font-bold text-gray-400 uppercase mb-1">Story Title</label>
+                    <input type="text" id="jira-title" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg mb-4 font-semibold text-gray-700 focus:outline-none focus:border-blue-500 transition" value="Improve Login">
+                    <label class="text-xs font-bold text-gray-400 uppercase mb-1">Description</label>
+                    <textarea id="jira-desc" class="w-full flex-grow bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm mb-4 resize-none font-mono text-gray-600 leading-relaxed focus:outline-none focus:border-blue-500 transition">User needs to login. Button should be blue.</textarea>
+                    <div class="grid grid-cols-2 gap-3 mt-auto">
+                        <button onclick="fillBadTicket()" class="bg-red-50 text-red-700 border border-red-100 py-3 rounded-lg hover:bg-red-100 font-bold transition text-sm">Bad Example</button>
+                        <button onclick="fillGoodTicket()" class="bg-green-50 text-green-700 border border-green-100 py-3 rounded-lg hover:bg-green-100 font-bold transition text-sm">Good Example</button>
+                    </div>
+                </div>
+
+                <!-- Panel 2: The Engine -->
+                <div class="w-1/3 bg-white rounded-xl border border-gray-200 p-6 flex flex-col items-center justify-center relative shadow-lg">
+                    <div class="scanner-line" id="ai-scanner"></div>
+                    <h3 class="text-gray-400 font-bold mb-8 tracking-widest text-xs uppercase flex items-center gap-2">
+                        <i class="fas fa-microchip"></i> AI Analysis Core
+                    </h3>
+                    <div class="flex gap-4 mb-10">
+                        <div id="node-L" class="node w-20 h-20 rounded-full bg-gray-50 border-2 border-gray-200 flex flex-col items-center justify-center text-xs text-gray-400 font-bold shadow-sm"><i class="fas fa-language text-lg mb-1"></i> L (Text)</div>
+                        <div id="node-K" class="node w-20 h-20 rounded-full bg-gray-50 border-2 border-gray-200 flex flex-col items-center justify-center text-xs text-gray-400 font-bold shadow-sm"><i class="fas fa-users text-lg mb-1"></i> K (Struct)</div>
+                        <div id="node-M" class="node w-20 h-20 rounded-full bg-gray-50 border-2 border-gray-200 flex flex-col items-center justify-center text-xs text-gray-400 font-bold shadow-sm"><i class="fas fa-list-check text-lg mb-1"></i> M (Crit)</div>
+                    </div>
+                    <div class="bg-gray-900 text-white p-4 rounded-lg shadow-inner mb-8 w-full text-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-white/5"></div>
+                        <div class="text-gray-400 text-[10px] uppercase mb-1 relative z-10">Cobb-Douglas Algorithm</div>
+                        <div class="font-mono text-yellow-400 text-xl tracking-wider relative z-10">Q = A · Lᵅ · Kᵝ · Mᵞ</div>
+                    </div>
+                    <button onclick="analyzeTicket()" class="w-full bg-black hover:bg-gray-800 text-white py-4 rounded-lg font-bold shadow-md transform active:scale-95 transition-all text-lg flex items-center justify-center gap-2">
+                        Run Assessment
+                    </button>
+                </div>
+
+                <!-- Panel 3: Result -->
+                <div class="w-1/3 bg-white rounded-xl border border-gray-200 p-8 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-lg" id="result-panel">
+                    <div id="status-icon" class="text-7xl text-gray-200 mb-6 transition-all duration-500"><i class="fas fa-shield-alt"></i></div>
+                    <div class="text-5xl font-black mb-2 text-gray-300 transition-all duration-500" id="score-text">--</div>
+                    <p class="text-sm text-gray-500 px-4 leading-relaxed h-16 flex items-center justify-center font-medium" id="feedback-text">System ready. Awaiting input.</p>
+                    <div id="star-rating" class="mt-6 flex gap-2 text-2xl text-gray-200 transition-colors duration-500"><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i></div>
+                    
+                    <!-- Stamps -->
+                    <div id="stamp" class="absolute inset-0 flex items-center justify-center opacity-0 transform scale-150 transition-all duration-300 pointer-events-none bg-white/90 backdrop-blur-sm z-20">
+                        <!-- Content injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: Culture Shift -->
+        <div id="slide-5" class="hidden absolute inset-0 flex flex-col items-center justify-center p-10">
+            <h2 class="text-2xl uppercase tracking-widest text-gray-400 mb-12 font-bold">Cultural Transformation</h2>
+            <div class="flex items-center gap-12 text-5xl font-black">
+                <div class="flex flex-col items-center gap-4 opacity-40">
+                    <span class="text-gray-400 line-through decoration-[#db0011] decoration-4">Quality AFTER</span>
+                    <span class="text-sm font-medium text-gray-400 no-underline uppercase tracking-wide">Reactive</span>
+                </div>
+                
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 text-2xl">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+                
+                <div class="flex flex-col items-center gap-4 scale-110 transform transition-all">
+                    <span class="text-green-600 bg-green-50 px-8 py-4 rounded-2xl shadow-lg border border-green-100">Quality BEFORE</span>
+                    <span class="text-sm font-bold text-green-700 uppercase tracking-wide">Proactive (Shift Left)</span>
+                </div>
+            </div>
+            <p class="mt-20 text-xl text-gray-500 text-center font-light">Shifting mindset from "fixing bugs" to <span class="text-gray-900 font-bold">"preventing ambiguity"</span>.</p>
+        </div>
+
+        <!-- SLIDE 6: ROI -->
+        <div id="slide-6" class="hidden absolute inset-0 flex flex-col items-center justify-center p-10">
+            <h2 class="text-4xl font-bold mb-12 text-gray-900">Financial Impact & ROI</h2>
+            <div class="grid grid-cols-3 gap-8 w-full max-w-5xl mt-4">
+                <div class="counter-box p-8 rounded-2xl text-center bg-white">
+                    <div class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-3">Dev Force</div>
+                    <div class="text-5xl font-black text-gray-800">20,000</div>
+                </div>
+                <div class="counter-box p-8 rounded-2xl text-center bg-white">
+                    <div class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-3">Efficiency Gain</div>
+                    <div class="text-5xl font-black text-green-600">5%</div>
+                </div>
+                <div class="counter-box p-8 rounded-2xl text-center bg-white">
+                    <div class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-3">Avg. Cost / Day</div>
+                    <div class="text-5xl font-black text-blue-600">$300</div>
+                </div>
+            </div>
+            
+            <div class="mt-12 w-full max-w-3xl bg-gray-900 text-white border border-gray-800 p-10 rounded-3xl flex items-center justify-between px-16 transform scale-95 opacity-0 transition-all duration-1000 shadow-2xl" id="roi-result">
+                <div class="text-left">
+                    <div class="text-red-400 font-bold text-lg uppercase tracking-wide">Annual Savings Potential</div>
+                    <div class="text-gray-500 text-sm mt-1">Based on conservative estimates</div>
+                </div>
+                <div class="text-7xl font-black text-white tracking-tighter" id="savings-counter">$0</div>
+            </div>
+            <button onclick="calculateROI()" class="mt-12 px-10 py-4 bg-[#db0011] text-white font-bold rounded-full hover:bg-red-700 transition shadow-lg flex items-center gap-2">
+                <i class="fas fa-calculator"></i> Calculate Savings
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Navigation -->
+    <div class="fixed bottom-10 right-10 flex gap-4 z-50">
+        <button onclick="prevSlide()" class="w-14 h-14 rounded-full bg-white hover:bg-gray-50 flex items-center justify-center border border-gray-200 text-gray-600 shadow-md transition-all hover:-translate-x-1">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <button onclick="nextSlide()" class="w-14 h-14 rounded-full bg-black hover:bg-gray-800 flex items-center justify-center shadow-lg text-white font-bold transition-all hover:translate-x-1">
+            <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+    <div class="fixed bottom-10 left-10 text-gray-400 text-sm font-mono bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100">
+        Slide <span id="slide-number" class="text-gray-900 font-bold">1</span> / 6
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 6;
+
+        function updateSlide() {
+            document.getElementById('progress-bar').style.width = `${((currentSlide - 1) / (totalSlides - 1)) * 100}%`;
+            document.getElementById('slide-number').innerText = currentSlide;
+            for (let i = 1; i <= totalSlides; i++) {
+                const el = document.getElementById(`slide-${i}`);
+                if (i === currentSlide) {
+                    el.classList.remove('hidden');
+                    el.classList.add('slide-enter');
+                } else {
+                    el.classList.add('hidden');
+                    el.classList.remove('slide-enter');
+                }
+            }
+        }
+
+        function nextSlide() { if (currentSlide < totalSlides) { currentSlide++; updateSlide(); } }
+        function prevSlide() { if (currentSlide > 1) { currentSlide--; updateSlide(); } }
+        document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') nextSlide(); if (e.key === 'ArrowLeft') prevSlide(); });
+
+        /* --- SLIDE 2 ANIMATION --- */
+        function revealTruth() {
+            const left = document.getElementById('s2-left');
+            const right = document.getElementById('s2-right');
+            
+            // Highlight Code (to show it's not the problem)
+            left.classList.add('opacity-40', 'blur-sm', 'scale-95');
+            left.classList.remove('border-[#db0011]', 'shadow-2xl', 'scale-110');
+            left.querySelector('h3').classList.remove('text-[#db0011]');
+            
+            right.classList.remove('opacity-40', 'blur-sm');
+            right.classList.add('scale-110', 'border-gray-300', 'shadow-xl');
+            
+            setTimeout(() => {
+                // Switch focus to the real problem (Sentences)
+                right.classList.add('opacity-40', 'blur-sm', 'scale-95');
+                right.classList.remove('scale-110', 'border-gray-300', 'shadow-xl');
+
+                left.classList.remove('opacity-40', 'blur-sm', 'scale-95');
+                left.classList.add('scale-110', 'border-[#db0011]', 'shadow-2xl');
+                left.querySelector('h3').classList.remove('text-gray-800');
+                left.querySelector('h3').classList.add('text-[#db0011]');
+                
+                // Add icon highlight
+                left.querySelector('.w-20').classList.remove('bg-gray-50', 'text-gray-400');
+                left.querySelector('.w-20').classList.add('bg-red-50', 'text-[#db0011]');
+                
+            }, 1500);
+        }
+
+        /* --- DEMO LOGIC --- */
+        function fillBadTicket() {
+            document.getElementById('jira-title').value = "Fix login bug";
+            document.getElementById('jira-desc').value = "The login is broken. Fix it asap.";
+        }
+        function fillGoodTicket() {
+            document.getElementById('jira-title').value = "Enable 2FA (Google Auth)";
+            document.getElementById('jira-desc').value = "As a User, I want to enable 2FA using Google Authenticator, So that my account is secure.\n\nAcceptance Criteria:\n1. User scans QR.\n2. Validates 6-digit code.";
+        }
+        function analyzeTicket() {
+            const desc = document.getElementById('jira-desc').value;
+            const scanner = document.getElementById('ai-scanner');
+            const resultPanel = document.getElementById('result-panel');
+            const stamp = document.getElementById('stamp');
+            
+            document.querySelectorAll('.node').forEach(n => n.className = "node w-20 h-20 rounded-full bg-gray-50 border-2 border-gray-200 flex flex-col items-center justify-center text-xs text-gray-400 font-bold shadow-sm");
+            stamp.style.opacity = '0'; stamp.style.transform = 'scale(1.5)';
+            document.getElementById('score-text').innerText = "--";
+            document.getElementById('score-text').className = "text-5xl font-black mb-2 text-gray-300 transition-all duration-500";
+            
+            scanner.style.display = 'block';
+            resultPanel.classList.add('opacity-50');
+
+            setTimeout(() => {
+                scanner.style.display = 'none';
+                resultPanel.classList.remove('opacity-50');
+                const isGood = desc.toLowerCase().includes("as a") && desc.toLowerCase().includes("acceptance criteria");
+                if (isGood) {
+                    document.querySelectorAll('.node').forEach(n => n.classList.add('active'));
+                    document.getElementById('status-icon').innerHTML = '<i class="fas fa-check-circle text-green-500"></i>';
+                    document.getElementById('score-text').innerText = "95/100";
+                    document.getElementById('score-text').className = "text-6xl font-black mb-2 text-green-500";
+                    document.getElementById('feedback-text').innerText = "Standard Ticket. Ready for Sprint.";
+                    document.getElementById('star-rating').innerHTML = '<i class="fas fa-star text-yellow-400"></i><i class="fas fa-star text-yellow-400"></i><i class="fas fa-star text-yellow-400"></i><i class="fas fa-star text-yellow-400"></i><i class="fas fa-star text-yellow-400"></i>';
+                    
+                    stamp.innerHTML = '<div class="border-8 border-green-500 text-green-600 font-black text-5xl p-6 rounded-xl uppercase -rotate-12 bg-white shadow-2xl">APPROVED</div>';
+                    stamp.style.opacity = '1'; stamp.style.transform = 'scale(1)';
+                } else {
+                    document.querySelectorAll('.node').forEach(n => n.classList.add('error'));
+                    document.getElementById('status-icon').innerHTML = '<i class="fas fa-times-circle text-[#db0011]"></i>';
+                    document.getElementById('score-text').innerText = "15/100";
+                    document.getElementById('score-text').className = "text-6xl font-black mb-2 text-[#db0011]";
+                    document.getElementById('feedback-text').innerText = "Vague requirements. Missing WHO/WHAT/WHY structure.";
+                    document.getElementById('feedback-text').className = "text-sm text-red-600 px-4 leading-relaxed h-16 flex items-center justify-center font-bold";
+                    document.getElementById('star-rating').innerHTML = '<i class="fas fa-star text-[#db0011]"></i><i class="far fa-star text-gray-300"></i><i class="far fa-star text-gray-300"></i><i class="far fa-star text-gray-300"></i><i class="far fa-star text-gray-300"></i>';
+                    
+                    stamp.innerHTML = '<div class="border-8 border-[#db0011] text-[#db0011] font-black text-5xl p-6 rounded-xl uppercase -rotate-12 bg-white shadow-2xl">REJECTED</div>';
+                    stamp.style.opacity = '1'; stamp.style.transform = 'scale(1)';
+                }
+            }, 1500);
+        }
+
+        /* --- ROI LOGIC --- */
+        function calculateROI() {
+            const resultBox = document.getElementById('roi-result');
+            const counterEl = document.getElementById('savings-counter');
+            resultBox.classList.remove('scale-95', 'opacity-0');
+            resultBox.classList.add('scale-100', 'opacity-100');
+            let start = 0; const end = 40; const duration = 2000; const startTime = performance.now();
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 4);
+                counterEl.innerText = `$${Math.floor(start + (end - start) * ease)} Million`;
+                if (progress < 1) requestAnimationFrame(update);
+                else counterEl.classList.add('text-green-400');
+            }
+            requestAnimationFrame(update);
+        }
+
+        updateSlide();
+    </script>
+</body>
+</html>
