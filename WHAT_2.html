@@ -32,15 +32,8 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .glow-text {
-            text-shadow: 0 0 20px rgba(219, 0, 17, 0.3);
-        }
-
-        .counter-box {
-            background: white;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            border: 1px solid #e5e7eb;
-        }
+        .glow-text { text-shadow: 0 0 20px rgba(219, 0, 17, 0.3); }
+        .counter-box { background: white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e5e7eb; }
 
         /* Demo Slide Styles */
         .scanner-line {
@@ -53,11 +46,29 @@
         .node { transition: all 0.5s ease; }
         .node.active { background-color: #10b981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); border-color: #10b981; color: white; }
         .node.error { background-color: #db0011; box-shadow: 0 0 15px rgba(219, 0, 17, 0.4); color: white; border-color: #db0011; }
+
+        /* --- NEW ANIMATIONS FOR SLIDE 1 --- */
+        
+        /* 1. Iceberg */
+        .iceberg-float { animation: float 6s ease-in-out infinite; }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+        
+        /* 2. Domino */
+        .domino { transform-origin: bottom right; transition: transform 0.4s ease-in; }
+        .domino-fall { transform: rotate(70deg); }
+        
+        /* 3. Ping Pong */
+        .ping-pong-anim { animation: pingpong 2s ease-in-out infinite alternate; }
+        @keyframes pingpong { 
+            0% { transform: translateX(0); } 
+            100% { transform: translateX(400px); } 
+        }
+        .ping-pong-active .doc-icon { color: #db0011; }
     </style>
 </head>
 <body class="h-screen w-screen flex flex-col items-center justify-center relative">
 
-    <!-- Navbar / Header (Consistent Branding) -->
+    <!-- Navbar / Header -->
     <nav class="w-full bg-white shadow-sm py-4 px-8 flex justify-between items-center fixed top-0 z-50 h-[72px]">
         <div class="flex items-center gap-4">
             <img src="https://upload.wikimedia.org/wikipedia/commons/a/aa/HSBC_logo_%282018%29.svg" alt="HSBC Logo" class="h-10 w-auto">
@@ -76,27 +87,123 @@
     <!-- MAIN CONTAINER -->
     <div class="w-full max-w-7xl h-[85vh] relative flex items-center justify-center pt-16">
 
-        <!-- SLIDE 1: The Insight -->
-        <div id="slide-1" class="absolute inset-0 flex flex-col items-center justify-center text-center p-10 slide-enter">
-            <div class="mb-8 p-3 px-6 rounded-full bg-red-50 border border-red-100 text-[#db0011] font-bold uppercase tracking-wide text-xs shadow-sm animate-pulse">
-                <i class="fas fa-chart-line mr-2"></i> Strategic Insight
+        <!-- SLIDE 1: The Interactive Insight (NEW VERSION) -->
+        <div id="slide-1" class="absolute inset-0 flex flex-col items-center justify-start pt-10 text-center slide-enter">
+            <div class="mb-4 p-2 px-4 rounded-full bg-red-50 border border-red-100 text-[#db0011] font-bold uppercase tracking-wide text-xs shadow-sm">
+                The Problem
             </div>
-            <h1 class="text-5xl md:text-6xl font-black mb-8 leading-tight text-gray-900">
-                We spend millions finding bugs in <span class="text-blue-600 relative inline-block">
-                    code
-                    <svg class="absolute w-full h-3 -bottom-1 left-0 text-blue-200 opacity-50" viewBox="0 0 100 10" preserveAspectRatio="none"><path d="M0 5 Q 50 10 100 5" stroke="currentColor" stroke-width="8" fill="none" /></svg>
-                </span>.
+            <h1 class="text-4xl md:text-5xl font-black mb-6 leading-tight text-gray-900 max-w-4xl">
+                The Most Expensive Bugs<br>
+                <span class="hsbc-red-text">Are Not in the Code.</span>
             </h1>
-            <p class="text-2xl md:text-3xl text-gray-500 max-w-4xl leading-relaxed font-light">
-                But statistics show the most expensive bugs aren't in the code.<br>
-                <span class="text-gray-900 font-bold mt-6 block text-4xl">They are <span class="hsbc-red-text">Requirement Bugs</span>.</span>
-            </p>
+
+            <!-- Interactive Concept Selector -->
+            <div class="w-full max-w-5xl flex flex-col flex-grow bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden mb-8">
+                
+                <!-- Tabs -->
+                <div class="flex border-b border-gray-200 bg-gray-50">
+                    <button onclick="showConcept('iceberg')" class="flex-1 py-4 text-sm font-bold uppercase tracking-wider text-gray-500 hover:bg-white hover:text-gray-900 transition-all border-r border-gray-200 focus:outline-none concept-tab active-tab" id="tab-iceberg">
+                        <i class="fas fa-icicles mr-2"></i> The Iceberg
+                    </button>
+                    <button onclick="showConcept('domino')" class="flex-1 py-4 text-sm font-bold uppercase tracking-wider text-gray-500 hover:bg-white hover:text-gray-900 transition-all border-r border-gray-200 focus:outline-none concept-tab" id="tab-domino">
+                        <i class="fas fa-dice-d20 mr-2"></i> The Domino Effect
+                    </button>
+                    <button onclick="showConcept('loop')" class="flex-1 py-4 text-sm font-bold uppercase tracking-wider text-gray-500 hover:bg-white hover:text-gray-900 transition-all focus:outline-none concept-tab" id="tab-loop">
+                        <i class="fas fa-sync-alt mr-2"></i> The Ambiguity Loop
+                    </button>
+                </div>
+
+                <!-- Concept 1: Iceberg -->
+                <div id="concept-iceberg" class="concept-view flex-grow relative bg-gradient-to-b from-sky-100 to-sky-900 overflow-hidden flex flex-col items-center justify-center">
+                    <!-- Water Line -->
+                    <div class="absolute top-[40%] left-0 w-full h-1 bg-white/50 z-10"></div>
+                    
+                    <!-- The Iceberg -->
+                    <div class="iceberg-float relative z-0 flex flex-col items-center">
+                        <!-- Tip (Visible) -->
+                        <div class="w-0 h-0 border-l-[60px] border-l-transparent border-r-[60px] border-r-transparent border-b-[100px] border-b-white opacity-90 relative">
+                            <div class="absolute top-[40px] -left-[40px] text-xs font-bold text-sky-900 bg-white/80 px-2 py-1 rounded shadow">Code Bugs</div>
+                        </div>
+                        <!-- Body (Hidden) -->
+                        <div class="w-0 h-0 border-l-[150px] border-l-transparent border-r-[150px] border-r-transparent border-t-[250px] border-t-sky-950 opacity-90 relative">
+                            <div class="absolute -top-[150px] -left-[70px] text-2xl font-black text-white text-center">
+                                REQUIREMENT<br>BUGS
+                                <div class="text-sm font-normal text-sky-300 mt-1">Massive Hidden Cost</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-6 text-white/80 text-sm font-mono">"The real danger is what you don't see."</div>
+                </div>
+
+                <!-- Concept 2: Domino -->
+                <div id="concept-domino" class="concept-view hidden flex-grow relative bg-gray-100 flex flex-col items-center justify-end pb-20">
+                    <div class="flex items-end gap-8 relative">
+                        <!-- Domino 1: Ticket -->
+                        <div id="domino-1" class="domino w-16 h-32 bg-gray-800 rounded flex items-center justify-center text-white border-2 border-gray-600 shadow-lg z-30 relative">
+                            <span class="text-xs font-bold -rotate-90">Ticket</span>
+                        </div>
+                        
+                        <!-- Domino 2: Code -->
+                        <div id="domino-2" class="domino w-24 h-48 bg-gray-700 rounded flex items-center justify-center text-white border-2 border-gray-500 shadow-lg z-20">
+                            <span class="text-sm font-bold -rotate-90">Code</span>
+                        </div>
+
+                        <!-- Domino 3: Product -->
+                        <div id="domino-3" class="domino w-32 h-64 bg-gray-900 rounded flex items-center justify-center text-white border-4 border-gray-800 shadow-xl z-10 transition-colors duration-300">
+                            <span class="text-lg font-bold -rotate-90">Product</span>
+                        </div>
+                    </div>
+                    
+                    <button onclick="startDomino()" class="mt-12 px-6 py-2 bg-[#db0011] text-white rounded font-bold hover:bg-red-700 transition shadow-lg z-40">
+                        Introduce Ambiguity (Push)
+                    </button>
+                    <div class="absolute top-10 text-gray-500 font-mono text-sm">"Small error at start = Disaster at end."</div>
+                </div>
+
+                <!-- Concept 3: Ambiguity Loop -->
+                <div id="concept-loop" class="concept-view hidden flex-grow relative bg-white flex flex-col items-center justify-center">
+                    
+                    <div class="flex w-full max-w-3xl justify-between items-center px-10 relative h-40">
+                        <!-- Dev -->
+                        <div class="flex flex-col items-center z-10">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-3xl text-blue-600">
+                                <i class="fas fa-laptop-code"></i>
+                            </div>
+                            <span class="font-bold text-gray-700 mt-2">Dev</span>
+                        </div>
+
+                        <!-- Business -->
+                        <div class="flex flex-col items-center z-10">
+                            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-3xl text-green-600">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <span class="font-bold text-gray-700 mt-2">Business</span>
+                        </div>
+
+                        <!-- Moving Ticket -->
+                        <div id="moving-ticket" class="absolute left-20 top-8 bg-white border-2 border-gray-300 p-3 rounded shadow-md text-gray-400 z-0">
+                            <i class="fas fa-file-alt text-2xl doc-icon"></i>
+                            <div class="text-[10px] font-bold mt-1">Ticket</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 text-center">
+                        <div class="text-gray-500 text-xs uppercase font-bold mb-1">Wasted Cost</div>
+                        <div class="text-5xl font-black text-[#db0011] font-mono" id="loop-cost">$0</div>
+                    </div>
+
+                    <div class="flex gap-4 mt-6">
+                        <button onclick="startLoop()" class="px-6 py-2 bg-gray-800 text-white rounded font-bold hover:bg-black transition">Start "Ping-Pong"</button>
+                        <button onclick="stopLoop()" class="px-6 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 transition">Apply AI Gatekeeper</button>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
         <!-- SLIDE 2: Garbage In -->
         <div id="slide-2" class="hidden absolute inset-0 flex flex-col items-center justify-center p-10">
             <h2 class="text-4xl font-bold mb-16 text-center text-gray-900">The Hidden Cost Structure</h2>
-            
             <div class="flex items-center justify-center gap-16 w-full">
                 <!-- Left: Sentences -->
                 <div class="text-center transform transition-all duration-700 p-8 rounded-2xl bg-white border border-gray-100 shadow-xl" id="s2-left">
@@ -106,12 +213,10 @@
                     <h3 class="text-3xl font-bold text-gray-800 mb-2">Wrong Sentences</h3>
                     <p class="text-gray-500 uppercase text-sm font-semibold tracking-wider">Ambiguous Tickets</p>
                 </div>
-
                 <!-- Arrow -->
                 <div class="text-4xl text-gray-300">
                     <i class="fas fa-arrow-right"></i>
                 </div>
-
                 <!-- Right: Code -->
                 <div class="text-center opacity-40 blur-sm transform transition-all duration-700 p-8 rounded-2xl bg-white border border-gray-100 shadow-sm" id="s2-right">
                     <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-400">
@@ -121,14 +226,12 @@
                     <p class="text-gray-400 uppercase text-sm font-semibold tracking-wider">Development Waste</p>
                 </div>
             </div>
-
             <div class="mt-20 relative max-w-3xl">
                 <div class="absolute -left-4 top-0 bottom-0 w-1 bg-[#db0011]"></div>
                 <p class="text-2xl text-center text-gray-600 italic">
                     "In any software organization, the biggest hidden cost comes not from wrong code, but from <span class="text-gray-900 font-bold not-italic">wrong sentences</span>."
                 </p>
             </div>
-            
             <button onclick="revealTruth()" class="mt-12 px-8 py-3 bg-black text-white rounded-full hover:bg-gray-800 transition text-sm uppercase font-bold tracking-widest shadow-lg">
                 Analyze Impact
             </button>
@@ -218,7 +321,7 @@
             </div>
         </div>
 
-        <!-- SLIDE 5: Smart Remediation (Interactive) -->
+        <!-- SLIDE 5: Smart Remediation -->
         <div id="slide-5" class="hidden absolute inset-0 flex flex-col items-center justify-center p-10">
             <div class="text-center mb-12">
                 <span class="text-[#db0011] font-bold tracking-widest uppercase text-sm mb-3 block">Beyond Scoring</span>
@@ -227,7 +330,6 @@
             </div>
 
             <div class="flex gap-8 w-full max-w-6xl">
-                
                 <!-- Interactive Feedback Loop -->
                 <div class="w-1/2 bg-white rounded-2xl shadow-xl border border-gray-200 p-8 flex flex-col relative overflow-hidden">
                     <div class="flex items-center gap-4 mb-6">
@@ -236,18 +338,13 @@
                         </div>
                         <h3 class="text-2xl font-bold text-gray-800">Actionable Feedback</h3>
                     </div>
-                    
-                    <!-- Simulation Area -->
                     <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 mb-4">
                         <div class="text-xs text-gray-400 uppercase font-bold mb-1">User Input</div>
                         <div class="text-gray-700 font-mono text-sm">"I want a report page."</div>
                     </div>
-
                     <button onclick="simulateFeedback()" id="btn-feedback" class="self-start bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold mb-4 hover:bg-blue-700 transition flex items-center gap-2">
                         <i class="fas fa-search"></i> Analyze
                     </button>
-
-                    <!-- Feedback Output (Hidden initially) -->
                     <div id="feedback-output" class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg opacity-0 transition-all duration-500 transform translate-y-4">
                         <div class="flex items-start gap-3">
                             <i class="fas fa-robot text-blue-600 mt-1"></i>
@@ -267,17 +364,13 @@
                         </div>
                         <h3 class="text-2xl font-bold text-gray-800">Generative Rewrite</h3>
                     </div>
-
                     <div class="relative flex-grow flex flex-col justify-center">
-                        <!-- Before State -->
                         <div id="rewrite-before" class="absolute inset-0 flex flex-col transition-all duration-700">
                             <div class="bg-red-50 rounded-lg p-6 border border-red-100 h-full flex flex-col justify-center items-center text-center">
                                 <div class="text-xs text-red-400 uppercase font-bold mb-2">Original (Weak)</div>
                                 <div class="text-red-800 font-mono text-lg">"Fix login button."</div>
                             </div>
                         </div>
-
-                        <!-- After State -->
                         <div id="rewrite-after" class="absolute inset-0 flex flex-col opacity-0 scale-95 transition-all duration-700">
                             <div class="bg-green-50 rounded-lg p-6 border border-green-100 h-full flex flex-col justify-center items-center text-center">
                                 <div class="text-xs text-green-500 uppercase font-bold mb-2">AI Rewritten (Gold Standard)</div>
@@ -289,12 +382,10 @@
                             </div>
                         </div>
                     </div>
-
                     <button onclick="simulateRewrite()" id="btn-rewrite" class="mt-6 w-full bg-purple-600 text-white px-4 py-3 rounded-lg text-sm font-bold hover:bg-purple-700 transition flex items-center justify-center gap-2 z-10">
                         <i class="fas fa-wand-magic-sparkles"></i> Auto-Fix Ticket
                     </button>
                 </div>
-
             </div>
         </div>
 
@@ -349,11 +440,8 @@
                     <div class="text-5xl font-black mb-2 text-gray-300 transition-all duration-500" id="score-text">--</div>
                     <p class="text-sm text-gray-500 px-4 leading-relaxed h-16 flex items-center justify-center font-medium" id="feedback-text">System ready. Awaiting input.</p>
                     <div id="star-rating" class="mt-6 flex gap-2 text-2xl text-gray-200 transition-colors duration-500"><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i></div>
-                    
                     <!-- Stamps (No blur) -->
-                    <div id="stamp" class="absolute inset-0 flex items-center justify-center opacity-0 transform scale-150 transition-all duration-300 pointer-events-none z-20">
-                        <!-- Content injected via JS -->
-                    </div>
+                    <div id="stamp" class="absolute inset-0 flex items-center justify-center opacity-0 transform scale-150 transition-all duration-300 pointer-events-none z-20"></div>
                 </div>
             </div>
         </div>
@@ -418,7 +506,6 @@
             </div>
 
             <div class="grid grid-cols-3 gap-8 w-full max-w-6xl px-4">
-                
                 <!-- Card 1: Security -->
                 <div class="bg-white p-8 rounded-2xl shadow-lg border-t-4 border-gray-800 relative group hover:-translate-y-2 transition-transform duration-300">
                     <div class="absolute top-4 right-4 text-gray-200 group-hover:text-gray-300 transition-colors"><i class="fas fa-lock text-6xl"></i></div>
@@ -430,15 +517,12 @@
                         </li>
                     </ul>
                 </div>
-
                 <!-- Card 2: Rollout -->
                 <div class="bg-white p-8 rounded-2xl shadow-lg border-t-4 border-[#db0011] relative group hover:-translate-y-2 transition-transform duration-300">
                     <div class="absolute top-4 right-4 text-red-50 group-hover:text-red-100 transition-colors"><i class="fas fa-road text-6xl"></i></div>
                     <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2"><i class="fas fa-tasks text-[#db0011]"></i> Phased Rollout</h3>
                     <div class="space-y-4 relative">
-                        <!-- Connecting Line -->
                         <div class="absolute left-[11px] top-2 bottom-2 w-0.5 bg-gray-200"></div>
-                        
                         <div class="flex items-center gap-3 relative z-10">
                             <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-600">1</div>
                             <span class="text-sm font-medium text-gray-500"><strong>Silent Mode:</strong> Monitor only.</span>
@@ -453,7 +537,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Card 3: Human Oversight -->
                 <div class="bg-white p-8 rounded-2xl shadow-lg border-t-4 border-blue-600 relative group hover:-translate-y-2 transition-transform duration-300">
                     <div class="absolute top-4 right-4 text-blue-50 group-hover:text-blue-100 transition-colors"><i class="fas fa-user-check text-6xl"></i></div>
@@ -465,7 +548,6 @@
                         Risk Level: LOW (Advisory System)
                     </div>
                 </div>
-
             </div>
         </div>
 
@@ -506,6 +588,76 @@
         function nextSlide() { if (currentSlide < totalSlides) { currentSlide++; updateSlide(); } }
         function prevSlide() { if (currentSlide > 1) { currentSlide--; updateSlide(); } }
         document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') nextSlide(); if (e.key === 'ArrowLeft') prevSlide(); });
+
+        /* --- SLIDE 1 LOGIC (Concept Switcher) --- */
+        let loopInterval = null;
+        
+        function showConcept(conceptId) {
+            // Reset UI
+            document.querySelectorAll('.concept-view').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.concept-tab').forEach(el => el.classList.remove('bg-gray-100', 'text-gray-900', 'active-tab'));
+            
+            // Activate Selection
+            document.getElementById(`concept-${conceptId}`).classList.remove('hidden');
+            document.getElementById(`tab-${conceptId}`).classList.add('bg-gray-100', 'text-gray-900', 'active-tab');
+            
+            // Stop Loops if leaving loop tab
+            if(conceptId !== 'loop') stopLoop();
+        }
+
+        /* Iceberg Logic: CSS Only */
+
+        /* Domino Logic */
+        function startDomino() {
+            const d1 = document.getElementById('domino-1');
+            const d2 = document.getElementById('domino-2');
+            const d3 = document.getElementById('domino-3');
+            
+            // Reset
+            d1.classList.remove('domino-fall');
+            d2.classList.remove('domino-fall');
+            d3.classList.remove('domino-fall');
+            d3.classList.remove('bg-red-600');
+            d3.classList.add('bg-gray-900');
+            
+            setTimeout(() => {
+                d1.classList.add('domino-fall');
+                setTimeout(() => {
+                    d2.classList.add('domino-fall');
+                    setTimeout(() => {
+                        d3.classList.add('domino-fall');
+                        d3.classList.remove('bg-gray-900');
+                        d3.classList.add('bg-red-600'); // Fail color
+                    }, 300);
+                }, 300);
+            }, 100);
+        }
+
+        /* Ping Pong Loop Logic */
+        function startLoop() {
+            const ticket = document.getElementById('moving-ticket');
+            const costEl = document.getElementById('loop-cost');
+            let cost = 0;
+            
+            ticket.classList.add('ping-pong-anim', 'ping-pong-active');
+            
+            if (loopInterval) clearInterval(loopInterval);
+            loopInterval = setInterval(() => {
+                cost += 500;
+                costEl.innerText = `$${cost.toLocaleString()}`;
+            }, 200);
+        }
+
+        function stopLoop() {
+            const ticket = document.getElementById('moving-ticket');
+            const costEl = document.getElementById('loop-cost');
+            
+            ticket.classList.remove('ping-pong-anim', 'ping-pong-active');
+            if (loopInterval) clearInterval(loopInterval);
+            costEl.innerText = "$0 (Saved!)";
+            costEl.classList.add('text-green-600');
+            setTimeout(() => costEl.classList.remove('text-green-600'), 2000);
+        }
 
         /* --- SLIDE 2 ANIMATION --- */
         function revealTruth() {
@@ -614,7 +766,6 @@
                     document.getElementById('feedback-text').innerText = "Standard Ticket. Ready for Sprint.";
                     document.getElementById('star-rating').innerHTML = '<i class="fas fa-star text-yellow-400"></i><i class="fas fa-star text-yellow-400"></i><i class="fas fa-star text-yellow-400"></i><i class="fas fa-star text-yellow-400"></i><i class="fas fa-star text-yellow-400"></i>';
                     
-                    // Made stamp smaller and removed huge padding
                     stamp.innerHTML = '<div class="border-4 border-green-500 text-green-600 font-black text-3xl px-4 py-2 rounded-lg uppercase -rotate-12 bg-white/90 shadow-xl">APPROVED</div>';
                     stamp.style.opacity = '1'; stamp.style.transform = 'scale(1)';
                 } else {
@@ -626,7 +777,6 @@
                     document.getElementById('feedback-text').className = "text-sm text-red-600 px-4 leading-relaxed h-16 flex items-center justify-center font-bold";
                     document.getElementById('star-rating').innerHTML = '<i class="fas fa-star text-[#db0011]"></i><i class="far fa-star text-gray-300"></i><i class="far fa-star text-gray-300"></i><i class="far fa-star text-gray-300"></i><i class="far fa-star text-gray-300"></i>';
                     
-                    // Made stamp smaller and removed huge padding
                     stamp.innerHTML = '<div class="border-4 border-[#db0011] text-[#db0011] font-black text-3xl px-4 py-2 rounded-lg uppercase -rotate-12 bg-white/90 shadow-xl">REJECTED</div>';
                     stamp.style.opacity = '1'; stamp.style.transform = 'scale(1)';
                 }
@@ -652,6 +802,13 @@
         }
 
         updateSlide();
+        
+        // Add active class for styling
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .active-tab { border-bottom: 3px solid #db0011; color: #db0011; background-color: white; }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
