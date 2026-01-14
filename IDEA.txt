@@ -1,1 +1,17 @@
-1. Data & Preprocessing (داده و آماده‌سازی)این بخش نشان می‌دهد داده‌ها چگونه مدیریت شده‌اند.NLP Preprocessing: (Tokenization, HTML Removal)Feature Engineering: Hybrid Features (Traditional Formulas + Structural)Ground Truth: Expert Consensus (Subjective $\to$ Objective)Imbalance Handling: SMOTE & Class Weighting2. ML Core: Readability Score (هسته هوشمند)این بخش مربوط به مدل XGBoost است که کیفیت متن را می‌سنجد.Algorithm: XGBoost Classifier (Gradient Boosting)Validation: K-Fold Cross-ValidationOptimization: Hyper-parameter Tuning & Early StoppingInterpretability: SHAP Values (Feature Importance)Score Transformation: Mathematical Expectation (Probabilities $\to$ Continuous Score)3. Structural Analysis (تحلیل ساختاری)این بخش مربوط به ۴ فلگ (Flag) است.Heuristic Pattern Matching: (Rule-based detection)User Story Components: Who / What / Why ExtractionCompleteness Check: Acceptance Criteria Detection4. Final Aggregation (تجمیع نهایی)این بخش نهایی که نوآوری اصلی توست (ترکیب مدل و فلگ‌ها).Aggregation Logic: Cobb-Douglas Utility FunctionLogic Type: Non-Compensatory Aggregation (Strict Scoring)Final Output: 5-Star Rating System
+Project Title: Automated Readability Scoring System for Jira User Stories (MVP)
+
+Abstract: This project aims to enhance the quality of technical requirements by deploying a supervised machine learning model to assess the readability and structural completeness of Jira User Stories.
+
+Technical Highlights:
+
+Data Validity: Ground truth established via expert consensus, validated by Fleiss' Kappa (Inter-Annotator Agreement).
+
+Feature Engineering: A hybrid vector of 25 features, including traditional readability formulas (e.g., Flesch-Kincaid) and custom linguistic/structural indicators.
+
+Core Model: XGBoost Classifier utilized for ordinal classification, optimized via Stratified K-Fold Cross-Validation and SMOTE for class imbalance handling.
+
+Scoring Mechanism: Class probabilities are converted into a continuous scalar (0-95) using Mathematical Expectation.
+
+Aggregation Logic: The final 5-star rating is derived using the Cobb-Douglas Utility Function. This integrates the ML-based readability score with heuristic structural flags (Who/What/Why/Acceptance Criteria), enforcing a non-compensatory scoring policy to ensure strict adherence to standard User Story formats.
+
+Explainability: Model decisions are interpreted using SHAP (SHapley Additive exPlanations) values to provide actionable feedback.
