@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Quality Index | Cobb-Douglas Model</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .hsbc-red { background-color: #db0011; }
+        .hsbc-red-text { color: #db0011; }
+        .hsbc-hover:hover { background-color: #b3000e; }
+        
+        /* Form Inputs Style */
+        .input-label {
+            display: block;
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+        .input-field {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.125rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #db0011;
+            box-shadow: 0 0 0 1px #db0011;
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <img 
+                    src="./image_6e865c.png" 
+                    onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/a/aa/HSBC_logo_%282018%29.svg';" 
+                    alt="Logo" 
+                    class="h-8 w-auto object-contain"
+                >
+                <div class="hidden md:block h-8 w-px bg-gray-300 mx-2"></div>
+                <div class="hidden md:block">
+                    <h1 class="text-lg font-semibold text-gray-800 leading-none">Global AI Analysis</h1>
+                    <span class="text-[10px] uppercase tracking-wider text-gray-500">Agile Quality Index Tool</span>
+                </div>
+            </div>
+            <nav class="flex items-center gap-8">
+                <a href="#" class="text-gray-600 hover:text-[#db0011] text-sm font-medium">Model Config</a>
+                <a href="#" class="text-gray-600 hover:text-[#db0011] text-sm font-medium">Batch Processing</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center p-6">
+        
+        <div class="bg-white rounded-sm shadow-xl w-full max-w-5xl overflow-hidden border-t-4 border-[#db0011]">
+            
+            <form id="calcForm" onsubmit="calculateIndex(event)" class="p-8">
+                
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-100 pb-4 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-light text-gray-800">Cobb-Douglas Calculator</h2>
+                        <p class="text-gray-500 text-sm mt-1">Configure weights and test story quality interactively.</p>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                         <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full border border-gray-200">
+                            Model v2.1 (Python Backend)
+                         </span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    
+                    <!-- COLUMN 1: Weights (Elasticity) -->
+                    <div class="space-y-4">
+                        <h3 class="font-medium text-gray-800 border-b pb-2 text-sm">1. Elasticity & Weights</h3>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="input-label" title="Importance of Clarity">Alpha (α)</label>
+                                <input type="number" step="0.1" id="alpha" value="0.7" class="input-field bg-gray-50">
+                            </div>
+                            <div>
+                                <label class="input-label" title="Importance of Structure">Beta (β)</label>
+                                <input type="number" step="0.1" id="beta" value="0.3" class="input-field bg-gray-50">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="input-label">Struct Weight (w_s)</label>
+                            <input type="number" step="0.1" id="w_s" value="3.0" class="input-field bg-gray-50">
+                            <p class="text-[10px] text-gray-400 mt-1">Weight for Role/Goal/Reason</p>
+                        </div>
+                        
+                        <div>
+                            <label class="input-label">AC Weight (w_a)</label>
+                            <input type="number" step="0.1" id="w_a" value="2.0" class="input-field bg-gray-50">
+                            <p class="text-[10px] text-gray-400 mt-1">Weight for Acceptance Criteria</p>
+                        </div>
+                    </div>
+
+                    <!-- COLUMN 2: Constraints -->
+                    <div class="space-y-4">
+                        <h3 class="font-medium text-gray-800 border-b pb-2 text-sm">2. Limits & Thresholds</h3>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="input-label">Clarity Min</label>
+                                <input type="number" step="1" id="clarity_min" value="5.0" class="input-field bg-gray-50">
+                            </div>
+                            <div>
+                                <label class="input-label">Clarity Max</label>
+                                <input type="number" step="1" id="clarity_max" value="95.0" class="input-field bg-gray-50">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="input-label">Penalty Cap</label>
+                                <input type="number" step="0.5" id="penalty_cap" value="3.0" class="input-field bg-gray-50 text-red-600 font-medium">
+                            </div>
+                            <div>
+                                <label class="input-label">Star Min</label>
+                                <input type="number" step="0.5" id="star_min" value="1.0" class="input-field bg-gray-50">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COLUMN 3: Input Data (Test Case) -->
+                    <div class="bg-gray-50 p-5 rounded border border-gray-200">
+                        <h3 class="font-medium text-[#db0011] border-b border-gray-200 pb-2 text-sm mb-4">3. Test Story Data</h3>
+                        
+                        <div class="mb-4">
+                            <label class="input-label">Clarity Score (0-100)</label>
+                            <input type="number" id="input_score" value="65" class="input-field bg-white border-gray-300">
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" id="has_role" checked class="form-checkbox h-4 w-4 text-[#db0011] rounded border-gray-300 focus:ring-[#db0011]">
+                                <span class="text-sm text-gray-700">Has Role Defined</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" id="has_goal" checked class="form-checkbox h-4 w-4 text-[#db0011] rounded border-gray-300 focus:ring-[#db0011]">
+                                <span class="text-sm text-gray-700">Has Goal Defined</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" id="has_reason" class="form-checkbox h-4 w-4 text-[#db0011] rounded border-gray-300 focus:ring-[#db0011]">
+                                <span class="text-sm text-gray-700">Has Reason Defined</span>
+                            </label>
+                            <div class="pt-2 border-t border-gray-200">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" id="has_ac" checked class="form-checkbox h-4 w-4 text-[#db0011] rounded border-gray-300 focus:ring-[#db0011]">
+                                    <span class="text-sm font-semibold text-gray-800">Has Acceptance Criteria</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer / Action -->
+                <div class="mt-8 pt-6 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                    
+                    <div id="resultBox" class="hidden flex items-center gap-4 animate-fade-in">
+                        <div class="text-right">
+                            <span class="block text-xs text-gray-400 uppercase">Calculated Quality</span>
+                            <span class="text-sm text-gray-500">Star Index</span>
+                        </div>
+                        <div class="h-12 w-px bg-gray-200"></div>
+                        <div class="text-4xl font-light text-[#db0011]" id="finalResult">0.0</div>
+                        <div class="flex text-[#db0011]" id="starVisuals">
+                            <!-- Stars generated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="flex-grow md:flex-grow-0 w-full md:w-auto ml-auto">
+                        <button type="submit" id="calcBtn" class="w-full md:w-auto bg-[#db0011] hover:bg-[#b3000e] text-white font-medium py-3 px-10 rounded-sm transition shadow-sm uppercase tracking-wide text-sm flex items-center justify-center">
+                            <span>Calculate Index</span>
+                            <svg id="loader" class="hidden animate-spin ml-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Error area -->
+                <div id="errorArea" class="hidden mt-4 text-center text-sm text-red-600 bg-red-50 p-2 rounded border border-red-100"></div>
+
+            </form>
+        </div>
+    </main>
+
+    <script>
+        async function calculateIndex(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('calcBtn');
+            const loader = document.getElementById('loader');
+            const resultBox = document.getElementById('resultBox');
+            const errorArea = document.getElementById('errorArea');
+            const resultText = document.getElementById('finalResult');
+            const starVisuals = document.getElementById('starVisuals');
+
+            // 1. Gather Configuration Inputs
+            const payload = {
+                // Config Params
+                alpha: parseFloat(document.getElementById('alpha').value),
+                beta: parseFloat(document.getElementById('beta').value),
+                w_s: parseFloat(document.getElementById('w_s').value),
+                w_a: parseFloat(document.getElementById('w_a').value),
+                penalty_cap: parseFloat(document.getElementById('penalty_cap').value),
+                clarity_min: parseFloat(document.getElementById('clarity_min').value),
+                clarity_max: parseFloat(document.getElementById('clarity_max').value),
+                star_min: parseFloat(document.getElementById('star_min').value),
+                
+                // Story Data (Single Row Simulation)
+                clarity_score: parseFloat(document.getElementById('input_score').value),
+                has_role: document.getElementById('has_role').checked,
+                has_goal: document.getElementById('has_goal').checked,
+                has_reason: document.getElementById('has_reason').checked,
+                has_ac: document.getElementById('has_ac').checked
+            };
+
+            // UI Loading State
+            btn.disabled = true;
+            btn.classList.add('opacity-75');
+            loader.classList.remove('hidden');
+            errorArea.classList.add('hidden');
+            resultBox.classList.add('hidden');
+
+            try {
+                // NOTE FOR ALI: 
+                // This URL assumes your FastAPI will be running locally.
+                // You will write the backend next.
+                const response = await fetch('http://127.0.0.1:8000/calculate_star', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                
+                const data = await response.json();
+                
+                // Display Result
+                const score = data.star_index; // Assuming backend returns { "star_index": 3.5 }
+                resultText.textContent = score.toFixed(1);
+                
+                // Generate Stars Visual
+                let starsHtml = '';
+                const fullStars = Math.floor(score);
+                const hasHalf = score % 1 !== 0;
+                
+                for(let i=0; i<fullStars; i++) starsHtml += '★';
+                if(hasHalf) starsHtml += '½';
+                
+                starVisuals.textContent = starsHtml; // Or use SVGs for prettier stars
+                resultBox.classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                // Fallback for Demo purposes if API isn't running yet:
+                // Simulate calculation logic locally just to show UI works
+                const fallbackScore = simulateLocalCalculation(payload);
+                errorArea.innerHTML = `Backend not connected. <br> <span class="text-xs text-gray-500">Showing local simulation: ${fallbackScore}</span>`;
+                errorArea.classList.remove('hidden');
+                resultText.textContent = fallbackScore;
+                resultBox.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-75');
+                loader.classList.add('hidden');
+            }
+        }
+
+        // Temporary local logic to test UI without Python running
+        function simulateLocalCalculation(p) {
+            // Cobb-Douglas Logic Replication
+            const clamped = Math.min(Math.max(p.clarity_score, p.clarity_min), p.clarity_max);
+            const x_c = (clamped - p.clarity_min) / (p.clarity_max - p.clarity_min);
+            
+            const x_s = ((p.has_role ? 1:0) + (p.has_goal ? 1:0) + (p.has_reason ? 1:0)) / 3.0;
+            const x_a = p.has_ac ? 1.0 : 0.0;
+
+            const K = ((p.w_s * x_s) + (p.w_a * x_a) + 1) / (p.w_s + p.w_a + 1);
+            
+            // Avoid negative base for power
+            const safe_xc = Math.max(0, x_c);
+            const safe_K = Math.max(0, K);
+
+            const I = Math.pow(safe_xc, p.alpha) * Math.pow(safe_K, p.beta);
+            
+            let y = p.star_min + 4.0 * I;
+            
+            if (!p.has_ac) {
+                y = Math.min(y, p.penalty_cap);
+            }
+            
+            // Round to nearest 0.5
+            y = Math.max(p.star_min, Math.round(y * 2) / 2);
+            return y;
+        }
+    </script>
+</body>
+</html>
