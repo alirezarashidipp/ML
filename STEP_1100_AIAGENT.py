@@ -48,4 +48,41 @@ def call_model(state: AgentState):
     system_prompt = """You are an expert Agile Product Owner. 
     Your task is to convert the user's raw input into a standard Jira User Story format.
     Output must include:
-    1. User Story (As a... I want
+    1. User Story (As a... I want to... So that...)
+    2. Acceptance Criteria
+    Keep it clear and professional."""
+    
+    # Prepend the system prompt to the message list
+    if not isinstance(messages[0], SystemMessage):
+        messages.insert(0, SystemMessage(content=system_prompt))
+        
+    response = local_llm.invoke(messages)
+    
+    # Append the model's response to the message list
+    return {"messages": [response]}
+
+# 5. Build Graph (The Workflow Map)
+workflow = StateGraph(AgentState)
+
+# Add the processing node
+workflow.add_node("agent_node", call_model)
+
+# Define the execution flow (Start -> Node -> End)
+workflow.add_edge(START, "agent_node")
+workflow.add_edge("agent_node", END)
+
+# Compile the graph
+app = workflow.compile()
+
+# 6. Execution / Testing
+user_input = "من میخوام کاربر بتونه با گوگل لاگین کنه تا سریع وارد شه"
+print(f"\nUser Input: {user_input}\n")
+print("--- Agent is thinking... ---")
+
+# Pass input data into the graph
+input_data = {"messages": [HumanMessage(content=user_input)]}
+result = app.invoke(input_data)
+
+print("\n--- Final Jira Ticket ---")
+# Print the final message (model's response)
+print(result['messages'][-1].content)
