@@ -85,4 +85,4 @@ result = app.invoke(input_data)
 
 print("\n--- Final Jira Ticket ---")
 # Print the final message (model's response)
-print(result['messages'][-1].content)
+print(result['messages'][-1])
