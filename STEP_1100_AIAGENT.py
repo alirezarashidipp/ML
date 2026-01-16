@@ -11,7 +11,10 @@ path = r"C:\Users\45315874\Desktop\EXTERNAL WORKS\LLM\Local_LLM"
 
 print("--- Loading Model & Tokenizer ---")
 tokenizer = AutoTokenizer.from_pretrained(path)
-# Important: Using float32 for CPU to avoid gibberish output
+# مطمئن شویم پدینگ به درستی تنظیم شده
+if tokenizer.pad_token is None:
+    tokenizer.pad_token = tokenizer.eos_token
+
 model = AutoModelForCausalLM.from_pretrained(
     path, 
     torch_dtype=torch.float32, 
@@ -23,15 +26,13 @@ text_generation_pipeline = pipeline(
     "text-generation",
     model=model,
     tokenizer=tokenizer,
-    max_new_tokens=512,
-    do_sample=True,
-    temperature=0.1, # Lower temperature for more stable output
-    top_p=0.9,
+    max_new_tokens=256, # برای تست کوتاه‌تر کردیم
+    do_sample=False,    # حذف نمونه‌برداری تصادفی برای دقت بیشتر
+    repetition_penalty=1.2, # جلوگیری از تکرار (مثل 1: 1: 1)
     return_full_text=False
 )
 
 local_llm = HuggingFacePipeline(pipeline=text_generation_pipeline)
-
 print("--- Model Loaded Successfully ---")
 
 # 3. Define State
@@ -40,18 +41,18 @@ class AgentState(TypedDict):
 
 # 4. Define Node
 def call_model(state: AgentState):
-    messages = state['messages']
-    user_content = messages[-1].content
+    user_message = state['messages'][-1].content
     
-    # Manually formatting for Llama-3.2-1B Instruct
-    system_prompt = "You are an expert Agile Product Owner. Convert input into Jira User Story (As a... I want to... So that...) and Acceptance Criteria."
+    # استفاده از ساختار استاندارد لاما 3
+    chat = [
+        {"role": "system", "content": "You are an expert Agile Product Owner. Convert input into Jira User Story and Acceptance Criteria."},
+        {"role": "user", "content": user_message},
+    ]
     
-    # Constructing a clear prompt for the model
-    full_prompt = f"System: {system_prompt}\nUser: {user_content}\nAssistant:"
+    # این بخش جادوی اصلی است: تبدیل به فرمت مخصوص مدل
+    prompt = tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=True)
     
-    response = local_llm.invoke(full_prompt)
-    
-    # Return the clean text response
+    response = local_llm.invoke(prompt)
     return {"messages": [response]}
 
 # 5. Build Graph
@@ -59,17 +60,15 @@ workflow = StateGraph(AgentState)
 workflow.add_node("agent_node", call_model)
 workflow.add_edge(START, "agent_node")
 workflow.add_edge("agent_node", END)
-
 app = workflow.compile()
 
-# 6. Execution / Testing
+# 6. Execution
 user_input = "fixing bug in prod when user wants to log in"
 print(f"\nUser Input: {user_input}\n")
-print("--- Agent is thinking (this might take a minute on CPU)... ---")
+print("--- Agent is thinking... ---")
 
 input_data = {"messages": [HumanMessage(content=user_input)]}
 result = app.invoke(input_data)
 
 print("\n--- Final Jira Ticket ---")
-# The result is now a clean string
 print(result['messages'][-1])
