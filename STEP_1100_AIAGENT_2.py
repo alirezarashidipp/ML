@@ -1,4 +1,9 @@
 # model: meta-llama/Llama-3.2-1B-Instruct
+# Python== 3.9
+# Torch = 2.7.0
+# transformers = 4.49.0
+# tokenizers = 0.21.0
+# langgraph = 0.2.62
 
 from typing import TypedDict, List, Dict
 from langgraph.graph import StateGraph, START, END
