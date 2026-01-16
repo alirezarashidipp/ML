@@ -14,7 +14,7 @@ tokenizer = AutoTokenizer.from_pretrained(path)
 model = AutoModelForCausalLM.from_pretrained(
     path, 
     torch_dtype=torch.float16, # For faster inference and lower VRAM usage
-    device_map="auto" # Automatically utilize GPU if available
+    device_map=None # Automatically utilize GPU if available
 )
 
 # 2. Pipeline Creation (Bridge)
