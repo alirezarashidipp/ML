@@ -6,83 +6,70 @@ from langgraph.graph import StateGraph, START, END
 from typing import Annotated, TypedDict
 import operator
 
-# 1. Model Path (Specify your local directory)
+# 1. Model Path
 path = r"C:\Users\45315874\Desktop\EXTERNAL WORKS\LLM\Local_LLM"
 
 print("--- Loading Model & Tokenizer ---")
 tokenizer = AutoTokenizer.from_pretrained(path)
+# Important: Using float32 for CPU to avoid gibberish output
 model = AutoModelForCausalLM.from_pretrained(
     path, 
-    torch_dtype=torch.float16, # For faster inference and lower VRAM usage
-    device_map=None # Automatically utilize GPU if available
+    torch_dtype=torch.float32, 
+    device_map=None 
 )
 
-# 2. Pipeline Creation (Bridge)
-# Converts the raw model into a standard LangChain tool
+# 2. Pipeline Creation
 text_generation_pipeline = pipeline(
     "text-generation",
     model=model,
     tokenizer=tokenizer,
-    max_new_tokens=512, # Allowed output length
+    max_new_tokens=512,
     do_sample=True,
-    temperature=0.7,
-    return_full_text=False # Only return the generated text
+    temperature=0.1, # Lower temperature for more stable output
+    top_p=0.9,
+    return_full_text=False
 )
 
-# Create the LLM object compatible with LangGraph
 local_llm = HuggingFacePipeline(pipeline=text_generation_pipeline)
 
 print("--- Model Loaded Successfully ---")
 
 # 3. Define State
-# The agent's memory that stores the message history
 class AgentState(TypedDict):
     messages: Annotated[list, operator.add]
 
-# 4. Define Node (The "Brain" of the logic)
+# 4. Define Node
 def call_model(state: AgentState):
     messages = state['messages']
+    user_content = messages[-1].content
     
-    # Add system prompt if not already present
-    # This instructs the model to act as an Agile Product Owner
-    system_prompt = """You are an expert Agile Product Owner. 
-    Your task is to convert the user's raw input into a standard Jira User Story format.
-    Output must include:
-    1. User Story (As a... I want to... So that...)
-    2. Acceptance Criteria
-    Keep it clear and professional."""
+    # Manually formatting for Llama-3.2-1B Instruct
+    system_prompt = "You are an expert Agile Product Owner. Convert input into Jira User Story (As a... I want to... So that...) and Acceptance Criteria."
     
-    # Prepend the system prompt to the message list
-    if not isinstance(messages[0], SystemMessage):
-        messages.insert(0, SystemMessage(content=system_prompt))
-        
-    response = local_llm.invoke(messages)
+    # Constructing a clear prompt for the model
+    full_prompt = f"System: {system_prompt}\nUser: {user_content}\nAssistant:"
     
-    # Append the model's response to the message list
+    response = local_llm.invoke(full_prompt)
+    
+    # Return the clean text response
     return {"messages": [response]}
 
-# 5. Build Graph (The Workflow Map)
+# 5. Build Graph
 workflow = StateGraph(AgentState)
-
-# Add the processing node
 workflow.add_node("agent_node", call_model)
-
-# Define the execution flow (Start -> Node -> End)
 workflow.add_edge(START, "agent_node")
 workflow.add_edge("agent_node", END)
 
-# Compile the graph
 app = workflow.compile()
 
 # 6. Execution / Testing
 user_input = "fixing bug in prod when user wants to log in"
 print(f"\nUser Input: {user_input}\n")
-print("--- Agent is thinking... ---")
+print("--- Agent is thinking (this might take a minute on CPU)... ---")
 
-# Pass input data into the graph
 input_data = {"messages": [HumanMessage(content=user_input)]}
 result = app.invoke(input_data)
 
 print("\n--- Final Jira Ticket ---")
-# Print the final message (model's response)
+# The result is now a clean string
 print(result['messages'][-1])
