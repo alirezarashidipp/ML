@@ -75,7 +75,7 @@ workflow.add_edge("agent_node", END)
 app = workflow.compile()
 
 # 6. Execution / Testing
-user_input = "من میخوام کاربر بتونه با گوگل لاگین کنه تا سریع وارد شه"
+user_input = "fixing bug in prod when user wants to log in"
 print(f"\nUser Input: {user_input}\n")
 print("--- Agent is thinking... ---")
 
