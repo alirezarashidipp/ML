@@ -4,6 +4,29 @@
 # transformers = 4.49.0
 # tokenizers = 0.21.0
 # langgraph = 0.2.62
+CODE BELOW WORKS:
+""" 
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
+
+path = r"C:\Users\45315874\Desktop\EXTERNAL WORKS\LLM\LLAMA"
+
+try:
+    tokenizer = AutoTokenizer.from_pretrained(path)
+    model = AutoModelForCausalLM.from_pretrained(path)
+    prompt = "Where is capital of Poland?"
+    inputs = tokenizer(prompt, return_tensors="pt")
+    outputs = model.generate(**inputs, max_new_tokens=20, do_sample=True, temperature=0.5)
+    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    print("-" * 30)
+    print("Model Output:")
+    print(response)
+    print("-" * 30)
+
+except Exception as e:
+    print(f"Error occurred: {e}")
+    """
+    AND RETURNS THIS:Warsaw, Krakow, 
 
 Part 1: What You Have Done (The "Clarity Engine")
 You have successfully built a Supervised Machine Learning System designed to quantify the subjective quality of technical documentation (Jira User Stories).
