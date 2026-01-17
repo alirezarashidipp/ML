@@ -1,4 +1,4 @@
-# model: meta-llama/Llama-3.2-1B-Instruct
+# model: meta-llama/Llama-3.2-1B-Instruct inlcudes (tokenizer_config.json, tokenizer.json, special_tokens_map.json, model.safetensors, generation_config.json, config.json, .gitattributes)
 # Python== 3.9
 # Torch = 2.7.0
 # transformers = 4.49.0
