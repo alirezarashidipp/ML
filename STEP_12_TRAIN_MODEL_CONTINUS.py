@@ -169,3 +169,43 @@ joblib.dump(best_model, "runs_train/xgb_softprob_model.joblib")
 print("Model and reports saved to runs_train/")
 
 
+اگر خواستی اجرا شود: فقط RUN_DASHBOARD=1 ست کن
+
+# ========= Explainability Dashboard (ExplainerDashboard) =========
+# pip install explainerdashboard
+try:
+    from explainerdashboard import ClassifierExplainer, ExplainerDashboard
+
+    # Label names (safe for both numeric and string labels)
+    class_labels = [str(c) for c in sorted(pd.unique(y_train))]
+
+    # Build explainer on test set (you can change to X_train if you prefer)
+    explainer = ClassifierExplainer(
+        best_model,
+        X_test,
+        y_test,
+        labels=class_labels,
+        model_output="probability"   # aligns with multi:softprob
+    )
+
+    # Optional: persist explainer (can be large because it may cache SHAP etc.)
+    joblib.dump(explainer, "runs_train/xgb_explainer.joblib")
+
+    # Create dashboard object + save config
+    dashboard = ExplainerDashboard(
+        explainer,
+        title="XGBoost 3-class (softprob) Explainer",
+        shap_interaction=False
+    )
+    dashboard.to_yaml("runs_train/explainer_dashboard.yaml")
+
+    # Run only if explicitly requested (avoids blocking training script by default)
+    if os.environ.get("RUN_DASHBOARD", "0") == "1":
+        print("Starting ExplainerDashboard at http://127.0.0.1:8050")
+        dashboard.run(port=8050)
+    else:
+        print("ExplainerDashboard config saved: runs_train/explainer_dashboard.yaml (set RUN_DASHBOARD=1 to run)")
+
+except Exception as e:
+    print("ExplainerDashboard not available or failed to initialize:", repr(e))
+
