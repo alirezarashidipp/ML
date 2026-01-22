@@ -231,7 +231,8 @@ def embedding_upgrade_flags(text: str, flags: Dict[str, int]) -> Dict[str, int]:
     for k in missing:
         thr, margin = EMB_THR[k]
         sim = util.cos_sim(chunk_emb, PROTO_EMB[k])
-
+        
+        flat = sim.flatten()
         best = float(sim.max().item())
 
         if sim.numel() > 1:
