@@ -140,9 +140,9 @@ EMB_PROTOTYPES = {
 # ============================================================
 
 EMB_THR = {
-    "has_role_defined":   (0.45, 0.05),
-    "has_goal_defined":   (0.42, 0.05),
-    "has_reason_defined": (0.48, 0.06),
+    "has_role_defined":   (0.40, 0.01),
+    "has_goal_defined":   (0.40, 0.01),
+    "has_reason_defined": (0.40, 0.01),
 }
 
 
