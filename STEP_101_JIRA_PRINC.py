@@ -56,9 +56,8 @@ else:
 
 EMB_PROTOTYPES = {
 
-    # -------- ROLE (WHO): Focus on Persona and Stakeholders --------
+    # -------- ROLE (WHO) --------
     "has_role_defined": [
-        # Classic User Story Roles
         "As a user, I want to",
         "As an administrator, I want to",
         "As a developer, I need to",
@@ -66,75 +65,65 @@ EMB_PROTOTYPES = {
         "As a support agent, I need to",
         "As a system architect, we need",
         "As a stakeholder, I want to see",
-        
-        # Third-party & External Roles
+
         "The end-user should have the ability to",
         "External clients must be able to",
         "The API consumer needs a way to",
         "The mobile app user wants to",
-        
-        # Permission-based Roles
+
         "Users with read-only access should",
         "Privileged users can perform",
         "Authorized personnel must be able to",
         "Unauthenticated visitors should be redirected",
-        
-        # System-as-a-Role (Non-human)
+
         "The system needs to",
         "The backend service should",
         "The database administrator needs to",
         "The automated script must be able to",
     ],
 
-    # -------- GOAL (WHAT): Focus on Functionality, Capability, and Intent --------
+    # -------- GOAL (WHAT) --------
     "has_goal_defined": [
-        # Action-Oriented
         "I want to perform an action",
         "I need to be able to",
         "Allow the user to",
         "Enable the functionality of",
         "Provide a mechanism for",
         "The system shall provide the capability to",
-        
-        # CRUD Operations (Create, Read, Update, Delete)
+
         "Create a new record in the system",
         "Update the existing configuration",
         "Delete obsolete data from the logs",
         "View and export report summaries",
         "Search for specific entries in the database",
-        
-        # Technical Intent
+
         "Implement a new endpoint for",
         "Integrate with the third-party service",
         "Automate the process of synchronization",
         "Enhance the validation logic for",
         "The application should support multi-factor authentication",
-        
-        # Common Jira Tasks
+
         "Migrate data from the old platform",
         "Fix the bug related to the UI",
         "Refactor the legacy code in the module",
         "Optimize the performance of the query",
     ],
 
-    # -------- REASON (WHY / VALUE): Focus on Business Value, Risk, and Purpose --------
+    # -------- REASON (WHY) --------
     "has_reason_defined": [
-        # Classic Value Statement
         "So that I can achieve a benefit",
         "So that the workflow is not interrupted",
         "In order to improve efficiency and speed",
         "To ensure better user experience",
         "With the aim of increasing productivity",
-        
-        # Risk & Compliance
+
         "To reduce manual work and human error",
         "To mitigate security risks and vulnerabilities",
         "To prevent data leakage during transfer",
         "For compliance with GDPR and privacy laws",
         "In order to satisfy audit requirements",
         "To meet the regulatory standards of the industry",
-        
-        # Business Driver
+
         "To reduce operational costs",
         "To provide better insights for decision making",
         "To increase system reliability and uptime",
@@ -196,7 +185,6 @@ def split_chunks(text: str) -> List[str]:
         if len(sent) < 5:
             continue
 
-        # split long Jira sentences softly
         if len(sent) > 180:
             parts = sent.split(",")
             chunks.extend(
@@ -231,17 +219,16 @@ def embedding_upgrade_flags(text: str, flags: Dict[str, int]) -> Dict[str, int]:
     for k in missing:
         thr, margin = EMB_THR[k]
         sim = util.cos_sim(chunk_emb, PROTO_EMB[k])
-        
-        flat = sim.flatten()
-        best = float(sim.max().item())
 
-        if sim.numel() > 1:
-            top2 = sim.topk(2).values
-            second = float(top2[-1])
+        flat = sim.flatten()
+        best = float(flat.max().item())
+
+        if flat.numel() > 1:
+            top2 = flat.topk(2).values
+            second = float(top2[1])
         else:
             second = 0.0
 
-        # strict recovery rule
         if best >= thr and (best - second) >= margin:
             flags[k] = 1
 
@@ -256,7 +243,6 @@ def step_101_embedding():
     print(f"📂 Reading input: {INPUT_CSV}")
     df = pd.read_csv(INPUT_CSV)
 
-    # validation
     for col in [KEY_COL, TEXT_COL]:
         if col not in df.columns:
             raise ValueError(f"Missing column: {col}")
@@ -272,7 +258,6 @@ def step_101_embedding():
     def _process(row):
         flags = {f: int(row.get(f, 0)) for f in TARGET_FLAGS}
 
-        # if already fully covered by spaCy → skip
         if all(flags.values()):
             return row
 
