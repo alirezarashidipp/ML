@@ -75,7 +75,7 @@ def flag_story_quality(text: str) -> Dict[str, int]:
     return flags
 
 # ---- Pipeline ----
-def main():
+def process_jira_princ():
     df = pd.read_csv(INPUT_CSV)
 
     flag_rows = df[TEXT_COL].apply(flag_story_quality)
@@ -83,8 +83,9 @@ def main():
 
     df_out = pd.concat([df[[KEY_COL, TEXT_COL]], flag_df], axis=1)
     df_out.to_csv(OUTPUT_CSV, index=False, encoding="utf-8")
-
+    return df_out
     print(f"✅ Saved {len(df_out)} rows to {OUTPUT_CSV}")
+    
 
 if __name__ == "__main__":
-    main()
+    process_jira_princ()
