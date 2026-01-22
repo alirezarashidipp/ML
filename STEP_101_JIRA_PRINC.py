@@ -117,9 +117,9 @@ EMB_PROTOTYPES = {
 
 
 EMB_THR = {
-    "has_role_defined": 0.62,
-    "has_goal_defined": 0.60,
-    "has_reason_defined": 0.58,
+    "has_role_defined": 0.40,
+    "has_goal_defined": 0.40,
+    "has_reason_defined": 0.40,
 }
 
 # Precompute Prototypes
