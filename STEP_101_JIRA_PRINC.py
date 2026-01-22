@@ -24,8 +24,8 @@ KEY_COL    = "Key"
 
 TARGET_FLAGS = ["has_role_defined", "has_goal_defined", "has_reason_defined"]
 
-# Embedding model
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
+MODEL_PATH = r"C:\Users\45315874\Desktop\EXTERNAL WORKS\JRE\Code\FINAL_CODE\all_MiniLM_L6_v2-1.0.0"
+embedder = SentenceTransformer(MODEL_PATH)
 
 
 # ---------------- Prototypes ----------------
@@ -135,7 +135,7 @@ def embedding_upgrade_flags(text: str, flags: Dict[str, int]) -> Dict[str, int]:
 
 
 # ---------------- Pipeline ----------------
-def main():
+def step_101_embedding():
     df = pd.read_csv(INPUT_CSV)
 
     # ensure required columns exist
@@ -173,4 +173,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    step_101_embedding()
