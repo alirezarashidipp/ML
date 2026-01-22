@@ -1,13 +1,11 @@
 # ============================================================
-# STEP 101 - Embedding fallback for WHO/WHAT/WHY flags
-# Input : STEP_100_JIRA_PRINC.csv
-# Output: STEP_101_JIRA_PRINC.csv
+# STEP 101 - Embedding fallback (Refined by Ali & AI)
 # ============================================================
 
 import pandas as pd
 from typing import Dict, List
+import spacy
 from sentence_transformers import SentenceTransformer, util
-
 
 # ---------------- Config ----------------
 INPUT_CSV  = "STEP_100_JIRA_PRINC.csv"
@@ -16,9 +14,20 @@ TEXT_COL   = "ISSUE_DESC_STR_CLEANED"
 KEY_COL    = "Key"
 
 TARGET_FLAGS = ["has_role_defined", "has_goal_defined", "has_reason_defined"]
+MAX_SENTENCES = 15
 
 MODEL_PATH = r"C:\Users\45315874\Desktop\EXTERNAL WORKS\JRE\Code\FINAL_CODE\all_MiniLM_L6_v2-1.0.0"
+# Load model once
 embedder = SentenceTransformer(MODEL_PATH)
+
+# Setup Spacy
+if not spacy.util.is_package("en_core_web_md"):
+    sent_nlp = spacy.blank("en")
+    sent_nlp.add_pipe("sentencizer")
+else:
+    sent_nlp = spacy.load("en_core_web_sm", disable=["tagger", "parser", "ner"])
+    if "sentencizer" not in sent_nlp.pipe_names:
+        sent_nlp.add_pipe("sentencizer")
 
 
 # ---------------- Prototypes ----------------
@@ -107,34 +116,44 @@ EMB_PROTOTYPES = {
 }
 
 
-# Thresholds (tune later if needed)
 EMB_THR = {
     "has_role_defined": 0.62,
     "has_goal_defined": 0.60,
     "has_reason_defined": 0.58,
 }
 
-# Precompute prototype embeddings once ✅
+# Precompute Prototypes
 PROTO_EMB = {k: embedder.encode(v, convert_to_tensor=True) for k, v in EMB_PROTOTYPES.items()}
 
 
 # ---------------- Helpers ----------------
 def split_chunks(text: str) -> List[str]:
     """
-    Single-line input => no chunking.
-    Use the whole text as one chunk.
+    Sentence chunking handling '.' and ';'
     """
     if not isinstance(text, str):
         return []
+    
     t = text.strip()
-    return [t] if t else []
+    if not t:
+        return []
+
+    # FIX: Replace semicolon with dot so Spacy treats it as a break
+    t = t.replace(';', '. ') 
+    
+    doc = sent_nlp(t)
+    sents = [s.text.strip() for s in doc.sents if len(s.text.strip()) > 3] # Skip tiny noise
+
+    if not sents:
+        return [t]
+
+    return sents[:MAX_SENTENCES]
 
 
 def embedding_upgrade_flags(text: str, flags: Dict[str, int]) -> Dict[str, int]:
-    if not isinstance(text, str) or not text.strip():
-        return flags
-
     missing = [k for k in TARGET_FLAGS if int(flags.get(k, 0)) == 0]
+    
+    # Optimization: If no flags are missing, return immediately
     if not missing:
         return flags
 
@@ -142,12 +161,15 @@ def embedding_upgrade_flags(text: str, flags: Dict[str, int]) -> Dict[str, int]:
     if not chunks:
         return flags
 
-    # Encode once (single chunk)
+    # Encode locally (Small batch of 15 items)
+    # This is still not "Global Batch", but handles the 15 sentences in parallel
     chunk_emb = embedder.encode(chunks, convert_to_tensor=True)
 
     for k in missing:
-        sim = util.cos_sim(chunk_emb, PROTO_EMB[k])  # [1, num_protos]
+        sim = util.cos_sim(chunk_emb, PROTO_EMB[k])
+        # Find max similarity across all chunks vs all prototypes
         best = float(sim.max().item())
+        
         if best >= EMB_THR[k]:
             flags[k] = 1
 
@@ -156,37 +178,47 @@ def embedding_upgrade_flags(text: str, flags: Dict[str, int]) -> Dict[str, int]:
 
 # ---------------- Pipeline ----------------
 def step_101_embedding():
+    print(f"📂 Reading {INPUT_CSV}...")
     df = pd.read_csv(INPUT_CSV)
 
+    # Validation
     for col in [KEY_COL, TEXT_COL]:
         if col not in df.columns:
-            raise ValueError(f"Missing required column: {col}")
-
+            raise ValueError(f"Missing column: {col}")
+    
     for f in TARGET_FLAGS:
         if f not in df.columns:
             df[f] = 0
 
     before = {f: int(df[f].sum()) for f in TARGET_FLAGS}
 
-    def _row_apply(row):
+    print("🚀 Running Embedding Analysis (Row-by-Row)...")
+    
+    # Using a simple progress indicator if possible, otherwise standard apply
+    # We use a wrapper to handle the apply logic cleanly
+    def _process(row):
         flags = {f: int(row.get(f, 0)) for f in TARGET_FLAGS}
+        # Only run embedding if strictly necessary
+        if all(flags.values()): 
+            return row
+            
         upgraded = embedding_upgrade_flags(row[TEXT_COL], flags)
         for f in TARGET_FLAGS:
             row[f] = int(upgraded[f])
         return row
 
-    df_out = df.apply(_row_apply, axis=1)
+    df_out = df.apply(_process, axis=1)
 
     after = {f: int(df_out[f].sum()) for f in TARGET_FLAGS}
     delta = {f: after[f] - before[f] for f in TARGET_FLAGS}
 
     df_out.to_csv(OUTPUT_CSV, index=False, encoding="utf-8")
 
+    print("-" * 30)
     print(f"✅ Saved {len(df_out)} rows to {OUTPUT_CSV}")
-    print("📌 Upgrades via embedding:")
+    print("📌 Results:")
     for f in TARGET_FLAGS:
-        print(f" - {f}: +{delta[f]} (before={before[f]}, after={after[f]})")
-
+        print(f" - {f}: +{delta[f]} (Total: {after[f]})")
 
 if __name__ == "__main__":
     step_101_embedding()
