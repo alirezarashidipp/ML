@@ -25,7 +25,7 @@ if not spacy.util.is_package("en_core_web_md"):
     sent_nlp = spacy.blank("en")
     sent_nlp.add_pipe("sentencizer")
 else:
-    sent_nlp = spacy.load("en_core_web_sm", disable=["tagger", "parser", "ner"])
+    sent_nlp = spacy.load("en_core_web_md", disable=["tagger", "parser", "ner"])
     if "sentencizer" not in sent_nlp.pipe_names:
         sent_nlp.add_pipe("sentencizer")
 
