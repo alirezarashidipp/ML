@@ -1,5 +1,9 @@
 # ============================================================
-# STEP 101 - Embedding fallback (Refined by Ali & AI)
+# STEP 101 - Embedding Recall Recovery (Production Version)
+# Author: Ali
+# Purpose:
+#   - Preserve spaCy precision (oracle)
+#   - Recover false negatives using semantic embeddings
 # ============================================================
 
 import pandas as pd
@@ -7,20 +11,36 @@ from typing import Dict, List
 import spacy
 from sentence_transformers import SentenceTransformer, util
 
-# ---------------- Config ----------------
+
+# ============================================================
+# CONFIG
+# ============================================================
+
 INPUT_CSV  = "STEP_100_JIRA_PRINC.csv"
 OUTPUT_CSV = "STEP_101_JIRA_PRINC.csv"
-TEXT_COL   = "ISSUE_DESC_STR_CLEANED"
-KEY_COL    = "Key"
 
-TARGET_FLAGS = ["has_role_defined", "has_goal_defined", "has_reason_defined"]
+TEXT_COL = "ISSUE_DESC_STR_CLEANED"
+KEY_COL  = "Key"
+
+TARGET_FLAGS = [
+    "has_role_defined",
+    "has_goal_defined",
+    "has_reason_defined",
+]
+
 MAX_SENTENCES = 15
 
 MODEL_PATH = r"C:\Users\45315874\Desktop\EXTERNAL WORKS\JRE\Code\FINAL_CODE\all_MiniLM_L6_v2-1.0.0"
-# Load model once
+
+
+# ============================================================
+# LOAD MODELS
+# ============================================================
+
+print("🔹 Loading embedding model...")
 embedder = SentenceTransformer(MODEL_PATH)
 
-# Setup Spacy
+print("🔹 Loading spaCy sentencizer...")
 if not spacy.util.is_package("en_core_web_md"):
     sent_nlp = spacy.blank("en")
     sent_nlp.add_pipe("sentencizer")
@@ -30,130 +50,171 @@ else:
         sent_nlp.add_pipe("sentencizer")
 
 
-# ---------------- Prototypes ----------------
+# ============================================================
+# EMBEDDING PROTOTYPES
+# ============================================================
+
 EMB_PROTOTYPES = {
-    # ---------------- ROLE (WHO) ----------------
+
+    # -------- ROLE (WHO): Focus on Persona and Stakeholders --------
     "has_role_defined": [
-        # classic user story
+        # Classic User Story Roles
         "As a user, I want to",
         "As an administrator, I want to",
-        "As a customer, I want to",
-        "As a developer, I want to",
+        "As a developer, I need to",
         "As a product owner, I want to",
-        "As a support agent, I want to",
-
-        # variants people write in Jira
-        "As an admin, I need to",
-        "As a manager, I need to",
-        "As an analyst, I need to",
-        "As an engineer, I need to",
-        "As a tester, I need to",
-
-        # implicit-role formulations (often appears without 'As a')
-        "Admin should be able to",
-        "Users should be able to",
-        "A user should be able to",
-        "The administrator should be able to",
-        "Customer should be able to",
-        "Developers should be able to",
+        "As a support agent, I need to",
+        "As a system architect, we need",
+        "As a stakeholder, I want to see",
+        
+        # Third-party & External Roles
+        "The end-user should have the ability to",
+        "External clients must be able to",
+        "The API consumer needs a way to",
+        "The mobile app user wants to",
+        
+        # Permission-based Roles
+        "Users with read-only access should",
+        "Privileged users can perform",
+        "Authorized personnel must be able to",
+        "Unauthenticated visitors should be redirected",
+        
+        # System-as-a-Role (Non-human)
+        "The system needs to",
+        "The backend service should",
+        "The database administrator needs to",
+        "The automated script must be able to",
     ],
 
-    # ---------------- GOAL (WHAT) ----------------
+    # -------- GOAL (WHAT): Focus on Functionality, Capability, and Intent --------
     "has_goal_defined": [
-        # classic goal
+        # Action-Oriented
         "I want to perform an action",
-        "I need to perform an action",
-        "I want to be able to do something",
-        "I need to be able to do something",
-
-        # system/requirement style
-        "The system should allow the user to perform an action",
-        "The system shall allow the user to perform an action",
-        "The system should support the ability to perform an action",
-        "The application should allow users to perform an action",
-        "Allow the user to perform an action",
-        "Enable the user to perform an action",
-
-        # common Jira phrasing
-        "Please add the ability to perform an action",
-        "Implement functionality to perform an action",
-        "Provide an option to perform an action",
-        "Users can perform an action",
-        "Users should be able to perform an action",
-
-        # very common action intents
-        "I want to log in",
-        "I want to login",
-        "I want to reset my password",
-        "I want to update my profile",
-        "I want to view my account details",
-        "I want to download a report",
+        "I need to be able to",
+        "Allow the user to",
+        "Enable the functionality of",
+        "Provide a mechanism for",
+        "The system shall provide the capability to",
+        
+        # CRUD Operations (Create, Read, Update, Delete)
+        "Create a new record in the system",
+        "Update the existing configuration",
+        "Delete obsolete data from the logs",
+        "View and export report summaries",
+        "Search for specific entries in the database",
+        
+        # Technical Intent
+        "Implement a new endpoint for",
+        "Integrate with the third-party service",
+        "Automate the process of synchronization",
+        "Enhance the validation logic for",
+        "The application should support multi-factor authentication",
+        
+        # Common Jira Tasks
+        "Migrate data from the old platform",
+        "Fix the bug related to the UI",
+        "Refactor the legacy code in the module",
+        "Optimize the performance of the query",
     ],
 
-    # ---------------- REASON (WHY / VALUE) ----------------
+    # -------- REASON (WHY / VALUE): Focus on Business Value, Risk, and Purpose --------
     "has_reason_defined": [
-        # classic user story reason
+        # Classic Value Statement
         "So that I can achieve a benefit",
-        "So that we can achieve a benefit",
-        "So that the user can achieve a benefit",
-
-        # common variants
-        "In order to achieve a benefit",
-        "In order to reduce risk",
-        "In order to improve efficiency",
-        "To improve user experience",
-        "To reduce manual work",
-        "To prevent errors",
-
-        # enterprise drivers
-        "For compliance reasons",
-        "For audit purposes",
-        "To meet regulatory requirements",
-        "To reduce incidents",
-        "To improve security",
-        "To increase reliability",
+        "So that the workflow is not interrupted",
+        "In order to improve efficiency and speed",
+        "To ensure better user experience",
+        "With the aim of increasing productivity",
+        
+        # Risk & Compliance
+        "To reduce manual work and human error",
+        "To mitigate security risks and vulnerabilities",
+        "To prevent data leakage during transfer",
+        "For compliance with GDPR and privacy laws",
+        "In order to satisfy audit requirements",
+        "To meet the regulatory standards of the industry",
+        
+        # Business Driver
+        "To reduce operational costs",
+        "To provide better insights for decision making",
+        "To increase system reliability and uptime",
+        "To maintain backward compatibility",
+        "This is required for the upcoming release",
+        "To avoid customer dissatisfaction and churn",
+        "Because the current process is too slow",
     ],
 }
 
+
+# ============================================================
+# THRESHOLDS (threshold, margin)
+# ============================================================
 
 EMB_THR = {
-    "has_role_defined": 0.40,
-    "has_goal_defined": 0.40,
-    "has_reason_defined": 0.40,
+    "has_role_defined":   (0.45, 0.05),
+    "has_goal_defined":   (0.42, 0.05),
+    "has_reason_defined": (0.48, 0.06),
 }
 
-# Precompute Prototypes
-PROTO_EMB = {k: embedder.encode(v, convert_to_tensor=True) for k, v in EMB_PROTOTYPES.items()}
+
+# ============================================================
+# PRECOMPUTE PROTOTYPE EMBEDDINGS
+# ============================================================
+
+print("🔹 Encoding prototype embeddings...")
+PROTO_EMB = {
+    k: embedder.encode(
+        v,
+        convert_to_tensor=True,
+        normalize_embeddings=True
+    )
+    for k, v in EMB_PROTOTYPES.items()
+}
 
 
-# ---------------- Helpers ----------------
+# ============================================================
+# HELPERS
+# ============================================================
+
 def split_chunks(text: str) -> List[str]:
     """
-    Sentence chunking handling '.' and ';'
+    Sentence + soft clause chunking.
+    Handles '.', ',' and ';' with Jira-style noise.
     """
     if not isinstance(text, str):
         return []
-    
-    t = text.strip()
+
+    t = text.strip().replace(";", ". ")
     if not t:
         return []
 
-    # FIX: Replace semicolon with dot so Spacy treats it as a break
-    t = t.replace(';', '. ') 
-    
     doc = sent_nlp(t)
-    sents = [s.text.strip() for s in doc.sents if len(s.text.strip()) > 3] # Skip tiny noise
+    chunks = []
 
-    if not sents:
-        return [t]
+    for s in doc.sents:
+        sent = s.text.strip()
+        if len(sent) < 5:
+            continue
 
-    return sents[:MAX_SENTENCES]
+        # split long Jira sentences softly
+        if len(sent) > 180:
+            parts = sent.split(",")
+            chunks.extend(
+                p.strip() for p in parts if len(p.strip()) > 10
+            )
+        else:
+            chunks.append(sent)
+
+    return chunks[:MAX_SENTENCES]
 
 
 def embedding_upgrade_flags(text: str, flags: Dict[str, int]) -> Dict[str, int]:
+    """
+    Semantic recall recovery.
+    spaCy positives are NEVER overridden.
+    """
+
     missing = [k for k in TARGET_FLAGS if int(flags.get(k, 0)) == 0]
-    
-    # Optimization: If no flags are missing, return immediately
     if not missing:
         return flags
 
@@ -161,50 +222,64 @@ def embedding_upgrade_flags(text: str, flags: Dict[str, int]) -> Dict[str, int]:
     if not chunks:
         return flags
 
-    # Encode locally (Small batch of 15 items)
-    # This is still not "Global Batch", but handles the 15 sentences in parallel
-    chunk_emb = embedder.encode(chunks, convert_to_tensor=True)
+    chunk_emb = embedder.encode(
+        chunks,
+        convert_to_tensor=True,
+        normalize_embeddings=True
+    )
 
     for k in missing:
+        thr, margin = EMB_THR[k]
         sim = util.cos_sim(chunk_emb, PROTO_EMB[k])
-        # Find max similarity across all chunks vs all prototypes
+
         best = float(sim.max().item())
-        
-        if best >= EMB_THR[k]:
+
+        if sim.numel() > 1:
+            top2 = sim.topk(2).values
+            second = float(top2[-1])
+        else:
+            second = 0.0
+
+        # strict recovery rule
+        if best >= thr and (best - second) >= margin:
             flags[k] = 1
 
     return flags
 
 
-# ---------------- Pipeline ----------------
+# ============================================================
+# PIPELINE
+# ============================================================
+
 def step_101_embedding():
-    print(f"📂 Reading {INPUT_CSV}...")
+    print(f"📂 Reading input: {INPUT_CSV}")
     df = pd.read_csv(INPUT_CSV)
 
-    # Validation
+    # validation
     for col in [KEY_COL, TEXT_COL]:
         if col not in df.columns:
             raise ValueError(f"Missing column: {col}")
-    
+
     for f in TARGET_FLAGS:
         if f not in df.columns:
             df[f] = 0
 
     before = {f: int(df[f].sum()) for f in TARGET_FLAGS}
 
-    print("🚀 Running Embedding Analysis (Row-by-Row)...")
-    
-    # Using a simple progress indicator if possible, otherwise standard apply
-    # We use a wrapper to handle the apply logic cleanly
+    print("🚀 Running embedding recall recovery...")
+
     def _process(row):
         flags = {f: int(row.get(f, 0)) for f in TARGET_FLAGS}
-        # Only run embedding if strictly necessary
-        if all(flags.values()): 
+
+        # if already fully covered by spaCy → skip
+        if all(flags.values()):
             return row
-            
+
         upgraded = embedding_upgrade_flags(row[TEXT_COL], flags)
+
         for f in TARGET_FLAGS:
             row[f] = int(upgraded[f])
+
         return row
 
     df_out = df.apply(_process, axis=1)
@@ -214,11 +289,16 @@ def step_101_embedding():
 
     df_out.to_csv(OUTPUT_CSV, index=False, encoding="utf-8")
 
-    print("-" * 30)
-    print(f"✅ Saved {len(df_out)} rows to {OUTPUT_CSV}")
-    print("📌 Results:")
+    print("-" * 40)
+    print(f"✅ Saved {len(df_out)} rows → {OUTPUT_CSV}")
+    print("📊 Recovery summary:")
     for f in TARGET_FLAGS:
-        print(f" - {f}: +{delta[f]} (Total: {after[f]})")
+        print(f" - {f}: +{delta[f]} (total = {after[f]})")
+
+
+# ============================================================
+# ENTRY POINT
+# ============================================================
 
 if __name__ == "__main__":
     step_101_embedding()
