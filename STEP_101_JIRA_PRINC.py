@@ -23,34 +23,89 @@ embedder = SentenceTransformer(MODEL_PATH)
 
 # ---------------- Prototypes ----------------
 EMB_PROTOTYPES = {
+    # ---------------- ROLE (WHO) ----------------
     "has_role_defined": [
+        # classic user story
         "As a user, I want to",
-        "As an administrator, I need to",
+        "As an administrator, I want to",
         "As a customer, I want to",
-        "As a developer, I need to",
-        "As a <persona>, I want to",
-        "As a <role>, I need to",
+        "As a developer, I want to",
+        "As a product owner, I want to",
+        "As a support agent, I want to",
+
+        # variants people write in Jira
+        "As an admin, I need to",
+        "As a manager, I need to",
+        "As an analyst, I need to",
+        "As an engineer, I need to",
+        "As a tester, I need to",
+
+        # implicit-role formulations (often appears without 'As a')
+        "Admin should be able to",
+        "Users should be able to",
+        "A user should be able to",
+        "The administrator should be able to",
+        "Customer should be able to",
+        "Developers should be able to",
     ],
+
+    # ---------------- GOAL (WHAT) ----------------
     "has_goal_defined": [
-        "I want to",
-        "I need to",
-        "We want to",
-        "We need to",
-        "The system should",
-        "Allow users to",
-        "Enable the user to",
-        "Please add a feature to",
+        # classic goal
+        "I want to perform an action",
+        "I need to perform an action",
+        "I want to be able to do something",
+        "I need to be able to do something",
+
+        # system/requirement style
+        "The system should allow the user to perform an action",
+        "The system shall allow the user to perform an action",
+        "The system should support the ability to perform an action",
+        "The application should allow users to perform an action",
+        "Allow the user to perform an action",
+        "Enable the user to perform an action",
+
+        # common Jira phrasing
+        "Please add the ability to perform an action",
+        "Implement functionality to perform an action",
+        "Provide an option to perform an action",
+        "Users can perform an action",
+        "Users should be able to perform an action",
+
+        # very common action intents
+        "I want to log in",
+        "I want to login",
+        "I want to reset my password",
+        "I want to update my profile",
+        "I want to view my account details",
+        "I want to download a report",
     ],
+
+    # ---------------- REASON (WHY / VALUE) ----------------
     "has_reason_defined": [
-        "So that I can",
-        "So we can",
-        "In order to",
-        "To reduce risk",
+        # classic user story reason
+        "So that I can achieve a benefit",
+        "So that we can achieve a benefit",
+        "So that the user can achieve a benefit",
+
+        # common variants
+        "In order to achieve a benefit",
+        "In order to reduce risk",
+        "In order to improve efficiency",
         "To improve user experience",
+        "To reduce manual work",
+        "To prevent errors",
+
+        # enterprise drivers
         "For compliance reasons",
-        "To avoid incidents",
+        "For audit purposes",
+        "To meet regulatory requirements",
+        "To reduce incidents",
+        "To improve security",
+        "To increase reliability",
     ],
 }
+
 
 # Thresholds (tune later if needed)
 EMB_THR = {
