@@ -2,7 +2,8 @@
 LABELS = {
     "WHO":  "an explicit actor/role (WHO)",
     "WHAT": "an explicit goal/action (WHAT)",
-    "WHY":  "an explicit reason/value (WHY)",
+    # improved WHY label (slightly clearer separation from WHAT)
+    "WHY":  "an explicit reason, business value, or intended outcome (WHY)",
 }
 
 TEMPLATES = {
@@ -10,7 +11,6 @@ TEMPLATES = {
         "This Jira user story explicitly states {}.",
         "The text clearly includes {}.",
         "There is {} in the story.",
-        # more context (boost WHO precision/recall)
         "The story has a role/actor mentioned such as user/admin/developer/system: {}.",
         "An actor is specified (e.g., 'As a ...', 'User should be able to ...'): {}.",
     ],
@@ -18,19 +18,47 @@ TEMPLATES = {
         "This Jira user story explicitly states {}.",
         "The text clearly includes {}.",
         "There is {} in the story.",
-        # more context (boost WHAT)
         "A concrete requested capability or action is stated (e.g., 'I want to ...', 'System should ...'): {}.",
         "The story contains a goal or required functionality: {}.",
     ],
     "WHY": [
+        # base
         "This Jira user story explicitly states {}.",
         "The text clearly includes {}.",
         "There is {} in the story.",
-        # more context (boost WHY)
         "A reason or business value is stated using cues like 'so that', 'in order to', 'because': {}.",
         "The story explains the benefit/outcome/value of the request: {}.",
+
+        # --- MORE CONTEXT for VALUE / WHY ---
+        "This Jira user story explicitly explains a reason or value (WHY): {}.",
+        "The story states the benefit/outcome of the request (WHY): {}.",
+        "The text contains an explicit rationale for the action (WHY): {}.",
+        "The story includes a 'so that / in order to / because' style justification (WHY): {}.",
+
+        "The story explains what positive outcome will happen if the request is implemented (WHY): {}.",
+        "The story states the intended impact or result of the change (WHY): {}.",
+        "The story describes the value delivered to a user, customer, or business (WHY): {}.",
+        "The story clarifies the purpose of the request beyond the action itself (WHY): {}.",
+
+        "The story mentions value such as faster delivery, time saving, or efficiency (WHY): {}.",
+        "The story mentions value such as improved user experience or usability (WHY): {}.",
+        "The story mentions value such as reduced risk, fewer errors, or higher safety (WHY): {}.",
+        "The story mentions value such as reliability, availability, or performance improvement (WHY): {}.",
+        "The story mentions value such as cost reduction or operational savings (WHY): {}.",
+        "The story mentions compliance, audit, regulatory, or security justification (WHY): {}.",
+        "The story mentions data quality, accuracy, or consistency as the reason (WHY): {}.",
+
+        "The story explains the underlying business objective behind the request (WHY): {}.",
+        "The story includes a motivation statement (e.g., 'to reduce...', 'to prevent...', 'to enable...') (WHY): {}.",
+        "The story includes a value statement about what is gained or avoided (WHY): {}.",
+        "The story includes a justification describing why the change matters (WHY): {}.",
+
+        "The story indicates preventing an issue, avoiding failure, or mitigating a problem as the WHY: {}.",
+        "The story explains the reason as reducing manual work, rework, or bottlenecks (WHY): {}.",
+        "The story explains the reason as improving traceability, transparency, or monitoring (WHY): {}.",
     ],
 }
+
 
 AGGREGATION = "max"   # "max" (recommended) or "mean"
 
