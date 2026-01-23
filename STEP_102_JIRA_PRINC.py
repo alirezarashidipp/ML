@@ -1,3 +1,35 @@
+# ============================================================
+# WHO / WHAT / WHY detection (NLI Zero-Shot)
+# - Reusable module
+# - Batch (CSV), Real-time (API), Standalone
+# ============================================================
+
+from typing import Dict, Tuple, List
+from transformers import pipeline
+import pandas as pd
+
+
+# ============================================================
+# CONFIG
+# ============================================================
+
+MODEL_PATH = r"C:\Users\45315874\Desktop\EXTERNAL WORKS\JRE\Code\FINAL_CODE\bart-Large-mnli-tensors"
+
+TEXT_COL = "ISSUE_DESC_STR_CLEANED"
+KEY_COL  = "Key"
+
+INPUT_CSV  = "STEP_4_LANG_SEP.csv"
+OUTPUT_CSV = "STEP_200_JIRA_NLI_WHO_WHAT_WHY.csv"
+
+AGGREGATION = "max"      # "max" | "mean"
+RETURN_DEBUG = False     # True for diagnostics
+THRESHOLDS = {"WHO": 0.55, "WHAT": 0.55, "WHY": 0.65}
+
+
+# ============================================================
+# LABELS & TEMPLATES
+# ============================================================
+
 # ---------- config ----------
 LABELS = {
     "WHO":  "an explicit actor/role (WHO)",
@@ -60,41 +92,128 @@ TEMPLATES = {
 }
 
 
-AGGREGATION = "max"   # "max" (recommended) or "mean"
+# ============================================================
+# LOAD MODEL (ONCE)
+# ============================================================
+
+print("🔹 Loading NLI model...")
+clf = pipeline(
+    "zero-shot-classification",
+    model=MODEL_PATH,
+    truncation=True,
+)
 
 
-# ---------- code ----------
-from transformers import pipeline
+# ============================================================
+# INTERNAL HELPERS
+# ============================================================
 
-MODEL_PATH = r"C:\Users\45315874\Desktop\EXTERNAL WORKS\JRE\Code\FINAL_CODE\bart-Large-mnli-tensors"
-clf = pipeline("zero-shot-classification", model=MODEL_PATH)
-
-def aggregate(scores, how="max"):
+def _aggregate(scores: List[float], how: str = "max") -> float:
     if not scores:
         return 0.0
-    if how == "mean":
-        return sum(scores) / len(scores)
-    return max(scores)
+    return max(scores) if how == "max" else sum(scores) / len(scores)
 
-def who_what_why_scores(text: str):
-    out = {}
-    for key, label in LABELS.items():
-        template_scores = []
-        for tpl in TEMPLATES[key]:
-            res = clf(
-                text,
-                [label],                       # single label => cleaner signal
-                hypothesis_template=tpl,
-                multi_label=True,              # keep independent probability
-            )
-            template_scores.append(float(res["scores"][0]))
-        out[key] = aggregate(template_scores, AGGREGATION)
-    return out
 
-# demo
-text = "As a developer, I want to deploy the code so that releases are faster."
-scores = who_what_why_scores(text)
+def _score_dimension(text: str, dim: str) -> Tuple[float, List[Tuple[str, float]]]:
+    label = LABELS[dim]
+    scores = []
+    debug = []
 
-print("Text:", text)
-for k in ["WHO", "WHAT", "WHY"]:
-    print(f"{k}: {scores[k]*100:.2f}%")
+    for tpl in TEMPLATES[dim]:
+        res = clf(
+            text,
+            [label],
+            hypothesis_template=tpl,
+            multi_label=True,
+        )
+        s = float(res["scores"][0])
+        scores.append(s)
+        if RETURN_DEBUG:
+            debug.append((tpl, s))
+
+    final_score = _aggregate(scores, AGGREGATION)
+    return final_score, debug
+
+
+# ============================================================
+# ✅ CORE BUSINESS FUNCTION (REAL-TIME SAFE)
+# ============================================================
+
+def detect_who_what_why(text: str) -> Dict[str, object]:
+    """
+    Core reusable logic:
+    - No file IO
+    - Safe for FastAPI / services
+    """
+
+    if not isinstance(text, str) or not text.strip():
+        return {
+            "scores": {"WHO": 0.0, "WHAT": 0.0, "WHY": 0.0},
+            "flags":  {"WHO": False, "WHAT": False, "WHY": False},
+            "debug":  {},
+        }
+
+    scores = {}
+    flags = {}
+    debug = {}
+
+    for dim in ["WHO", "WHAT", "WHY"]:
+        s, d = _score_dimension(text, dim)
+        scores[dim] = s
+        flags[dim] = s >= THRESHOLDS[dim]
+
+        if RETURN_DEBUG:
+            debug[dim] = sorted(d, key=lambda x: x[1], reverse=True)[:5]
+
+    return {
+        "scores": scores,
+        "flags": flags,
+        "debug": debug if RETURN_DEBUG else None,
+    }
+
+
+# ============================================================
+# ✅ BATCH PIPELINE (CSV → CSV)
+# ============================================================
+
+def process_jira_nli_csv(
+    input_csv: str = INPUT_CSV,
+    output_csv: str = OUTPUT_CSV,
+) -> pd.DataFrame:
+
+    df = pd.read_csv(input_csv)
+
+    results = df[TEXT_COL].apply(detect_who_what_why)
+
+    scores_df = pd.DataFrame([r["scores"] for r in results])
+    flags_df  = pd.DataFrame([r["flags"]  for r in results])
+
+    scores_df = scores_df.add_prefix("nli_score_")
+    flags_df  = flags_df.add_prefix("has_")
+
+    df_out = pd.concat(
+        [df[[KEY_COL, TEXT_COL]], scores_df, flags_df],
+        axis=1
+    )
+
+    df_out.to_csv(output_csv, index=False, encoding="utf-8")
+    print(f"✅ Saved {len(df_out)} rows to {output_csv}")
+
+    return df_out
+
+
+# ============================================================
+# ✅ STANDALONE EXECUTION
+# ============================================================
+
+if __name__ == "__main__":
+    text = "As a developer, I want to deploy the code so that releases are faster."
+
+    out = detect_who_what_why(text)
+
+    print("Text:", text)
+    for k in ["WHO", "WHAT", "WHY"]:
+        print(f"{k}: {out['scores'][k]*100:.2f}% | flag={out['flags'][k]}")
+
+    # Uncomment for batch run
+    # process_jira_nli_csv()
