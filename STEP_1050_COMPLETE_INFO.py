@@ -17,22 +17,40 @@ try:
    model = AutoModelForCausalLM.from_pretrained(path)
 """
 
+"""
+MVP: Jira Story → Structured JSON
+Backends:
+- USE_LOCAL_MODEL=True  -> load from local folder (Windows path)
+- USE_LOCAL_MODEL=False -> load from Hugging Face (Google Colab-friendly)
+
+Deterministic generation:
+- do_sample=False
+- temperature=0.0
+
+Notes for gated Llama models on Colab:
+- You may need to login once:
+    from huggingface_hub import login
+    login()  # paste your HF token
+"""
+
 import json
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 # ---------------- Runtime Switch ----------------
-USE_LOCAL_MODEL = True  # True = Local Llama | False = API (stub)
+USE_LOCAL_MODEL = True  # True = Local folder | False = Hugging Face Hub
 
 # ---------------- Config ----------------
-MODEL_PATH = r"C:\Users\45315874\Desktop\EXTERNAL WORKS\LLM\LLAMA"
+MODEL_PATH_LOCAL = r"C:\Users\45315874\Desktop\EXTERNAL WORKS\LLM\LLAMA"
+MODEL_ID_HF = "meta-llama/Llama-3.2-1B-Instruct"  # for Colab / HF download
 MAX_NEW_TOKENS = 560
 
-# ---------------- Load (Local only) ----------------
-if USE_LOCAL_MODEL:
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
-    model = AutoModelForCausalLM.from_pretrained(MODEL_PATH)
-    model.eval()
+# ---------------- Load (Local OR Hugging Face) ----------------
+MODEL_SOURCE = MODEL_PATH_LOCAL if USE_LOCAL_MODEL else MODEL_ID_HF
+
+tokenizer = AutoTokenizer.from_pretrained(MODEL_SOURCE)
+model = AutoModelForCausalLM.from_pretrained(MODEL_SOURCE)
+model.eval()
 
 
 def build_prompt(story: str) -> str:
@@ -120,18 +138,16 @@ Return JSON with EXACT structure:
 
 @torch.no_grad()
 def run_llm(prompt: str) -> str:
-    if USE_LOCAL_MODEL:
-        inputs = tokenizer(prompt, return_tensors="pt")
-        out_ids = model.generate(
-            **inputs,
-            max_new_tokens=MAX_NEW_TOKENS,
-            do_sample=False,   # deterministic
-            temperature=0.0,
-        )
-        return tokenizer.decode(out_ids[0], skip_special_tokens=True)
+    inputs = tokenizer(prompt, return_tensors="pt")
 
-    # API mode stub: plug your API client here later
-    raise NotImplementedError("API mode is not wired yet. Set USE_LOCAL_MODEL=True for local inference.")
+    out_ids = model.generate(
+        **inputs,
+        max_new_tokens=MAX_NEW_TOKENS,
+        do_sample=False,   # deterministic
+        temperature=0.0,
+    )
+
+    return tokenizer.decode(out_ids[0], skip_special_tokens=True)
 
 
 def analyze_story(story: str) -> dict:
@@ -159,7 +175,3 @@ if __name__ == "__main__":
         "As an admin, I want to reset user passwords via the portal to reduce support tickets. "
         "Acceptance Criteria: Admin can trigger a reset link; user receives email within 2 minutes. "
         "We must integrate with the existing Identity API."
-    )
-
-    result = analyze_story(jira_description)
-    print(json.dumps(result, indent=2))
