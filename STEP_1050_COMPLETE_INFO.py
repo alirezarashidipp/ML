@@ -37,6 +37,8 @@ Notes for gated Llama models on Colab:
 !pip uninstall -y torchvision torchaudio
 !pip install -U torch==2.7.0 transformers==4.49.0 tokenizers==0.21.0 huggingface_hub
 
+from huggingface_hub import login
+login()
 """
 
 import json
