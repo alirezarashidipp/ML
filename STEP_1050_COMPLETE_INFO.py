@@ -17,13 +17,14 @@ try:
    model = AutoModelForCausalLM.from_pretrained(path)
 """
 
+
 import json
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 # ---------------- Config ----------------
 MODEL_PATH = r"C:\Users\45315874\Desktop\EXTERNAL WORKS\LLM\LLAMA"
-MAX_NEW_TOKENS = 520  # JSON is longer; keep enough headroom
+MAX_NEW_TOKENS = 560
 
 # ---------------- Load ----------------
 tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
@@ -31,20 +32,18 @@ model = AutoModelForCausalLM.from_pretrained(MODEL_PATH)
 model.eval()
 
 
-# ---------------- Prompt ----------------
 def build_prompt(story: str) -> str:
     return f"""
 You are a strict JSON generator for Jira story intelligence.
 Return ONLY valid JSON. No markdown. No extra text.
 
-General rules:
+GENERAL RULES:
 - If something is NOT explicitly stated, set it to null and set is_defined=false.
 - confidence is a self-rated confidence in [0.0, 1.0] with ONE decimal (e.g., 0.7).
-- Extracted text fields must be short and grounded in the story.
-- key_clarification_questions must contain exactly 2 concise questions (or empty strings if none).
-- Keep outputs concise.
+- Keep extracted text short and grounded in the story.
+- Never invent technologies, systems, or constraints that are not hinted in the text.
 
-Allowed enums:
+ALLOWED ENUMS:
 - intent.type: "Create" | "Modify" | "Remove" | "Migrate" | "Integrate" | "Investigate" | "Enforce" | null
 - value.category: "Customer" | "Cost" | "Risk" | "Compliance" | "Internal Efficiency" | null
 - value.direct_customer_impact: "No" | "Low" | "Medium" | "High"
@@ -53,9 +52,22 @@ Allowed enums:
 - priorities: subset of
   ["Drive customer-centricity", "Deliver focused sustainable growth", "Be simple and agile"]
 
-Technology/skills constraints:
-- tech_stack_indicators: up to 3 items (e.g., "Frontend", "Backend", "Database", "API", "Python", "React", "Kafka")
-- skills_required_top3: up to 3 items (e.g., "Python", "SQL", "React")
+TECH/SKILLS CONSTRAINTS:
+- delivery_signals.tech_stack_indicators: up to 3 items (e.g., "Frontend", "Backend", "Database", "API", "Python", "React")
+- delivery_signals.skills_required_top3: up to 3 items (e.g., "Python", "SQL", "React")
+
+DELIVERY CLARIFICATION QUESTIONS (VERY IMPORTANT):
+- Generate EXACTLY 2 questions.
+- Questions MUST be about DELIVERY/CONTENT CLARIFICATIONS, NOT about identifying WHAT or WHY.
+- DO NOT ask: "What is the goal?" / "What is requested?" / "Why is this needed?" / "Can you clarify?" / "Provide more details".
+- Each question must focus on ONE of these areas:
+  (1) Acceptance criteria / testability
+  (2) Scope boundaries (in-scope / out-of-scope)
+  (3) Dependencies / integration specifics (which system/API/data)
+  (4) Edge cases / failure scenarios / rollback
+  (5) Non-functional requirements (security, performance, logging, audit)
+- Questions must be specific and verifiable, referencing story terms when possible.
+- If the story already includes clear measurable AC + clear scope + clear dependencies, then ask about failure scenarios and audit/logging.
 
 Now analyze the story:
 
@@ -82,8 +94,8 @@ Return JSON with EXACT structure:
     "category": null,
     "direct_customer_impact": "No"
   }},
-  "information_gaps": {{
-    "key_clarification_questions": ["", ""]
+  "delivery_clarifications": {{
+    "top2_questions": ["", ""]
   }},
   "scope": {{
     "shape": null
@@ -103,7 +115,6 @@ Return JSON with EXACT structure:
 """.strip()
 
 
-# ---------------- Inference ----------------
 @torch.no_grad()
 def analyze_story(story: str) -> dict:
     prompt = build_prompt(story)
@@ -118,18 +129,16 @@ def analyze_story(story: str) -> dict:
 
     text = tokenizer.decode(out_ids[0], skip_special_tokens=True)
 
-    # Minimal, reliable JSON extraction
     try:
         start = text.index("{")
         end = text.rindex("}") + 1
         return json.loads(text[start:end])
     except Exception:
-        # Fail-safe minimal structure
         return {
             "ownership": {"is_defined": False, "confidence": 0.0, "owner_or_actor": None},
             "intent": {"is_defined": False, "confidence": 0.0, "primary_intent": None, "type": None},
             "value": {"is_defined": False, "confidence": 0.0, "category": None, "direct_customer_impact": "No"},
-            "information_gaps": {"key_clarification_questions": ["", ""]},
+            "delivery_clarifications": {"top2_questions": ["", ""]},
             "scope": {"shape": None},
             "execution_risk": {"level": "High", "primary_risk_driver": "Unclear scope boundary"},
             "strategic_alignment": {"hsbc_priorities": []},
@@ -137,7 +146,6 @@ def analyze_story(story: str) -> dict:
         }
 
 
-# ---------------- Example ----------------
 if __name__ == "__main__":
     jira_description = (
         "As an admin, I want to reset user passwords via the portal to reduce support tickets. "
@@ -147,3 +155,4 @@ if __name__ == "__main__":
 
     result = analyze_story(jira_description)
     print(json.dumps(result, indent=2))
+
