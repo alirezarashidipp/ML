@@ -175,3 +175,7 @@ if __name__ == "__main__":
         "As an admin, I want to reset user passwords via the portal to reduce support tickets. "
         "Acceptance Criteria: Admin can trigger a reset link; user receives email within 2 minutes. "
         "We must integrate with the existing Identity API."
+    )
+
+    result = analyze_story(jira_description)
+    print(json.dumps(result, indent=2))
