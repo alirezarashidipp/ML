@@ -17,19 +17,22 @@ try:
    model = AutoModelForCausalLM.from_pretrained(path)
 """
 
-
 import json
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
+
+# ---------------- Runtime Switch ----------------
+USE_LOCAL_MODEL = True  # True = Local Llama | False = API (stub)
 
 # ---------------- Config ----------------
 MODEL_PATH = r"C:\Users\45315874\Desktop\EXTERNAL WORKS\LLM\LLAMA"
 MAX_NEW_TOKENS = 560
 
-# ---------------- Load ----------------
-tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
-model = AutoModelForCausalLM.from_pretrained(MODEL_PATH)
-model.eval()
+# ---------------- Load (Local only) ----------------
+if USE_LOCAL_MODEL:
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
+    model = AutoModelForCausalLM.from_pretrained(MODEL_PATH)
+    model.eval()
 
 
 def build_prompt(story: str) -> str:
@@ -116,18 +119,23 @@ Return JSON with EXACT structure:
 
 
 @torch.no_grad()
+def run_llm(prompt: str) -> str:
+    if USE_LOCAL_MODEL:
+        inputs = tokenizer(prompt, return_tensors="pt")
+        out_ids = model.generate(
+            **inputs,
+            max_new_tokens=MAX_NEW_TOKENS,
+            do_sample=False,   # deterministic
+            temperature=0.0,
+        )
+        return tokenizer.decode(out_ids[0], skip_special_tokens=True)
+
+    # API mode stub: plug your API client here later
+    raise NotImplementedError("API mode is not wired yet. Set USE_LOCAL_MODEL=True for local inference.")
+
+
 def analyze_story(story: str) -> dict:
-    prompt = build_prompt(story)
-    inputs = tokenizer(prompt, return_tensors="pt")
-
-    out_ids = model.generate(
-        **inputs,
-        max_new_tokens=MAX_NEW_TOKENS,
-        do_sample=False,   # deterministic
-        temperature=0.0,
-    )
-
-    text = tokenizer.decode(out_ids[0], skip_special_tokens=True)
+    text = run_llm(build_prompt(story))
 
     try:
         start = text.index("{")
@@ -155,4 +163,3 @@ if __name__ == "__main__":
 
     result = analyze_story(jira_description)
     print(json.dumps(result, indent=2))
-
