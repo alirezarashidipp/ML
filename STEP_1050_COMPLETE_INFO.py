@@ -31,6 +31,12 @@ Notes for gated Llama models on Colab:
 - You may need to login once:
     from huggingface_hub import login
     login()  # paste your HF token
+
+
+#######################################################################################
+!pip uninstall -y torchvision torchaudio
+!pip install -U torch==2.7.0 transformers==4.49.0 tokenizers==0.21.0 huggingface_hub
+
 """
 
 import json
