@@ -1,9 +1,10 @@
 # model: meta-llama/Llama-3.2-1B-Instruct inlcudes (tokenizer_config.json, tokenizer.json, special_tokens_map.json, model.safetensors, generation_config.json, config.json, .gitattributes)
 # Python== 3.9
-# Torch = 2.7.0
+# torch 2.7.0 (CPU-only)
 # transformers = 4.49.0
 # tokenizers = 0.21.0
 # langgraph = 0.2.62
+NO CUDA / CPU only
 CODE BELOW WORKS:
 """ 
 from transformers import AutoTokenizer, AutoModelForCausalLM
