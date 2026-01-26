@@ -1,189 +1,195 @@
-"""
-MVP: Local Llama-3.2-1B-Instruct → Jira Story → Structured JSON
-- CPU-only
-- Deterministic (repeatable)
-- Single-pass read of story description
-- Minimal code (no extra ifs/loops)
-- Transformers 4.49.0 | Torch 2.7.0 | Python 3.9 | tokenizers = 0.21.0 | langgraph = 0.2.62
-
-# model: meta-llama/Llama-3.2-1B-Instruct 
-from transformers import AutoTokenizer, AutoModelForCausalLM 
-import torch 
-path = r"C:\Users\45315874\Desktop\EXTERNAL WORKS\LLM\LLAMA" 
-try: 
-   print("Step 1: Loading Tokenizer...") 
-   tokenizer = AutoTokenizer.from_pretrained(path) 
-   print("Step 2: Loading Model (This may take a while)...") 
-   model = AutoModelForCausalLM.from_pretrained(path)
-"""
-
-"""
-MVP: Jira Story → Structured JSON
-Backends:
-- USE_LOCAL_MODEL=True  -> load from local folder (Windows path)
-- USE_LOCAL_MODEL=False -> load from Hugging Face (Google Colab-friendly)
-
-Deterministic generation:
-- do_sample=False
-- temperature=0.0
-
-Notes for gated Llama models on Colab:
-- You may need to login once:
-    from huggingface_hub import login
-    login()  # paste your HF token
-
-
-#######################################################################################
-!pip uninstall -y torchvision torchaudio
-!pip install -U torch==2.7.0 transformers==4.49.0 tokenizers==0.21.0 huggingface_hub
-
-from huggingface_hub import login
-login()
-"""
-
 import json
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+import os
 
-# ---------------- Runtime Switch ----------------
-USE_LOCAL_MODEL = True  # True = Local folder | False = Hugging Face Hub
+# ---------------------------------------------------------
+# 1. تنظیمات اصلی (CONFIGURATION) - کنترل پنل شما
+# ---------------------------------------------------------
+CONFIG = {
+    # انتخاب مود: 'HF' (هالینگ فیس), 'LOCAL' (دانلود شده), 'HSBC_API' (سرور شرکت)
+    "SOURCE_MODE": "HF", 
+    
+    # تنظیمات Hugging Face
+    "HF_MODEL_ID": "meta-llama/Llama-3.2-1B-Instruct",
+    
+    # تنظیمات Local (آدرس پوشه مدل روی سیستم شما)
+    "LOCAL_PATH": "/content/drive/MyDrive/models/llama-1b-v2", 
+    
+    # تنظیمات API شرکت (HSBC)
+    "API_URL": "https://api.hsbc.internal/v1/chat/completions",
+    "API_KEY": "sk-xxxxxxxxxxxxxxxxxxxxxxxx",
+    "API_TIMEOUT": 30
+}
 
-# ---------------- Config ----------------
-MODEL_PATH_LOCAL = r"C:\Users\45315874\Desktop\EXTERNAL WORKS\LLM\LLAMA"
-MODEL_ID_HF = "meta-llama/Llama-3.2-1B-Instruct"  # for Colab / HF download
-MAX_NEW_TOKENS = 560
+# ---------------------------------------------------------
+# 2. بارگذاری اولیه (فقط برای حالت‌های لوکال و HF)
+# ---------------------------------------------------------
+pipeline_instance = None
 
-# ---------------- Load (Local OR Hugging Face) ----------------
-MODEL_SOURCE = MODEL_PATH_LOCAL if USE_LOCAL_MODEL else MODEL_ID_HF
+if CONFIG["SOURCE_MODE"] in ["HF", "LOCAL"]:
+    import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 
-tokenizer = AutoTokenizer.from_pretrained(MODEL_SOURCE)
-model = AutoModelForCausalLM.from_pretrained(MODEL_SOURCE)
-model.eval()
+    # تعیین مسیر مدل بر اساس انتخاب شما
+    model_path = CONFIG["HF_MODEL_ID"] if CONFIG["SOURCE_MODE"] == "HF" else CONFIG["LOCAL_PATH"]
+    
+    print(f"🔄 Initializing Model from source: {CONFIG['SOURCE_MODE']} ({model_path})...")
+    
+    try:
+        # تشخیص سخت‌افزار
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path,
+            torch_dtype=torch.float16 if device == "cuda" else torch.float32,
+            device_map="auto"
+        )
+        
+        pipeline_instance = pipeline(
+            "text-generation",
+            model=model,
+            tokenizer=tokenizer,
+            max_new_tokens=500,
+            temperature=0.1,
+            do_sample=True
+        )
+        print("✅ Model loaded successfully!")
+        
+    except Exception as e:
+        print(f"❌ Error loading model: {e}")
+        print("Hint: If using LOCAL, make sure the path is correct.")
 
+elif CONFIG["SOURCE_MODE"] == "HSBC_API":
+    import requests
+    print("✅ System configured for API usage. No local model loading needed.")
 
-def build_prompt(story: str) -> str:
-    return f"""
-You are a strict JSON generator for Jira story intelligence.
-Return ONLY valid JSON. No markdown. No extra text.
+# ---------------------------------------------------------
+# 3. توابع کمکی (Abstraction Layer)
+# ---------------------------------------------------------
 
-GENERAL RULES:
-- If something is NOT explicitly stated, set it to null and set is_defined=false.
-- confidence is a self-rated confidence in [0.0, 1.0] with ONE decimal (e.g., 0.7).
-- Keep extracted text short and grounded in the story.
-- Never invent technologies, systems, or constraints that are not hinted in the text.
+def get_llm_response(messages):
+    """
+    این تابع تصمیم می‌گیرد درخواست را به کجا بفرستد
+    بر اساس تنظیمات CONFIG["SOURCE_MODE"]
+    """
+    mode = CONFIG["SOURCE_MODE"]
+    
+    # --- روش ۱ و ۲: اجرا روی سخت‌افزار خودمان (HF / LOCAL) ---
+    if mode in ["HF", "LOCAL"]:
+        if pipeline_instance is None:
+            return "Error: Model not loaded."
+        
+        outputs = pipeline_instance(messages)
+        return outputs[0]["generated_text"][-1]["content"]
 
-ALLOWED ENUMS:
-- intent.type: "Create" | "Modify" | "Remove" | "Migrate" | "Integrate" | "Investigate" | "Enforce" | null
-- value.category: "Customer" | "Cost" | "Risk" | "Compliance" | "Internal Efficiency" | null
-- value.direct_customer_impact: "No" | "Low" | "Medium" | "High"
-- scope.shape: "Needle" | "Balloon" | "Fog" | "Brick" | null
-- execution_risk.level: "Low" | "Medium" | "High"
-- priorities: subset of
-  ["Drive customer-centricity", "Deliver focused sustainable growth", "Be simple and agile"]
+    # --- روش ۳: فراخوانی API شرکت (HSBC) ---
+    elif mode == "HSBC_API":
+        # اکثر APIهای شرکتی استاندارد OpenAI یا Azure را دنبال می‌کنند
+        payload = {
+            "model": "gpt-4-turbo-internal", # یا نام مدلی که شرکت داده
+            "messages": messages,
+            "temperature": 0.1,
+            "max_tokens": 500
+        }
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {CONFIG['API_KEY']}", 
+            # گاهی بانک‌ها هدرهای خاص خود را دارند مثل:
+            # "x-api-key": CONFIG['API_KEY'],
+            # "Ocp-Apim-Subscription-Key": CONFIG['API_KEY'] (اگر Azure باشد)
+        }
+        
+        try:
+            response = requests.post(
+                CONFIG["API_URL"], 
+                json=payload, 
+                headers=headers, 
+                timeout=CONFIG["API_TIMEOUT"],
+                verify=False # در محیط‌های بانکی گاهی SSL داخلی self-signed است
+            )
+            response.raise_for_status()
+            
+            # پارس کردن جواب (معمولا ساختار choices[0].message.content دارند)
+            data = response.json()
+            return data["choices"][0]["message"]["content"]
+            
+        except Exception as e:
+            return f"API Error: {str(e)}"
 
-TECH/SKILLS CONSTRAINTS:
-- delivery_signals.tech_stack_indicators: up to 3 items (e.g., "Frontend", "Backend", "Database", "API", "Python", "React")
-- delivery_signals.skills_required_top3: up to 3 items (e.g., "Python", "SQL", "React")
+def clean_json_output(text):
+    """پاکسازی متن برای استخراج JSON"""
+    text = text.strip()
+    if text.startswith("API Error") or text.startswith("Error"):
+        return None
+        
+    if text.startswith("```json"):
+        text = text.replace("```json", "", 1)
+    if text.startswith("```"):
+        text = text.replace("```", "", 1)
+    if text.endswith("```"):
+        text = text[:-3]
+    return text.strip()
 
-DELIVERY CLARIFICATION QUESTIONS (VERY IMPORTANT):
-- Generate EXACTLY 2 questions.
-- Questions MUST be about DELIVERY/CONTENT CLARIFICATIONS, NOT about identifying WHAT or WHY.
-- DO NOT ask: "What is the goal?" / "What is requested?" / "Why is this needed?" / "Can you clarify?" / "Provide more details".
-- Each question must focus on ONE of these areas:
-  (1) Acceptance criteria / testability
-  (2) Scope boundaries (in-scope / out-of-scope)
-  (3) Dependencies / integration specifics (which system/API/data)
-  (4) Edge cases / failure scenarios / rollback
-  (5) Non-functional requirements (security, performance, logging, audit)
-- Questions must be specific and verifiable, referencing story terms when possible.
-- If the story already includes clear measurable AC + clear scope + clear dependencies, then ask about failure scenarios and audit/logging.
+# ---------------------------------------------------------
+# 4. منطق اصلی برنامه (Main Logic - ثابت برای همه روش‌ها)
+# ---------------------------------------------------------
 
-Now analyze the story:
-
-STORY:
-\"\"\"{story}\"\"\"
-
-Return JSON with EXACT structure:
-
-{{
-  "ownership": {{
-    "is_defined": false,
-    "confidence": 0.0,
-    "owner_or_actor": null
-  }},
-  "intent": {{
-    "is_defined": false,
-    "confidence": 0.0,
-    "primary_intent": null,
-    "type": null
-  }},
-  "value": {{
-    "is_defined": false,
-    "confidence": 0.0,
-    "category": null,
-    "direct_customer_impact": "No"
-  }},
-  "delivery_clarifications": {{
-    "top2_questions": ["", ""]
-  }},
-  "scope": {{
-    "shape": null
-  }},
-  "execution_risk": {{
-    "level": "Low",
-    "primary_risk_driver": "Unclear scope boundary"
-  }},
-  "strategic_alignment": {{
-    "hsbc_priorities": []
-  }},
-  "delivery_signals": {{
-    "tech_stack_indicators": [],
-    "skills_required_top3": []
-  }}
-}}
-""".strip()
-
-
-@torch.no_grad()
-def run_llm(prompt: str) -> str:
-    inputs = tokenizer(prompt, return_tensors="pt")
-
-    out_ids = model.generate(
-        **inputs,
-        max_new_tokens=MAX_NEW_TOKENS,
-        do_sample=False,   # deterministic
-        temperature=0.0,
-    )
-
-    return tokenizer.decode(out_ids[0], skip_special_tokens=True)
-
-
-def analyze_story(story: str) -> dict:
-    text = run_llm(build_prompt(story))
+def analyze_jira_ticket(ticket_text):
+    system_prompt = """You are a JIRA analysis engine.
+    Allowed Intents: [Create, Modify, Remove, Migrate, Integrate, Investigate, Enforce].
+    
+    Return a VALID JSON object with this structure:
+    {
+      "story_ownership": { "identified": boolean, "confidence": int, "owner": string or null },
+      "primary_intent": { "defined": boolean, "confidence": int, "type": string }
+    }
+    Output ONLY JSON.
+    """
+    
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": ticket_text},
+    ]
+    
+    print(f"\n🚀 Processing via [{CONFIG['SOURCE_MODE']}]...")
+    
+    # 1. گرفتن متن خام از هر منبعی که انتخاب شده
+    raw_response = get_llm_response(messages)
+    
+    # 2. تلاش برای تبدیل به آبجکت و نمایش
+    clean_text = clean_json_output(raw_response)
+    
+    if clean_text is None:
+        print("❌ Failed to get valid response.")
+        print("Raw:", raw_response)
+        return
 
     try:
-        start = text.index("{")
-        end = text.rindex("}") + 1
-        return json.loads(text[start:end])
-    except Exception:
-        return {
-            "ownership": {"is_defined": False, "confidence": 0.0, "owner_or_actor": None},
-            "intent": {"is_defined": False, "confidence": 0.0, "primary_intent": None, "type": None},
-            "value": {"is_defined": False, "confidence": 0.0, "category": None, "direct_customer_impact": "No"},
-            "delivery_clarifications": {"top2_questions": ["", ""]},
-            "scope": {"shape": None},
-            "execution_risk": {"level": "High", "primary_risk_driver": "Unclear scope boundary"},
-            "strategic_alignment": {"hsbc_priorities": []},
-            "delivery_signals": {"tech_stack_indicators": [], "skills_required_top3": []},
-        }
+        result = json.loads(clean_text)
+        
+        # نمایش خروجی
+        print("-" * 30)
+        so = result.get('story_ownership', {})
+        print(f"STORY OWNERSHIP")
+        print(f"Identified:      {'Yes' if so.get('identified') else 'No'} ({so.get('confidence', 0)}%)")
+        print(f"Extracted Owner: {so.get('owner', 'N/A')}")
+        
+        print("-" * 30)
+        pi = result.get('primary_intent', {})
+        print(f"PRIMARY INTENT")
+        print(f"Clearly Defined: {'Yes' if pi.get('defined') else 'No'} ({pi.get('confidence', 0)}%)")
+        print(f"Intent Type:     {pi.get('type', 'N/A')}")
+        print("-" * 30)
+        
+    except json.JSONDecodeError:
+        print("❌ JSON Parsing Error. Model output was not valid JSON.")
+        print("Raw Output:", raw_response)
 
+# ---------------------------------------------------------
+# 5. اجرا
+# ---------------------------------------------------------
 
-if __name__ == "__main__":
-    jira_description = (
-        "As an admin, I want to reset user passwords via the portal to reduce support tickets. "
-        "Acceptance Criteria: Admin can trigger a reset link; user receives email within 2 minutes. "
-        "We must integrate with the existing Identity API."
-    )
+sample_text = "I am Payment Platform Product Owner, i want to build a system that easy integrate two code bases toghether."
 
-    result = analyze_story(jira_description)
-    print(json.dumps(result, indent=2))
+analyze_jira_ticket(sample_text)
