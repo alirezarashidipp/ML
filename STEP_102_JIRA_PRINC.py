@@ -182,35 +182,107 @@ def detect_who_what_why(text: str) -> Dict[str, object]:
 
 
 # ============================================================
-# ✅ BATCH PIPELINE (CSV → CSV)
+# ✅ BATCH PIPELINE (CSV → CSV)  [with conditional NLI overwrite]
 # ============================================================
 
 def process_jira_nli_csv(
     input_csv: str = INPUT_CSV,
     output_csv: str = OUTPUT_CSV,
-
-
-
 ) -> pd.DataFrame:
 
     df = pd.read_csv(input_csv)
 
-    results = df[TEXT_COL].apply(detect_who_what_why)
+    # ------------------------------------------------------------
+    # 1) Ensure required legacy flag columns exist
+    # ------------------------------------------------------------
+    required_cols = ["has_role_defined", "has_goal_defined", "has_reason_defined"]
+    for c in required_cols:
+        if c not in df.columns:
+            raise ValueError(f"Missing required column in input CSV: {c}")
 
-    scores_df = pd.DataFrame([r["scores"] for r in results])
-    flags_df  = pd.DataFrame([r["flags"]  for r in results])
+    # Normalize to int 0/1 (safe)
+    for c in required_cols:
+        df[c] = df[c].fillna(0).astype(int)
 
-    scores_df = scores_df.add_prefix("nli_score_")
-    flags_df  = flags_df.add_prefix("has_")
+    # ------------------------------------------------------------
+    # 2) Create confidence columns (empty by default)
+    #    Fill ONLY when a 0 is overwritten to 1
+    # ------------------------------------------------------------
+    df["confidence_who"] = pd.NA
+    df["confidence_what"] = pd.NA
+    df["confidence_why"] = pd.NA
+
+    # ------------------------------------------------------------
+    # 3) Run NLI ONLY for rows where at least one of the three flags is 0
+    # ------------------------------------------------------------
+    needs_nli_mask = (
+        (df["has_role_defined"] == 0)
+        | (df["has_goal_defined"] == 0)
+        | (df["has_reason_defined"] == 0)
+    )
+
+    # If nothing needs NLI, still write output with confidence cols
+    if needs_nli_mask.sum() == 0:
+        df.to_csv(output_csv, index=False, encoding="utf-8")
+        print(f"✅ Saved {len(df)} rows to {output_csv} (no NLI needed)")
+        return df
+
+    # Apply NLI only on selected subset
+    subset = df.loc[needs_nli_mask, TEXT_COL]
+    results = subset.apply(detect_who_what_why)  # returns {"scores":..., "flags":..., ...}
+
+    # Build score/flag frames for ONLY the subset (aligned by index)
+    scores_df = pd.DataFrame([r["scores"] for r in results], index=subset.index)
+    flags_df  = pd.DataFrame([r["flags"]  for r in results], index=subset.index)
+
+    # ------------------------------------------------------------
+    # 4) Conditional overwrite rules:
+    #    - Only overwrite when legacy column is 0 AND NLI flag is True
+    #    - If overwritten, also write the corresponding confidence score
+    # ------------------------------------------------------------
+
+    # WHO -> has_role_defined
+    overwrite_who = (df["has_role_defined"] == 0) & needs_nli_mask & (flags_df["WHO"] == True)
+    df.loc[overwrite_who, "has_role_defined"] = 1
+    df.loc[overwrite_who, "confidence_who"] = scores_df.loc[overwrite_who, "WHO"].round(4)
+
+    # WHAT -> has_goal_defined
+    overwrite_what = (df["has_goal_defined"] == 0) & needs_nli_mask & (flags_df["WHAT"] == True)
+    df.loc[overwrite_what, "has_goal_defined"] = 1
+    df.loc[overwrite_what, "confidence_what"] = scores_df.loc[overwrite_what, "WHAT"].round(4)
+
+    # WHY -> has_reason_defined
+    overwrite_why = (df["has_reason_defined"] == 0) & needs_nli_mask & (flags_df["WHY"] == True)
+    df.loc[overwrite_why, "has_reason_defined"] = 1
+    df.loc[overwrite_why, "confidence_why"] = scores_df.loc[overwrite_why, "WHY"].round(4)
+
+    # ------------------------------------------------------------
+    # 5) (Optional) If you still want to export NLI scores/flags as extra columns
+    #    for only processed rows, you can keep this block.
+    #    If you DON'T want them, comment it out.
+    # ------------------------------------------------------------
+    scores_df_full = pd.DataFrame(index=df.index, columns=["WHO", "WHAT", "WHY"])
+    flags_df_full  = pd.DataFrame(index=df.index, columns=["WHO", "WHAT", "WHY"])
+
+    scores_df_full.loc[subset.index, ["WHO", "WHAT", "WHY"]] = scores_df[["WHO", "WHAT", "WHY"]]
+    flags_df_full.loc[subset.index,  ["WHO", "WHAT", "WHY"]] = flags_df[["WHO", "WHAT", "WHY"]]
+
+    scores_df_full = scores_df_full.astype(float).add_prefix("nli_score_")
+    flags_df_full  = flags_df_full.astype("boolean").add_prefix("nli_flag_")
 
     df_out = pd.concat(
-        [df[[KEY_COL, TEXT_COL]], scores_df, flags_df],
-        axis=1
+        [
+            df,                 # includes legacy has_* + confidence_*
+            scores_df_full,
+            flags_df_full,
+        ],
+        axis=1,
     )
 
     df_out.to_csv(output_csv, index=False, encoding="utf-8")
     print(f"✅ Saved {len(df_out)} rows to {output_csv}")
-
+    print(f"🔎 NLI executed for {int(needs_nli_mask.sum())} rows")
+    print(f"🧩 Overwrites: WHO={int(overwrite_who.sum())}, WHAT={int(overwrite_what.sum())}, WHY={int(overwrite_why.sum())}")
 
     return df_out
 
