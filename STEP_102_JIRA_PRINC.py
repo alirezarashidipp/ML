@@ -6,12 +6,7 @@
 
 from typing import Dict, Tuple, List
 from transformers import pipeline
-
-
-
 import pandas as pd
-
-
 
 # ============================================================
 # CONFIG
@@ -164,21 +159,11 @@ def detect_who_what_why(text: str) -> Dict[str, object]:
             "scores": {"WHO": 0.0, "WHAT": 0.0, "WHY": 0.0},
             "flags":  {"WHO": False, "WHAT": False, "WHY": False},
             "debug":  {},
-
         }
 
     scores = {}
     flags = {}
     debug = {}
-
-
-
-
-
-
-
-
-
 
     for dim in ["WHO", "WHAT", "WHY"]:
         s, d = _score_dimension(text, dim)
@@ -228,8 +213,6 @@ def process_jira_nli_csv(
 
 
     return df_out
-
-
 
 
 # ============================================================
