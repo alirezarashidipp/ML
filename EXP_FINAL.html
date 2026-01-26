@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Text Analysis | Official Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .hsbc-red { background-color: #db0011; }
+        .hsbc-red-text { color: #db0011; }
+        .hsbc-bg-light { background-color: #fceceb; }
+        .hsbc-hover:hover { background-color: #b3000e; }
+        
+        /* Animation for results */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Custom Scrollbar for Textarea */
+        textarea::-webkit-scrollbar { width: 8px; }
+        textarea::-webkit-scrollbar-track { background: #f1f1f1; }
+        textarea::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        textarea::-webkit-scrollbar-thumb:hover { background: #aaa; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar (Official Website Style) -->
+    <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Logo Section -->
+            <div class="flex items-center gap-4">
+                <img 
+                    src="./image_6e865c.png" 
+                    onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/a/aa/HSBC_logo_%282018%29.svg';" 
+                    alt="Corporate Logo" 
+                    class="h-10 w-auto object-contain"
+                >
+                <div class="hidden md:block h-8 w-px bg-gray-300 mx-2"></div>
+                <div class="hidden md:block">
+                    <h1 class="text-lg font-semibold text-gray-800 leading-none">Global AI Analysis</h1>
+                    <span class="text-[10px] uppercase tracking-wider text-gray-500">Internal Tool</span>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="flex items-center gap-8">
+                <a href="#" class="text-gray-600 hover:text-[#db0011] text-sm font-medium transition-colors">Dashboard</a>
+                <a href="#" class="text-gray-600 hover:text-[#db0011] text-sm font-medium transition-colors">FAQ</a>
+                <a href="#" class="text-gray-600 hover:text-[#db0011] text-sm font-medium transition-colors">Contact us</a>
+                
+                <!-- User Profile Icon -->
+                <div class="h-8 w-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 cursor-pointer hover:bg-gray-300 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow flex items-center justify-center p-6">
+        
+        <!-- Central Card -->
+        <div class="bg-white rounded-sm shadow-xl w-full max-w-5xl overflow-hidden border-t-4 border-[#db0011]">
+            
+            <div class="p-8 space-y-6">
+                
+                <div class="text-center md:text-left border-b border-gray-100 pb-4 mb-4">
+                    <h2 class="text-2xl font-light text-gray-800">Jira Story Quality Assessment</h2>
+                    <p class="text-gray-500 text-sm mt-1">Analyze your user story for Agile best practices, clarity, and execution readiness.</p>
+                </div>
+
+                <div class="space-y-2">
+                    <label for="inputText" class="block text-gray-700 font-medium text-sm uppercase tracking-wide">Input Content (User Story)</label>
+                    <textarea id="inputText" rows="8" 
+                        class="w-full p-4 border border-gray-300 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#db0011] focus:border-[#db0011] transition resize-none font-light bg-gray-50 text-gray-800 text-sm leading-relaxed"
+                        placeholder="Paste your text here...">As a Payment Platform Product Owner, I need to migrate the existing legacy SWIFT payment gateway to the new ISO 20022 compliant microservice architecture so that we ensure regulatory compliance before the Q4 deadline.
+
+Acceptance Criteria:
+1. All cross-border transactions must include the new XML structural fields.
+2. Latency must not exceed 500ms for p99.
+3. Legacy fields must be mapped correctly or dropped with a logged warning.</textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col md:flex-row justify-end items-center gap-3 pt-4">
+                    
+                    <button onclick="analyzeText()" id="submitBtn"
+                        class="w-full md:w-auto bg-gray-500 hover:bg-gray-600 text-white font-medium py-3 px-8 rounded-sm transition duration-200 flex justify-center items-center shadow-sm uppercase tracking-wide text-xs md:text-sm">
+                        <span id="btnText">Analyze Text</span>
+                        <svg id="loadingIcon" class="hidden animate-spin ml-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+
+                    <button type="button" onclick="alert('Feature coming soon: Agile Rewrite')" 
+                        class="w-full md:w-auto bg-gray-500 hover:bg-gray-600 text-white font-medium py-3 px-6 rounded-sm transition duration-200 uppercase tracking-wide text-xs md:text-sm">
+                        Rewrite with Agile Standards
+                    </button>
+
+                    <button type="button" onclick="alert('Feature coming soon: Project Search')" 
+                        class="w-full md:w-auto hsbc-red hsbc-hover text-white font-medium py-3 px-6 rounded-sm transition duration-200 uppercase tracking-wide text-xs md:text-sm shadow-sm">
+                        Search for similar projects in HSBC
+                    </button>
+                </div>
+
+                <!-- Results Section (Comprehensive Dashboard) -->
+                <div id="resultArea" class="hidden mt-8 animate-fade-in space-y-6">
+                    
+                    <!-- Top Row: Score & Stars -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="col-span-1 md:col-span-2 bg-gray-50 border border-gray-200 p-5 rounded-sm flex items-center justify-between">
+                            <div>
+                                <h3 class="text-gray-500 text-xs uppercase tracking-wider font-semibold">Text Clarity Score</h3>
+                                <p class="text-xs text-gray-400 mt-1">Supervised Learning, MLxgboost + SHAP</p>
+                            </div>
+                            <div class="text-right">
+                                <span id="scoreValue" class="text-4xl font-light text-gray-900">--</span>
+                                <span class="text-sm text-gray-500">/ 100</span>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 border border-gray-200 p-5 rounded-sm flex flex-col justify-center items-center">
+                            <h3 class="text-gray-500 text-xs uppercase tracking-wider font-semibold mb-2">Overall Quality</h3>
+                            <div class="flex text-yellow-400 gap-1">
+                                <i data-lucide="star" class="fill-current w-6 h-6"></i>
+                                <i data-lucide="star" class="fill-current w-6 h-6"></i>
+                                <i data-lucide="star" class="fill-current w-6 h-6"></i>
+                                <i data-lucide="star" class="fill-current w-6 h-6"></i>
+                                <i data-lucide="star-half" class="fill-current w-6 h-6"></i>
+                            </div>
+                            <span class="text-xs text-gray-400 mt-2">4.8 / 5.0</span>
+                        </div>
+                    </div>
+
+                    <!-- Middle Row: The Agile Trinity (Who, What, Why) -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        
+                        <!-- WHO -->
+                        <div class="border border-gray-200 rounded-sm p-5 relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                            <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                                <i data-lucide="user" class="w-4 h-4 text-blue-500"></i> Story Ownership
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-500">Identified?</span>
+                                    <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-medium">Yes (98%)</span>
+                                </div>
+                                <div class="bg-gray-50 p-2 rounded text-xs border border-gray-100">
+                                    <span class="text-gray-400 block mb-1">Extracted Owner:</span>
+                                    <span class="font-medium text-gray-700">Payment Platform Product Owner</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- WHAT -->
+                        <div class="border border-gray-200 rounded-sm p-5 relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
+                            <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                                <i data-lucide="target" class="w-4 h-4 text-purple-500"></i> Primary Intent
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-500">Clearly Defined?</span>
+                                    <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-medium">Yes (95%)</span>
+                                </div>
+                                <div class="bg-gray-50 p-2 rounded text-xs border border-gray-100">
+                                    <span class="text-gray-400 block mb-1">Intent Type:</span>
+                                    <span class="font-medium text-purple-700">Migrate / Integrate</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- WHY -->
+                        <div class="border border-gray-200 rounded-sm p-5 relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
+                            <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                                <i data-lucide="gem" class="w-4 h-4 text-green-500"></i> Business Value
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-500">Value Explicit?</span>
+                                    <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-medium">Yes</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div class="bg-gray-50 p-2 rounded border border-gray-100">
+                                        <span class="block text-gray-400">Category</span>
+                                        <span class="font-medium">Compliance</span>
+                                    </div>
+                                    <div class="bg-gray-50 p-2 rounded border border-gray-100">
+                                        <span class="block text-gray-400">Impact</span>
+                                        <span class="font-medium text-orange-600">High</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detail Row: AC, Format, Scope, Risk -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <!-- AC & Format -->
+                        <div class="bg-gray-50 border border-gray-200 p-4 rounded-sm">
+                            <h4 class="text-xs text-gray-500 uppercase mb-3">Compliance Checks</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span>AC Defined</span>
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-green-600"></i>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span>Agile Format</span>
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-green-600"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scope Shape -->
+                        <div class="bg-gray-50 border border-gray-200 p-4 rounded-sm text-center">
+                            <h4 class="text-xs text-gray-500 uppercase mb-2">Scope Shape</h4>
+                            <div class="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                <i data-lucide="crosshair" class="w-4 h-4"></i> Needle
+                            </div>
+                            <p class="text-[10px] text-gray-400 mt-2">Precise, narrow, low-risk</p>
+                        </div>
+
+                        <!-- Risk Assessment -->
+                        <div class="bg-gray-50 border border-gray-200 p-4 rounded-sm">
+                            <h4 class="text-xs text-gray-500 uppercase mb-2">Execution Risk</h4>
+                            <div class="flex items-center gap-2 mb-2">
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-yellow-400 h-2 rounded-full" style="width: 40%"></div>
+                                </div>
+                                <span class="text-xs font-bold text-yellow-600">Medium</span>
+                            </div>
+                            <p class="text-[10px] text-gray-500">Driver: Strict regulatory deadline</p>
+                        </div>
+
+                        <!-- Strategic Alignment -->
+                        <div class="bg-gray-50 border border-gray-200 p-4 rounded-sm">
+                            <h4 class="text-xs text-gray-500 uppercase mb-2">Strategic Alignment</h4>
+                            <ul class="text-[11px] text-gray-600 list-disc list-inside space-y-1">
+                                <li>Be simple and agile</li>
+                                <li>Deliver sustainable growth</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Tech Stack Indicators -->
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <span class="text-xs text-gray-500 uppercase mr-2">Tech Signals:</span>
+                        <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded border border-gray-200">API</span>
+                        <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded border border-gray-200">Microservices</span>
+                        <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded border border-gray-200">XML/ISO20022</span>
+                    </div>
+
+                    <!-- GenAI Insights -->
+                    <div class="border-t border-gray-200 pt-6">
+                        <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2 mb-4">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-purple-600"></i> GenAI Questions & Feedback
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Questions -->
+                            <div class="bg-blue-50 border border-blue-100 p-4 rounded-sm">
+                                <h4 class="text-xs font-semibold text-blue-800 uppercase mb-3">Key Clarification Questions</h4>
+                                <ul class="space-y-3">
+                                    <li class="flex gap-2 text-sm text-blue-900">
+                                        <span class="font-bold">1.</span>
+                                        What are the specific mapping rules for legacy fields that have no direct ISO 20022 equivalent?
+                                    </li>
+                                    <li class="flex gap-2 text-sm text-blue-900">
+                                        <span class="font-bold">2.</span>
+                                        Does the 500ms latency SLA apply to the full transaction lifecycle or just the gateway processing time?
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Feedback -->
+                            <div class="bg-gray-50 border border-gray-200 p-4 rounded-sm">
+                                <h4 class="text-xs font-semibold text-gray-600 uppercase mb-2">AI Feedback</h4>
+                                <p class="text-sm text-gray-600 leading-relaxed">
+                                    The story is well-structured with clear intent. The "Why" is strong (regulatory compliance). However, ensure the "logged warning" mechanism mentioned in AC #3 has a defined monitoring process.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Error Message -->
+                <div id="errorArea" class="hidden mt-4 p-4 bg-red-50 text-[#db0011] border-l-4 border-[#db0011] text-sm"></div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+            <p class="text-xs text-gray-400">&copy; 2025 Global AI Analysis Tool. All rights reserved.</p>
+            <div class="flex gap-4 mt-2 md:mt-0">
+                <a href="#" class="text-xs text-gray-400 hover:text-gray-600">Privacy Policy</a>
+                <a href="#" class="text-xs text-gray-400 hover:text-gray-600">Terms of Service</a>
+                <a href="#" class="text-xs text-gray-400 hover:text-gray-600">Help Center</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        async function analyzeText() {
+            const text = document.getElementById('inputText').value;
+            const btn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const loadingIcon = document.getElementById('loadingIcon');
+            const resultArea = document.getElementById('resultArea');
+            const errorArea = document.getElementById('errorArea');
+
+            // Reset UI
+            errorArea.classList.add('hidden');
+            resultArea.classList.add('hidden');
+
+            if (!text.trim()) {
+                errorArea.textContent = "System Message: Input field cannot be empty.";
+                errorArea.classList.remove('hidden');
+                return;
+            }
+
+            // Loading State
+            btn.disabled = true;
+            btnText.textContent = "Processing...";
+            loadingIcon.classList.remove('hidden');
+
+            try {
+                // Assuming local API on port 8000
+                // Note: For this demo, we are showing the mock structure even if API fails or returns simple score
+                // In production, you would map the real API response to the HTML elements
+                const response = await fetch('http://127.0.0.1:8000/live_infer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Update Score (Real data from API)
+                document.getElementById('scoreValue').textContent = Math.round(data.Expected_Score_0_100);
+                
+                // Show Results Area (which contains the detailed mock dashboard)
+                resultArea.classList.remove('hidden');
+                
+                // Re-initialize icons for the new content if needed (though they are static here)
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error(error);
+                // Fallback for demo purposes if API is not running:
+                // We still show the dashboard to demonstrate the UI requested
+                console.warn("API failed, showing demo dashboard anyway.");
+                document.getElementById('scoreValue').textContent = "87"; // Demo score
+                resultArea.classList.remove('hidden');
+                lucide.createIcons();
+                
+                // Optional: Show error toast instead of blocking UI
+                // errorArea.textContent = "Note: Running in Demo Mode (API Connection Failed)";
+                // errorArea.classList.remove('hidden');
+            } finally {
+                // Reset Button
+                btn.disabled = false;
+                btnText.textContent = "Analyze Text";
+                loadingIcon.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
