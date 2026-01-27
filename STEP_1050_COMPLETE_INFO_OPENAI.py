@@ -22,6 +22,9 @@ Create, Modify, Remove, Migrate, Integrate, Investigate, Enforce
 Allowed Value Categories:
 Customer, Cost, Risk, Compliance, Internal Efficiency
 
+Allowed Customer Impact Levels:
+Low, Medium, High
+
 TEXT:
 \"\"\"{jira_description}\"\"\"
 
@@ -44,6 +47,12 @@ OUTPUT JSON SCHEMA:
     "confidence": number,
     "value_category": string | null,
     "value_evidence": string | null
+  }},
+  "customer_impact": {{
+    "identified": boolean,
+    "confidence": number,
+    "impact_level": string | null,
+    "impact_evidence": string | null
   }}
 }}
 """
@@ -57,5 +66,4 @@ OUTPUT JSON SCHEMA:
         ]
     )
 
-    content = response.choices[0].message.content
-    return json.loads(content)
+    return json.loads(response.choices[0].message.content)
