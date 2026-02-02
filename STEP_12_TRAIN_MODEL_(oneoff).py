@@ -169,10 +169,6 @@ joblib.dump(best_model, "runs_train/xgb_softprob_model.joblib")
 print("Model and reports saved to runs_train/")
 
 
-اگر خواستی اجرا شود: فقط RUN_DASHBOARD=1 ست کن
-
-# ========= Explainability Dashboard (ExplainerDashboard) =========
-# pip install explainerdashboard
 try:
     from explainerdashboard import ClassifierExplainer, ExplainerDashboard
 
